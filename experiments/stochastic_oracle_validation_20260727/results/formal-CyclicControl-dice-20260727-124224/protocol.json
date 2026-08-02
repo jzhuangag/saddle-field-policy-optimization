@@ -1,0 +1,45 @@
+{
+  "phase": "formal",
+  "environment": "CyclicControl",
+  "policy_parameterization": "two separate 4-8-3 neural policies",
+  "oracle": "finite trajectories with per-decision importance ratios; at behavior parameters repeated differentiation is DiCE",
+  "methods": [
+    "QP+G",
+    "noG",
+    "EGM"
+  ],
+  "seeds": [
+    4100,
+    4101,
+    4102,
+    4103,
+    4104,
+    4105,
+    4106,
+    4107,
+    4108,
+    4109
+  ],
+  "steps": 60,
+  "checkpoint_every": 10,
+  "transition_batches": [
+    128,
+    512,
+    2048
+  ],
+  "horizon": 16,
+  "discount": 0.9,
+  "entropy_tau": 0.03,
+  "simultaneous_updates": true,
+  "policy_warmup": "none",
+  "fixed_lr": 0.03,
+  "qp_caps": [
+    0.03,
+    0.03
+  ],
+  "curvature": "same-batch exact autograd Hessian-vector action G=DF F",
+  "controller_merit": "normalized same-batch stochastic field energy",
+  "training_best_response_calls": 0,
+  "evaluation": "exact population hard-BR and regularized field diagnostics at checkpoints only",
+  "primary_comparison": "final QP+G minus noG hard-BR return at transition batch 2048"
+}

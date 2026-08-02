@@ -1,0 +1,18 @@
+{
+  "same_seed_batch_reproducible": true,
+  "field_dimension": 134,
+  "behavior_ratio_max_error": 0.0,
+  "same_batch_autograd_vs_fd_hvp_relative_error": 6.153939928539131e-10,
+  "mean_oracle_batches": 64,
+  "mean_oracle_transitions_per_batch": 2048,
+  "mean_field_to_finite_horizon_population_cosine": 0.9873801398476237,
+  "mean_curvature_to_finite_horizon_population_cosine": 0.9828056700184815,
+  "qp_beta": 0.03,
+  "qp_gamma": 0.03,
+  "qp_predicted_decrease": 0.05609356062105156,
+  "accepted_beta": 0.03,
+  "accepted_gamma": 0.03,
+  "accepted_same_batch_merit_decrease": 0.05608411480892239,
+  "hard_br_residual": 8.928413564035509e-13,
+  "soft_br_residual": 8.448691746210102e-11
+}

@@ -1,0 +1,199 @@
+{
+  "frozen_sources": {
+    "experiments\\paper_suite_20260723\\results\\linear-geometry-20260723-103816\\curves.csv": {
+      "sha256": "36c375afa86ee1da36c8a04bce0b235da812584ed8df3b1a609acee38b4d8c74",
+      "bytes": 8607378
+    },
+    "experiments\\paper_suite_20260723\\results\\linear-geometry-20260723-103816\\summary.json": {
+      "sha256": "aa442918d2fdd3532199e8c8420d761564597873d3ffbed774ffae6488f460dd",
+      "bytes": 498
+    },
+    "experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\curves.csv": {
+      "sha256": "acc25b88a8552e7d9de827a8300dbf4b65c72e1102a82e2b062003d3431751e1",
+      "bytes": 693585
+    },
+    "experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\diagnostics.csv": {
+      "sha256": "3c3dce275f49b32c48ffc4090d5b719d49e189a1119bef7bcd7c294824a78656",
+      "bytes": 602206
+    },
+    "experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\summary.json": {
+      "sha256": "c8e84fd152cb2c971eab2852a2194b593f50d931d5f61040c66ff439faa4a81c",
+      "bytes": 7590
+    },
+    "experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\curves.csv": {
+      "sha256": "2692638d59cb9a5a2a094594470f652f5d2aea07f815f5cec149080836d9d806",
+      "bytes": 721521
+    },
+    "experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\diagnostics.csv": {
+      "sha256": "cef7c395dda32e47c1006ea8832e9ff826b326cd771f5f76171f5eb00e2f2d3b",
+      "bytes": 532470
+    },
+    "experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\summary.json": {
+      "sha256": "97b05761ed1c513f5e833891ce1ed58afb2efb3b0314ad46fc721006188c2fc9",
+      "bytes": 12194
+    }
+  },
+  "vi_b_decisions": [
+    {
+      "environment": "RPS",
+      "seed_count": 10,
+      "br_wins": 10,
+      "paired_br_gain_mean": 0.38660428210561754,
+      "paired_br_gain_95ci": [
+        0.29821966521043225,
+        0.4749888990008028
+      ],
+      "one_sided_exact_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 6.8805393836666105e-06,
+      "nog_exploitability_mean": 0.7740696148806354,
+      "strict_all_seed_positive": true,
+      "confirmatory_positive": true,
+      "median_rotation": 19.24559356096046,
+      "gamma_activation": 1.0,
+      "mean_g_contribution": 0.7412933442642513,
+      "inflation_fraction": 0.184
+    },
+    {
+      "environment": "CyclicControl",
+      "seed_count": 10,
+      "br_wins": 10,
+      "paired_br_gain_mean": 0.13926021813008505,
+      "paired_br_gain_95ci": [
+        0.11436648275610348,
+        0.1641539535040666
+      ],
+      "one_sided_exact_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 0.4881516002343044,
+      "nog_exploitability_mean": 0.7594376932800903,
+      "strict_all_seed_positive": true,
+      "confirmatory_positive": true,
+      "median_rotation": 15.675026613086956,
+      "gamma_activation": 1.0,
+      "mean_g_contribution": 0.4567927407351748,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "FrequencyHopping",
+      "seed_count": 10,
+      "br_wins": 9,
+      "paired_br_gain_mean": 0.05136927705387363,
+      "paired_br_gain_95ci": [
+        0.007551656103647199,
+        0.09518689800410007
+      ],
+      "one_sided_exact_sign_test_p": 0.0107421875,
+      "qpg_exploitability_mean": 2.0891314059249915,
+      "nog_exploitability_mean": 2.4612974495242077,
+      "strict_all_seed_positive": false,
+      "confirmatory_positive": true,
+      "median_rotation": 4.045192785168789,
+      "gamma_activation": 1.0,
+      "mean_g_contribution": 0.6556335712996972,
+      "inflation_fraction": 0.0
+    }
+  ],
+  "vi_c_decisions": [
+    {
+      "environment": "CyclicControl",
+      "seed_count": 10,
+      "br_wins": 10,
+      "paired_br_gain_mean": 0.20563729447758727,
+      "paired_br_gain_95ci": [
+        0.07679199363783304,
+        0.3344825953173415
+      ],
+      "one_sided_exact_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 0.16722489624784936,
+      "nog_exploitability_mean": 0.8019712159007503,
+      "strict_all_seed_positive": true,
+      "confirmatory_positive": true,
+      "median_rotation": 11.413890536677819,
+      "gamma_activation": 0.93,
+      "mean_g_contribution": 0.5870656241053877,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "FrequencyHopping",
+      "seed_count": 10,
+      "br_wins": 10,
+      "paired_br_gain_mean": 0.32045792307815113,
+      "paired_br_gain_95ci": [
+        0.1509292734024885,
+        0.48998657275381374
+      ],
+      "one_sided_exact_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 2.150153560495876,
+      "nog_exploitability_mean": 2.436753992200594,
+      "strict_all_seed_positive": true,
+      "confirmatory_positive": true,
+      "median_rotation": 0.9514314685560731,
+      "gamma_activation": 0.24666666666666667,
+      "mean_g_contribution": 0.17688847908064304,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "seed_count": 10,
+      "br_wins": 10,
+      "paired_br_gain_mean": 0.11835810490815346,
+      "paired_br_gain_95ci": [
+        0.04198123806075843,
+        0.1947349717555485
+      ],
+      "one_sided_exact_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 1.7963555478393605,
+      "nog_exploitability_mean": 1.9347194034100859,
+      "strict_all_seed_positive": true,
+      "confirmatory_positive": true,
+      "median_rotation": 0.9655512587824703,
+      "gamma_activation": 0.4066666666666667,
+      "mean_g_contribution": 0.28735423519794184,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "PursuitEvasion",
+      "seed_count": 10,
+      "br_wins": 7,
+      "paired_br_gain_mean": 0.03093196054760894,
+      "paired_br_gain_95ci": [
+        -0.007115254268082995,
+        0.06897917536330087
+      ],
+      "one_sided_exact_sign_test_p": 0.171875,
+      "qpg_exploitability_mean": 0.6595050135006445,
+      "nog_exploitability_mean": 0.7449362112651017,
+      "strict_all_seed_positive": false,
+      "confirmatory_positive": false,
+      "median_rotation": 3.139534260663421,
+      "gamma_activation": 1.0,
+      "mean_g_contribution": 0.33826893846271794,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "SecurityPatrol",
+      "seed_count": 10,
+      "br_wins": 9,
+      "paired_br_gain_mean": 0.14278653663100066,
+      "paired_br_gain_95ci": [
+        0.049389415541664844,
+        0.23618365772033648
+      ],
+      "one_sided_exact_sign_test_p": 0.0107421875,
+      "qpg_exploitability_mean": 1.1427102585344278,
+      "nog_exploitability_mean": 1.357367034772362,
+      "strict_all_seed_positive": false,
+      "confirmatory_positive": true,
+      "median_rotation": 1.2876793683654049,
+      "gamma_activation": 0.71,
+      "mean_g_contribution": 0.36728362326686315,
+      "inflation_fraction": 0.0
+    }
+  ],
+  "main_vi_c_environments": [
+    "CyclicControl",
+    "FrequencyHopping",
+    "RoutingInterdiction"
+  ],
+  "additional_confirmed_environment": "SecurityPatrol",
+  "nonconfirmed_environment": "PursuitEvasion"
+}

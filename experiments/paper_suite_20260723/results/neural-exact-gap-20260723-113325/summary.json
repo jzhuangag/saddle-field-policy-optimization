@@ -1,0 +1,376 @@
+{
+  "protocol": {
+    "mode": "neural",
+    "environments": [
+      "CyclicControl",
+      "FrequencyHopping",
+      "RoutingInterdiction",
+      "PursuitEvasion",
+      "SecurityPatrol"
+    ],
+    "seeds": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "steps": 60,
+    "checkpoint_every": 5,
+    "simultaneous_updates": true,
+    "warmup": "none",
+    "fixed_lr": 0.03,
+    "qp_caps": [
+      0.03,
+      0.03
+    ],
+    "ppm_inner": 3,
+    "discount": 0.9,
+    "entropy_tau": 0.03,
+    "performance_merit": "exact entropy-regularized policy-space Nash gap recomputed at every stencil point",
+    "direction": "G=DF F unchanged",
+    "fairness": "same initialization and outer-update count; oracle cost is not matched"
+  },
+  "maximum_training_soft_br_bellman_residual": 8.999961886857477e-11,
+  "maximum_evaluation_hard_br_bellman_residual": 8.999467837611519e-13,
+  "summaries": [
+    {
+      "environment": "CyclicControl",
+      "method": "QP+G",
+      "final_br_mean": -0.09394929982644992,
+      "final_br_sem": 0.008064692901518077,
+      "final_exploitability": 0.16722489624784936,
+      "final_field_norm": 0.01400610833042697
+    },
+    {
+      "environment": "CyclicControl",
+      "method": "noG",
+      "final_br_mean": -0.2995865943040372,
+      "final_br_sem": 0.05409499048750653,
+      "final_exploitability": 0.8019712159007503,
+      "final_field_norm": 0.3548988020015028
+    },
+    {
+      "environment": "CyclicControl",
+      "method": "GDA",
+      "final_br_mean": -0.34398593244677095,
+      "final_br_sem": 0.051530981902877686,
+      "final_exploitability": 0.86678752594079,
+      "final_field_norm": 0.32805133957300137
+    },
+    {
+      "environment": "CyclicControl",
+      "method": "Adam-GDA",
+      "final_br_mean": -9.917495158123291,
+      "final_br_sem": 0.04838366313413907,
+      "final_exploitability": 19.301512530322775,
+      "final_field_norm": 1.0274558431528837
+    },
+    {
+      "environment": "CyclicControl",
+      "method": "EGM",
+      "final_br_mean": -0.2649707925761931,
+      "final_br_sem": 0.0379043610923012,
+      "final_exploitability": 0.665676009161184,
+      "final_field_norm": 0.24861573352192864
+    },
+    {
+      "environment": "CyclicControl",
+      "method": "PPM-3",
+      "final_br_mean": -0.26418069840797986,
+      "final_br_sem": 0.0374207449874854,
+      "final_exploitability": 0.666450224813819,
+      "final_field_norm": 0.24901575087997668
+    },
+    {
+      "environment": "FrequencyHopping",
+      "method": "QP+G",
+      "final_br_mean": -0.09527547347350943,
+      "final_br_sem": 0.01250606874771065,
+      "final_exploitability": 2.150153560495876,
+      "final_field_norm": 0.2366736371227994
+    },
+    {
+      "environment": "FrequencyHopping",
+      "method": "noG",
+      "final_br_mean": -0.4157333965516606,
+      "final_br_sem": 0.07521632901153011,
+      "final_exploitability": 2.436753992200594,
+      "final_field_norm": 0.4007099825297894
+    },
+    {
+      "environment": "FrequencyHopping",
+      "method": "GDA",
+      "final_br_mean": -0.4743481535128165,
+      "final_br_sem": 0.06129965817331542,
+      "final_exploitability": 2.5141209484067155,
+      "final_field_norm": 0.47577648973066433
+    },
+    {
+      "environment": "FrequencyHopping",
+      "method": "Adam-GDA",
+      "final_br_mean": -10.642895784749,
+      "final_br_sem": 0.24044292338298015,
+      "final_exploitability": 17.598230492105028,
+      "final_field_norm": 1.6129375320436459
+    },
+    {
+      "environment": "FrequencyHopping",
+      "method": "EGM",
+      "final_br_mean": -0.43141280941854265,
+      "final_br_sem": 0.04593587448306452,
+      "final_exploitability": 2.4564614511491203,
+      "final_field_norm": 0.42820546499660794
+    },
+    {
+      "environment": "FrequencyHopping",
+      "method": "PPM-3",
+      "final_br_mean": -0.4325747732718169,
+      "final_br_sem": 0.04566983288816884,
+      "final_exploitability": 2.4580269196174926,
+      "final_field_norm": 0.42863495812849417
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "method": "QP+G",
+      "final_br_mean": -1.073367716914652,
+      "final_br_sem": 0.00850059366956858,
+      "final_exploitability": 1.7963555478393605,
+      "final_field_norm": 0.19427288726576936
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "method": "noG",
+      "final_br_mean": -1.1917258218228053,
+      "final_br_sem": 0.03562883817241189,
+      "final_exploitability": 1.9347194034100859,
+      "final_field_norm": 0.29416718619361143
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "method": "GDA",
+      "final_br_mean": -1.3285375088587092,
+      "final_br_sem": 0.04230242356011696,
+      "final_exploitability": 2.0285159914391784,
+      "final_field_norm": 0.33438762331702776
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "method": "Adam-GDA",
+      "final_br_mean": -8.20117301348922,
+      "final_br_sem": 0.2859600912690926,
+      "final_exploitability": 12.257532326982991,
+      "final_field_norm": 1.8364972218663524
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "method": "EGM",
+      "final_br_mean": -1.3098928898364008,
+      "final_br_sem": 0.03859777653138847,
+      "final_exploitability": 2.0110817424073812,
+      "final_field_norm": 0.3183035930782839
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "method": "PPM-3",
+      "final_br_mean": -1.3099389153518135,
+      "final_br_sem": 0.0386063934637096,
+      "final_exploitability": 2.011108918476003,
+      "final_field_norm": 0.31844942754569505
+    },
+    {
+      "environment": "PursuitEvasion",
+      "method": "QP+G",
+      "final_br_mean": -0.28436021499698677,
+      "final_br_sem": 0.04484575298155568,
+      "final_exploitability": 0.6595050135006445,
+      "final_field_norm": 0.050539651704545066
+    },
+    {
+      "environment": "PursuitEvasion",
+      "method": "noG",
+      "final_br_mean": -0.31529217554459577,
+      "final_br_sem": 0.056940706656652386,
+      "final_exploitability": 0.7449362112651017,
+      "final_field_norm": 0.06127611950610847
+    },
+    {
+      "environment": "PursuitEvasion",
+      "method": "GDA",
+      "final_br_mean": -0.3057218026699663,
+      "final_br_sem": 0.056332221496903555,
+      "final_exploitability": 0.7463915665951453,
+      "final_field_norm": 0.06079477692738119
+    },
+    {
+      "environment": "PursuitEvasion",
+      "method": "Adam-GDA",
+      "final_br_mean": -8.846373986710692,
+      "final_br_sem": 0.24549700972644145,
+      "final_exploitability": 17.429526937547354,
+      "final_field_norm": 3.8733361227640266
+    },
+    {
+      "environment": "PursuitEvasion",
+      "method": "EGM",
+      "final_br_mean": -0.3047279936463953,
+      "final_br_sem": 0.05594485772461822,
+      "final_exploitability": 0.7432627292012209,
+      "final_field_norm": 0.060424195692557046
+    },
+    {
+      "environment": "PursuitEvasion",
+      "method": "PPM-3",
+      "final_br_mean": -0.3047592068343226,
+      "final_br_sem": 0.05595211009962293,
+      "final_exploitability": 0.7433105156741868,
+      "final_field_norm": 0.06042763766988457
+    },
+    {
+      "environment": "SecurityPatrol",
+      "method": "QP+G",
+      "final_br_mean": -0.3289059091809926,
+      "final_br_sem": 0.006739370088996494,
+      "final_exploitability": 1.1427102585344278,
+      "final_field_norm": 0.12469517137857558
+    },
+    {
+      "environment": "SecurityPatrol",
+      "method": "noG",
+      "final_br_mean": -0.47169244581199327,
+      "final_br_sem": 0.04227980573357307,
+      "final_exploitability": 1.357367034772362,
+      "final_field_norm": 0.27257933871370044
+    },
+    {
+      "environment": "SecurityPatrol",
+      "method": "GDA",
+      "final_br_mean": -0.5370733704520616,
+      "final_br_sem": 0.04537402031057471,
+      "final_exploitability": 1.386331138152165,
+      "final_field_norm": 0.268326886323454
+    },
+    {
+      "environment": "SecurityPatrol",
+      "method": "Adam-GDA",
+      "final_br_mean": -5.149352728382676,
+      "final_br_sem": 0.045170473682809624,
+      "final_exploitability": 12.450023008126553,
+      "final_field_norm": 1.3458591918305416
+    },
+    {
+      "environment": "SecurityPatrol",
+      "method": "EGM",
+      "final_br_mean": -0.5007853585139943,
+      "final_br_sem": 0.03913511591543844,
+      "final_exploitability": 1.3437895235302582,
+      "final_field_norm": 0.2396699137408317
+    },
+    {
+      "environment": "SecurityPatrol",
+      "method": "PPM-3",
+      "final_br_mean": -0.5010734404038436,
+      "final_br_sem": 0.03915005388528276,
+      "final_exploitability": 1.3442713023734032,
+      "final_field_norm": 0.2398940226545725
+    }
+  ],
+  "decisions": [
+    {
+      "environment": "CyclicControl",
+      "all_seed_br_wins": true,
+      "br_win_count": 10,
+      "paired_br_gain_mean": 0.20563729447758727,
+      "paired_br_gain_95ci": [
+        0.07679199363783304,
+        0.3344825953173415
+      ],
+      "one_sided_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 0.16722489624784936,
+      "nog_exploitability_mean": 0.8019712159007503,
+      "strict_positive": true,
+      "median_rotation": 11.413890536677819,
+      "gamma_activation": 0.93,
+      "mean_g_contribution": 0.5870656241053877,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "FrequencyHopping",
+      "all_seed_br_wins": true,
+      "br_win_count": 10,
+      "paired_br_gain_mean": 0.32045792307815113,
+      "paired_br_gain_95ci": [
+        0.1509292734024885,
+        0.48998657275381374
+      ],
+      "one_sided_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 2.150153560495876,
+      "nog_exploitability_mean": 2.436753992200594,
+      "strict_positive": true,
+      "median_rotation": 0.9514314685560731,
+      "gamma_activation": 0.24666666666666667,
+      "mean_g_contribution": 0.17688847908064304,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "RoutingInterdiction",
+      "all_seed_br_wins": true,
+      "br_win_count": 10,
+      "paired_br_gain_mean": 0.11835810490815346,
+      "paired_br_gain_95ci": [
+        0.04198123806075843,
+        0.1947349717555485
+      ],
+      "one_sided_sign_test_p": 0.0009765625,
+      "qpg_exploitability_mean": 1.7963555478393605,
+      "nog_exploitability_mean": 1.9347194034100859,
+      "strict_positive": true,
+      "median_rotation": 0.9655512587824703,
+      "gamma_activation": 0.4066666666666667,
+      "mean_g_contribution": 0.28735423519794184,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "PursuitEvasion",
+      "all_seed_br_wins": false,
+      "br_win_count": 7,
+      "paired_br_gain_mean": 0.03093196054760894,
+      "paired_br_gain_95ci": [
+        -0.007115254268082995,
+        0.06897917536330087
+      ],
+      "one_sided_sign_test_p": null,
+      "qpg_exploitability_mean": 0.6595050135006445,
+      "nog_exploitability_mean": 0.7449362112651017,
+      "strict_positive": false,
+      "median_rotation": 3.139534260663421,
+      "gamma_activation": 1.0,
+      "mean_g_contribution": 0.33826893846271794,
+      "inflation_fraction": 0.0
+    },
+    {
+      "environment": "SecurityPatrol",
+      "all_seed_br_wins": false,
+      "br_win_count": 9,
+      "paired_br_gain_mean": 0.14278653663100066,
+      "paired_br_gain_95ci": [
+        0.049389415541664844,
+        0.23618365772033648
+      ],
+      "one_sided_sign_test_p": null,
+      "qpg_exploitability_mean": 1.1427102585344278,
+      "nog_exploitability_mean": 1.357367034772362,
+      "strict_positive": false,
+      "median_rotation": 1.2876793683654049,
+      "gamma_activation": 0.71,
+      "mean_g_contribution": 0.36728362326686315,
+      "inflation_fraction": 0.0
+    }
+  ],
+  "elapsed_seconds": 2380.341519832611
+}

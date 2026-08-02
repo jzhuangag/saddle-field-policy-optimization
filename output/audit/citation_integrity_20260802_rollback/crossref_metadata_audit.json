@@ -1,0 +1,450 @@
+{
+  "audit_date": "2026-08-02",
+  "source": "refs.bib",
+  "resolver": "Crossref live DOI endpoint",
+  "record_count": 11,
+  "verified_count": 11,
+  "review_count": 0,
+  "records": [
+    {
+      "citation_key": "MorimotoDoya2005RobustRL",
+      "doi": "10.1162/0899766053011528",
+      "crossref_url": "https://api.crossref.org/works/10.1162%2F0899766053011528",
+      "bib": {
+        "title": "Robust Reinforcement Learning",
+        "year": 2005,
+        "venue": "Neural Comput.",
+        "volume": "17",
+        "issue": "2",
+        "pages": "335--359"
+      },
+      "crossref": {
+        "title": "Robust Reinforcement Learning",
+        "authors": [
+          "Jun Morimoto",
+          "Kenji Doya"
+        ],
+        "years": [
+          2005
+        ],
+        "venue": "Neural Computation",
+        "publisher": "MIT Press - Journals",
+        "volume": "17",
+        "issue": "2",
+        "pages": "335-359",
+        "doi": "10.1162/0899766053011528"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Iyengar2005RobustDP",
+      "doi": "10.1287/moor.1040.0129",
+      "crossref_url": "https://api.crossref.org/works/10.1287%2Fmoor.1040.0129",
+      "bib": {
+        "title": "Robust Dynamic Programming",
+        "year": 2005,
+        "venue": "Math. Oper. Res.",
+        "volume": "30",
+        "issue": "2",
+        "pages": "257--280"
+      },
+      "crossref": {
+        "title": "Robust Dynamic Programming",
+        "authors": [
+          "Garud N. Iyengar"
+        ],
+        "years": [
+          2005
+        ],
+        "venue": "Mathematics of Operations Research",
+        "publisher": "Institute for Operations Research and the Management Sciences (INFORMS)",
+        "volume": "30",
+        "issue": "2",
+        "pages": "257-280",
+        "doi": "10.1287/moor.1040.0129"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "NilimElGhaoui2005",
+      "doi": "10.1287/opre.1050.0216",
+      "crossref_url": "https://api.crossref.org/works/10.1287%2Fopre.1050.0216",
+      "bib": {
+        "title": "Robust Control of Markov Decision Processes with Uncertain Transition Matrices",
+        "year": 2005,
+        "venue": "Oper. Res.",
+        "volume": "53",
+        "issue": "5",
+        "pages": "780--798"
+      },
+      "crossref": {
+        "title": "Robust Control of Markov Decision Processes with Uncertain Transition Matrices",
+        "authors": [
+          "Arnab Nilim",
+          "Laurent El Ghaoui"
+        ],
+        "years": [
+          2005
+        ],
+        "venue": "Operations Research",
+        "publisher": "Institute for Operations Research and the Management Sciences (INFORMS)",
+        "volume": "53",
+        "issue": "5",
+        "pages": "780-798",
+        "doi": "10.1287/opre.1050.0216"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Shapley1953StochasticGames",
+      "doi": "10.1073/pnas.39.10.1095",
+      "crossref_url": "https://api.crossref.org/works/10.1073%2Fpnas.39.10.1095",
+      "bib": {
+        "title": "Stochastic Games",
+        "year": 1953,
+        "venue": "Proc. Natl. Acad. Sci. U.S.A.",
+        "volume": "39",
+        "issue": "10",
+        "pages": "1095--1100"
+      },
+      "crossref": {
+        "title": "Stochastic Games",
+        "authors": [
+          "L. S. Shapley"
+        ],
+        "years": [
+          1953
+        ],
+        "venue": "Proceedings of the National Academy of Sciences",
+        "publisher": "National Academy of Sciences",
+        "volume": "39",
+        "issue": "10",
+        "pages": "1095-1100",
+        "doi": "10.1073/pnas.39.10.1095"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Littman1994MarkovGames",
+      "doi": "10.1016/B978-1-55860-335-6.50027-1",
+      "crossref_url": "https://api.crossref.org/works/10.1016%2FB978-1-55860-335-6.50027-1",
+      "bib": {
+        "title": "Markov Games as a Framework for Multi-Agent Reinforcement Learning",
+        "year": 1994,
+        "venue": "Proc. 11th Int. Conf. Mach. Learn. (ICML)",
+        "volume": null,
+        "issue": null,
+        "pages": "157--163"
+      },
+      "crossref": {
+        "title": "Markov games as a framework for multi-agent reinforcement learning",
+        "authors": [
+          "Michael L. Littman"
+        ],
+        "years": [
+          1994
+        ],
+        "venue": "Machine Learning Proceedings 1994",
+        "publisher": "Elsevier",
+        "volume": null,
+        "issue": null,
+        "pages": "157-163",
+        "doi": "10.1016/b978-1-55860-335-6.50027-1"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Rockafellar1976PPM",
+      "doi": "10.1137/0314056",
+      "crossref_url": "https://api.crossref.org/works/10.1137%2F0314056",
+      "bib": {
+        "title": "Monotone Operators and the Proximal Point Algorithm",
+        "year": 1976,
+        "venue": "SIAM J. Control Optim.",
+        "volume": "14",
+        "issue": "5",
+        "pages": "877--898"
+      },
+      "crossref": {
+        "title": "Monotone Operators and the Proximal Point Algorithm",
+        "authors": [
+          "R. Tyrrell Rockafellar"
+        ],
+        "years": [
+          1976
+        ],
+        "venue": "SIAM Journal on Control and Optimization",
+        "publisher": "Society for Industrial & Applied Mathematics (SIAM)",
+        "volume": "14",
+        "issue": "5",
+        "pages": "877-898",
+        "doi": "10.1137/0314056"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Nemirovski2004MirrorProx",
+      "doi": "10.1137/S1052623403425629",
+      "crossref_url": "https://api.crossref.org/works/10.1137%2FS1052623403425629",
+      "bib": {
+        "title": "Prox-Method with Rate of Convergence O(1/t) for Variational Inequalities with Lipschitz Continuous Monotone Operators and Smooth Convex–Concave Saddle Point Problems",
+        "year": 2004,
+        "venue": "SIAM J. Optim.",
+        "volume": "15",
+        "issue": "1",
+        "pages": "229--251"
+      },
+      "crossref": {
+        "title": "Prox-Method with Rate of Convergence <i>O</i>(1/<i>t</i>) for Variational Inequalities with Lipschitz Continuous Monotone Operators and Smooth Convex-Concave Saddle Point Problems",
+        "authors": [
+          "Arkadi Nemirovski"
+        ],
+        "years": [
+          2004
+        ],
+        "venue": "SIAM Journal on Optimization",
+        "publisher": "Society for Industrial & Applied Mathematics (SIAM)",
+        "volume": "15",
+        "issue": "1",
+        "pages": "229-251",
+        "doi": "10.1137/s1052623403425629"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Lu2022ODE",
+      "doi": "10.1007/s10107-021-01669-4",
+      "crossref_url": "https://api.crossref.org/works/10.1007%2Fs10107-021-01669-4",
+      "bib": {
+        "title": "An O(s^r)-Resolution ODE Framework for Understanding Discrete-Time Algorithms and Applications to the Linear Convergence of Minimax Problems",
+        "year": 2022,
+        "venue": "Math. Program.",
+        "volume": "194",
+        "issue": "1--2",
+        "pages": "1061--1112"
+      },
+      "crossref": {
+        "title": "An $$O(s^r)$$-resolution ODE framework for understanding discrete-time algorithms and applications to the linear convergence of minimax problems",
+        "authors": [
+          "Haihao Lu"
+        ],
+        "years": [
+          2021,
+          2022
+        ],
+        "venue": "Mathematical Programming",
+        "publisher": "Springer Science and Business Media LLC",
+        "volume": "194",
+        "issue": "1-2",
+        "pages": "1061-1112",
+        "doi": "10.1007/s10107-021-01669-4"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Zhang2025AdaptivePolyak",
+      "doi": "10.1109/TSP.2025.3528217",
+      "crossref_url": "https://api.crossref.org/works/10.1109%2FTSP.2025.3528217",
+      "bib": {
+        "title": "Adaptive Polyak Step-Size for Momentum Accelerated Stochastic Gradient Descent with General Convergence Guarantee",
+        "year": 2025,
+        "venue": "IEEE Trans. Signal Process.",
+        "volume": "73",
+        "issue": null,
+        "pages": "462--476"
+      },
+      "crossref": {
+        "title": "Adaptive Polyak Step-Size for Momentum Accelerated Stochastic Gradient Descent With General Convergence Guarantee",
+        "authors": [
+          "Jiawei Zhang",
+          "Cheng Jin",
+          "Yuantao Gu"
+        ],
+        "years": [
+          2025
+        ],
+        "venue": "IEEE Transactions on Signal Processing",
+        "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+        "volume": "73",
+        "issue": null,
+        "pages": "462-476",
+        "doi": "10.1109/tsp.2025.3528217"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Yuan2025StepSizeSDE",
+      "doi": "10.1109/TSP.2025.3592678",
+      "crossref_url": "https://api.crossref.org/works/10.1109%2FTSP.2025.3592678",
+      "bib": {
+        "title": "Step Size Adaptation for Accelerated Stochastic Momentum Algorithm Using SDE Modeling and Lyapunov Drift Minimization",
+        "year": 2025,
+        "venue": "IEEE Trans. Signal Process.",
+        "volume": "73",
+        "issue": null,
+        "pages": "3124--3139"
+      },
+      "crossref": {
+        "title": "Step Size Adaptation for Accelerated Stochastic Momentum Algorithm Using SDE Modeling and Lyapunov Drift Minimization",
+        "authors": [
+          "Yulan Yuan",
+          "Danny H. K. Tsang",
+          "Vincent K. N. Lau"
+        ],
+        "years": [
+          2025
+        ],
+        "venue": "IEEE Transactions on Signal Processing",
+        "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+        "volume": "73",
+        "issue": null,
+        "pages": "3124-3139",
+        "doi": "10.1109/tsp.2025.3592678"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [],
+      "status": "verified"
+    },
+    {
+      "citation_key": "Karimi2016PL",
+      "doi": "10.1007/978-3-319-46128-1_50",
+      "crossref_url": "https://api.crossref.org/works/10.1007%2F978-3-319-46128-1_50",
+      "bib": {
+        "title": "Linear Convergence of Gradient and Proximal-Gradient Methods Under the Polyak–Lojasiewicz Condition",
+        "year": 2016,
+        "venue": "Proc. Eur. Conf. Mach. Learn. Knowl. Discovery Databases (ECML PKDD)",
+        "volume": "9851",
+        "issue": null,
+        "pages": "795--811"
+      },
+      "crossref": {
+        "title": "Linear Convergence of Gradient and Proximal-Gradient Methods Under the Polyak-Łojasiewicz Condition",
+        "authors": [
+          "Hamed Karimi",
+          "Julie Nutini",
+          "Mark Schmidt"
+        ],
+        "years": [
+          2016
+        ],
+        "venue": "Lecture Notes in Computer Science",
+        "publisher": "Springer International Publishing",
+        "volume": null,
+        "issue": null,
+        "pages": "795-811",
+        "doi": "10.1007/978-3-319-46128-1_50"
+      },
+      "checks": {
+        "title": true,
+        "authors": true,
+        "year": true,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "crossref_coverage_gaps": [
+        "volume"
+      ],
+      "status": "verified"
+    }
+  ]
+}

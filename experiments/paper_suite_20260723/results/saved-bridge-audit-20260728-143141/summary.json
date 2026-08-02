@@ -1,0 +1,111 @@
+{
+  "game_values": {
+    "SecurityPatrol": {
+      "value": -0.25331964864951945,
+      "residual": 8.418266084220249e-13,
+      "iterations": 229
+    },
+    "FrequencyHopping": {
+      "value": 0.0,
+      "residual": 0.0,
+      "iterations": 1
+    },
+    "RPS": {
+      "value": 0.0,
+      "residual": 0.0,
+      "iterations": 1
+    },
+    "RoutingInterdiction": {
+      "value": -0.9999999999915546,
+      "residual": 8.446576771348191e-13,
+      "iterations": 242
+    },
+    "CyclicControl": {
+      "value": 0.0,
+      "residual": 0.0,
+      "iterations": 1
+    }
+  },
+  "entropy_bias": 0.659167373200866,
+  "maximum_shapley_residual": 8.446576771348191e-13,
+  "audits": {
+    "tabular": {
+      "source": "E:\\HKUST-study\\vin\\claude\u8bb0\u5f55\\RARL-Codex-Project\\experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\curves.csv",
+      "reported_environments": [
+        "CyclicControl",
+        "FrequencyHopping",
+        "RPS"
+      ],
+      "checkpoint_rows": 3780,
+      "minimum_bridge_slack": 0.3695118667376809,
+      "maximum_bridge_violation": 0.0
+    },
+    "neural": {
+      "source": "E:\\HKUST-study\\vin\\claude\u8bb0\u5f55\\RARL-Codex-Project\\experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\curves.csv",
+      "reported_environments": [
+        "CyclicControl",
+        "FrequencyHopping",
+        "RoutingInterdiction",
+        "SecurityPatrol"
+      ],
+      "checkpoint_rows": 3120,
+      "minimum_bridge_slack": 0.38594131744340465,
+      "maximum_bridge_violation": 0.0
+    }
+  },
+  "multiple_testing": {
+    "tabular": [
+      {
+        "environment": "RPS",
+        "br_win_count": 10,
+        "raw_sign_p": 0.0009765625,
+        "holm_adjusted_sign_p": 0.0029296875
+      },
+      {
+        "environment": "CyclicControl",
+        "br_win_count": 10,
+        "raw_sign_p": 0.0009765625,
+        "holm_adjusted_sign_p": 0.0029296875
+      },
+      {
+        "environment": "FrequencyHopping",
+        "br_win_count": 9,
+        "raw_sign_p": 0.0107421875,
+        "holm_adjusted_sign_p": 0.0107421875
+      }
+    ],
+    "neural": [
+      {
+        "environment": "CyclicControl",
+        "br_win_count": 10,
+        "raw_sign_p": 0.0009765625,
+        "holm_adjusted_sign_p": 0.0048828125
+      },
+      {
+        "environment": "FrequencyHopping",
+        "br_win_count": 10,
+        "raw_sign_p": 0.0009765625,
+        "holm_adjusted_sign_p": 0.0048828125
+      },
+      {
+        "environment": "RoutingInterdiction",
+        "br_win_count": 10,
+        "raw_sign_p": 0.0009765625,
+        "holm_adjusted_sign_p": 0.0048828125
+      },
+      {
+        "environment": "PursuitEvasion",
+        "br_win_count": 7,
+        "raw_sign_p": 0.171875,
+        "holm_adjusted_sign_p": 0.171875
+      },
+      {
+        "environment": "SecurityPatrol",
+        "br_win_count": 9,
+        "raw_sign_p": 0.0107421875,
+        "holm_adjusted_sign_p": 0.021484375
+      }
+    ]
+  },
+  "status": "PASS"
+}

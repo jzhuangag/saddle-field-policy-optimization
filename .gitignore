@@ -1,0 +1,74 @@
+# Recovery archives, external source material, and superseded drafts
+/recovered-claude-conversation/
+/recovered-generated-files/
+/recovered-generated-latest/
+/related-conversations/
+/local-source/
+/historical/
+/RECOVERY_HANDOFF.md
+
+# Local build and scratch directories
+/tmp/
+/logs/
+/$build/
+/$out/
+
+# LaTeX build products (the canonical release is RARL_final.pdf)
+/main.pdf
+/main.aux
+/main.bbl
+/main.blg
+/main.fdb_latexmk
+/main.fls
+/main.log
+/main.out
+/main_draftcheck*
+/RARL_final.aux
+/RARL_final.bbl
+/RARL_final.blg
+/RARL_final.fdb_latexmk
+/RARL_final.fls
+/RARL_final.log
+/RARL_final.out
+/latexmk*.log
+/latexmk*.pid
+
+# Python environments and caches
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.mplconfig/
+*.py[cod]
+
+# Exploratory experiment branches not used by the current manuscript
+/experiments/neural_markov_games_20260723/
+/experiments/pendulum_gate_20260721/
+
+# Keep only the frozen paper-suite result directories named by the release
+# manifest, together with the latest sentinel, tuning, and bridge audits.
+/experiments/paper_suite_20260723/results/*
+!/experiments/paper_suite_20260723/results/linear-geometry-20260723-103816/
+!/experiments/paper_suite_20260723/results/tabular-exact-gap-20260723-113009/
+!/experiments/paper_suite_20260723/results/neural-exact-gap-20260723-113325/
+!/experiments/paper_suite_20260723/results/theory-sentinels-20260728-142145/
+!/experiments/paper_suite_20260723/results/tuned-baselines-20260724-013019/
+!/experiments/paper_suite_20260723/results/saved-bridge-audit-20260728-143141/
+
+# Keep only the formal finite-trajectory result and its latest sentinel audit.
+/experiments/stochastic_oracle_validation_20260727/results/*
+!/experiments/stochastic_oracle_validation_20260727/results/formal-CyclicControl-dice-20260727-124224/
+!/experiments/stochastic_oracle_validation_20260727/results/sentinels-dice-20260728-142504/
+
+# Experiment scratch files
+/experiments/**/*.log
+/experiments/**/*.pid
+
+# Keep only the current citation-integrity release gate
+/output/audit/*
+!/output/audit/citation_integrity_20260802_rollback/
+!/output/audit/citation_integrity_20260802_rollback/**
+/output/logs/
+
+# Redundant root-level preview
+/neural_markov_games_main.png

@@ -1,0 +1,16 @@
+{
+  "trials": {
+    "decomposition": 1000,
+    "qp": 1000,
+    "entropy_bridge": 500,
+    "pure_rotation_radii": 200,
+    "centered_softplus": 500
+  },
+  "maximum_decomposition_identity_error": 5.684341886080802e-14,
+  "maximum_corrected_dominance_identity_error": 4.85722573273506e-17,
+  "maximum_box_qp_objective_error_vs_scipy": 1.4675760606763788e-15,
+  "maximum_performance_bridge_violation": 0.0,
+  "maximum_pure_rotation_normalized_margin_error_from_one_half": 2.220446049250313e-16,
+  "maximum_centered_softplus_property_violation": 3.469446951953614e-15,
+  "status": "PASS"
+}
