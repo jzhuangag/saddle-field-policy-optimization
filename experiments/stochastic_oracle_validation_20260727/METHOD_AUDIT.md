@@ -40,16 +40,6 @@ explicit prefix likelihood ratios.  Thus their off-behavior evaluations retain
 the trajectory-distribution derivative.  Exact soft or hard best-response
 solvers are never called during training; they are checkpoint evaluators only.
 
-## Rejected construction
-
-The historical `stochastic_actor_critic.py` formed a score-gradient field from
-fixed behavior trajectories and finite-differenced that field at perturbed
-policies without likelihood ratios.  The perturbed evaluations therefore
-treated the behavior state-action distribution as fixed.  The resulting
-curvature omitted distribution-derivative terms and remained directionally
-wrong as the batch increased.  Its outputs are retained as provenance, not as
-paper evidence.
-
 ## Numerical sentinels
 
 `sentinels_dice.py` checks:
@@ -63,5 +53,6 @@ paper evidence.
 5. positive-definite QP stabilization, box feasibility, accepted same-batch
    merit decrease, and dynamic-programming residuals.
 
-All generated data, logs, plots, and reports remain under this project
-directory.
+The frozen journal artifacts retain the final CSV/JSON evidence and audit
+reports; local logs and exploratory outputs are intentionally excluded from
+the public repository.

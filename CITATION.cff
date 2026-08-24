@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software or its experiment artifacts, please cite the
+  accompanying manuscript.
+title: >-
+  Saddle-Field Policy Optimization for Zero-Sum Markov Games: Adaptive
+  Lyapunov-Drift Control with Finite-Time Stationarity Guarantees
+type: software
+authors:
+  - family-names: Zhuang
+    given-names: Jialin
+    affiliation: The Hong Kong University of Science and Technology
+  - family-names: Lau
+    given-names: Vincent K. N.
+    affiliation: The Hong Kong University of Science and Technology
+repository-code: https://github.com/jzhuangag/saddle-field-policy-optimization
+version: 1.0.0
+date-released: 2026-08-24
+preferred-citation:
+  type: article
+  title: >-
+    Saddle-Field Policy Optimization for Zero-Sum Markov Games: Adaptive
+    Lyapunov-Drift Control with Finite-Time Stationarity Guarantees
+  authors:
+    - family-names: Zhuang
+      given-names: Jialin
+    - family-names: Lau
+      given-names: Vincent K. N.
+  year: 2026

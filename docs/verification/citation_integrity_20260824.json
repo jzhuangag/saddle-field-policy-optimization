@@ -1,0 +1,27 @@
+{
+  "schema": "citation-integrity-refresh/1",
+  "generated_at": "2026-08-24",
+  "bibliography": "refs.bib",
+  "sha256": "75E29A4DB355A4D79D94CEC59620D55C0E770FE402FD772A9F77FFAB06BC4A66",
+  "entry_count": 30,
+  "cited_unique_count": 30,
+  "duplicate_keys": [],
+  "uncited_entries": [],
+  "missing_entries": [],
+  "bibtex_warnings": 0,
+  "metadata_verification": {
+    "status": "pass",
+    "verified_records": 30,
+    "unresolved_entries": 0,
+    "material_conflicts": 0,
+    "fresh_authoritative_endpoints_checked": 30,
+    "hard_failures": 0,
+    "note": "All DOI and official-record endpoints returned HTTP 2xx except the access-controlled MIT Press book endpoint (HTTP 403), whose metadata had a positive authoritative baseline match. No endpoint returned HTTP 404 or 5xx."
+  },
+  "ieee_style": {
+    "bibliography_style": "IEEEtran.bst 1.14",
+    "status": "pass",
+    "note": "Fresh BibTeX compilation used all 30 entries and emitted zero warnings."
+  },
+  "status": "pass"
+}

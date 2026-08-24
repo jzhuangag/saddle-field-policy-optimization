@@ -11,7 +11,6 @@ import argparse
 import csv
 import json
 import math
-import sys
 import time
 from pathlib import Path
 
@@ -24,18 +23,9 @@ from scipy.special import logsumexp
 torch.set_default_dtype(torch.float64)
 torch.set_num_threads(1)
 
-HERE = Path(__file__).resolve().parent
-OLD = HERE.parent / "neural_markov_games_20260723"
-sys.path.insert(0, str(OLD))
-
-from candidate_games import (  # noqa: E402
-    candidate_games,
-    frequency_hopping,
-    pursuit_evasion,
-)
-from neural_markov_qp_screen import (  # noqa: E402
+from journal_games import (
     Game,
-    make_games,
+    journal_games,
     policy as neural_policy,
     policy_dim as neural_policy_dim,
 )
@@ -63,7 +53,7 @@ def rps_game() -> Game:
 
 
 def game_catalog() -> dict[str, Game]:
-    games = [rps_game(), make_games()[0], *candidate_games()]
+    games = [rps_game(), *journal_games()]
     return {game.name: game for game in games}
 
 
@@ -401,7 +391,16 @@ def main() -> None:
     LR = args.fixed_lr
     started = time.time()
     catalog = game_catalog()
-    default_names = ["RPS", "CyclicControl", "FrequencyHopping"] if args.mode == "tabular" else ["CyclicControl", "PursuitEvasion", "FrequencyHopping"]
+    default_names = (
+        ["RPS", "CyclicControl", "FrequencyHopping"]
+        if args.mode == "tabular"
+        else [
+            "CyclicControl",
+            "FrequencyHopping",
+            "RoutingInterdiction",
+            "SecurityPatrol",
+        ]
+    )
     names = args.environments or default_names
     games = [catalog[name] for name in names]
     methods = tuple(args.methods) if args.methods else METHODS

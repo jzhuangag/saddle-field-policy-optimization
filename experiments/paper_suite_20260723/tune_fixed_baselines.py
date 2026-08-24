@@ -2,7 +2,7 @@
 
 The tuning seeds (1000--1004) are disjoint from both the earlier candidate
 screening and the final reporting seeds (40--49).  One global learning rate per
-method is selected across all five neural Markov games, which avoids
+method is selected across all four reported neural Markov games, which avoids
 environment-specific test-set tuning.  QP+G and noG remain capped at 0.03 and
 are not retuned here.
 """
@@ -26,7 +26,6 @@ ENVIRONMENTS = (
     "FrequencyHopping",
     "RoutingInterdiction",
     "SecurityPatrol",
-    "PursuitEvasion",
 )
 METHODS = ("GDA", "Adam-GDA", "EGM", "PPM-3")
 LR_GRID = (0.001, 0.003, 0.01, 0.03)

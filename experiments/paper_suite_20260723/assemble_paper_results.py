@@ -1,4 +1,4 @@
-"""Assemble frozen final artifacts for the revised manuscript."""
+"""Regenerate journal figures and summaries from frozen release artifacts."""
 
 from __future__ import annotations
 
@@ -13,24 +13,67 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
+FIG_FONT_SIZE = 7.2
+METHOD_LINE_WIDTH = 1.35
+REFERENCE_LINE_WIDTH = 0.85
+BOUNDARY_MARKER_SIZE = 15
+CI_ALPHA = 0.08
+SPINE_WIDTH = 0.65
+GRID_LINE_WIDTH = 0.45
+GRID_ALPHA = 0.55
+DOUBLE_COLUMN_WIDTH = 7.16
+GAMMA_MAX = 0.03
+
+plt.rcParams.update(
+    {
+        "font.family": "Times New Roman",
+        "font.weight": "normal",
+        "font.size": FIG_FONT_SIZE,
+        "mathtext.fontset": "stix",
+        "axes.titlesize": FIG_FONT_SIZE,
+        "axes.titleweight": "normal",
+        "axes.labelsize": FIG_FONT_SIZE,
+        "axes.labelweight": "normal",
+        "xtick.labelsize": FIG_FONT_SIZE,
+        "ytick.labelsize": FIG_FONT_SIZE,
+        "legend.fontsize": FIG_FONT_SIZE,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
+        "figure.facecolor": "white",
+        "axes.facecolor": "white",
+        "savefig.facecolor": "white",
+    }
+)
 
 HERE = Path(__file__).resolve().parent
 PROJECT = HERE.parent.parent
 RESULTS = HERE / "results"
-LINEAR = RESULTS / "linear-geometry-20260723-103816"
+LINEAR = RESULTS / "linear-geometry-20260823-234632"
 TABULAR = RESULTS / "tabular-exact-gap-20260723-113009"
-NEURAL = RESULTS / "neural-exact-gap-20260723-113325"
+NEURAL = RESULTS / "neural-journal-four-20260824"
 OUTPUT_PDF = PROJECT / "output" / "pdf"
 OUTPUT_DATA = PROJECT / "output" / "data"
 METHODS = ("QP+G", "noG", "GDA", "Adam-GDA", "EGM", "PPM-3")
 STYLES = {"QP+G": ("black", "-"), "noG": ("tab:green", "-"), "GDA": ("tab:orange", "--"), "Adam-GDA": ("tab:blue", "--"), "EGM": ("tab:purple", "-."), "PPM-3": ("tab:red", ":")}
 
 
+def style_axis(axis):
+    axis.grid(
+        True,
+        color="0.84",
+        linewidth=GRID_LINE_WIDTH,
+        alpha=GRID_ALPHA,
+    )
+    axis.set_axisbelow(True)
+    axis.tick_params(width=SPINE_WIDTH, length=2.6, pad=1.5)
+    for spine in axis.spines.values():
+        spine.set_linewidth(SPINE_WIDTH)
+
+
 def read_csv(path: Path):
     with path.open(encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
-    numeric = {"seed", "step", "current_return", "hard_br_return", "hard_exploitability", "regularized_gap", "field_norm", "hard_br_residual", "hard_br_iterations", "soft_br_residual", "soft_br_iterations", "rotation", "cos_fg", "d", "beta", "gamma", "gamma_active", "g_contribution", "predicted_decrease", "realized_decrease", "inflation", "backtracks", "max_soft_residual", "analytic_d", "grad_norm", "merit", "mu", "ratio", "sigma", "skew_ratio", "z0", "z1"}
+    numeric = {"seed", "step", "current_return", "hard_br_return", "hard_exploitability", "regularized_gap", "field_norm", "hard_br_residual", "hard_br_iterations", "soft_br_residual", "soft_br_iterations", "rotation", "cos_fg", "d", "beta", "gamma", "gamma_active", "g_contribution", "curvature_contribution", "curvature_norm", "predicted_decrease", "realized_decrease", "inflation", "backtracks", "max_soft_residual", "analytic_d", "grad_norm", "merit", "mu", "ratio", "sigma", "skew_ratio", "z0", "z1"}
     for row in rows:
         for key in numeric & row.keys():
             if row[key] != "":
@@ -38,12 +81,16 @@ def read_csv(path: Path):
     return rows
 
 
-def sha256(path: Path):
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def canonical_bytes(path: Path) -> bytes:
+    """Return text bytes with platform-dependent line endings normalized."""
+    payload = path.read_bytes()
+    if path.suffix.lower() in {".csv", ".json"}:
+        payload = payload.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return payload
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(canonical_bytes(path)).hexdigest()
 
 
 def summarize(curves, diagnostics):
@@ -84,13 +131,24 @@ def write_csv(path, rows):
         writer = csv.DictWriter(handle, fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
 
 
-def plot(curves, environments, destination, figsize):
-    panels = (("hard_br_return", "hard BR return"), ("hard_exploitability", "hard exploitability"), ("regularized_gap", "regularized Nash gap"), ("field_norm", "regularized field norm"))
+def plot(curves, environments, destination):
+    panels = (
+        ("hard_br_return", "Worst-case return"),
+        ("hard_exploitability", "Exploitability"),
+        ("regularized_gap", "Regularized Nash gap"),
+        ("field_norm", r"Field norm $\|\mathbf{F}\|$"),
+    )
     seeds = sorted({int(row["seed"]) for row in curves})
-    fig, axes = plt.subplots(len(environments), 4, figsize=figsize, squeeze=False)
+    figure_height = 5.25 if len(environments) == 3 else 3.70
+    fig, axes = plt.subplots(
+        len(environments),
+        4,
+        figsize=(DOUBLE_COLUMN_WIDTH, figure_height),
+        squeeze=False,
+    )
     for row_index, environment in enumerate(environments):
         x = np.array(sorted({r["step"] for r in curves if r["environment"] == environment}))
-        for col, (key, title) in enumerate(panels):
+        for col, (key, ylabel) in enumerate(panels):
             axis = axes[row_index, col]; method_stats = {}
             for method in METHODS:
                 data = []
@@ -106,20 +164,83 @@ def plot(curves, environments, destination, figsize):
                 mean, sem = method_stats[method]
                 shown = np.clip(mean, lower, upper) if method == "Adam-GDA" else mean
                 shown_sem = np.minimum(sem, np.maximum(upper - shown, 0)) if method == "Adam-GDA" else sem
-                axis.plot(x, shown, label=method, color=STYLES[method][0], linestyle=STYLES[method][1], linewidth=1.65)
-                axis.fill_between(x, np.maximum(shown - shown_sem, lower), np.minimum(shown + shown_sem, upper), color=STYLES[method][0], alpha=0.08)
+                axis.plot(
+                    x,
+                    shown,
+                    label=method,
+                    color=STYLES[method][0],
+                    linestyle=STYLES[method][1],
+                    linewidth=METHOD_LINE_WIDTH,
+                )
+                axis.fill_between(
+                    x,
+                    np.maximum(shown - shown_sem, lower),
+                    np.minimum(shown + shown_sem, upper),
+                    color=STYLES[method][0],
+                    alpha=CI_ALPHA,
+                    linewidth=0,
+                )
                 if method == "Adam-GDA":
                     high, low = mean > upper, mean < lower
-                    if np.any(high): axis.scatter(x[high], np.full(np.sum(high), upper), marker="^", s=16, color=STYLES[method][0], zorder=4)
-                    if np.any(low): axis.scatter(x[low], np.full(np.sum(low), lower), marker="v", s=16, color=STYLES[method][0], zorder=4)
-            axis.set(title=f"{environment}: {title}", xlabel="simultaneous joint update", ylim=(lower, upper))
-            axis.title.set_fontsize(9.5); axis.grid(alpha=0.25)
+                    if np.any(high):
+                        axis.scatter(
+                            x[high],
+                            np.full(np.sum(high), upper),
+                            marker="^",
+                            s=BOUNDARY_MARKER_SIZE,
+                            color=STYLES[method][0],
+                            linewidths=0,
+                            zorder=4,
+                        )
+                    if np.any(low):
+                        axis.scatter(
+                            x[low],
+                            np.full(np.sum(low), lower),
+                            marker="v",
+                            s=BOUNDARY_MARKER_SIZE,
+                            color=STYLES[method][0],
+                            linewidths=0,
+                            zorder=4,
+                        )
+            axis.set_ylim(lower, upper)
+            axis.set_xlabel(r"Joint update $k$", labelpad=1.5)
+            axis.set_ylabel(ylabel, labelpad=2.0)
+            style_axis(axis)
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=6, frameon=False, bbox_to_anchor=(0.5, 0.016))
-    fig.text(0.5, 0.006, "Mean +/- one standard error. Boundary triangles denote clipped Adam-GDA means; CSV values are not clipped.", ha="center", fontsize=7.5)
-    fig.tight_layout(rect=(0, 0.045, 1, 1))
-    fig.savefig(destination, bbox_inches="tight")
-    fig.savefig(destination.with_suffix(".png"), dpi=240, bbox_inches="tight")
+    fig.legend(
+        handles,
+        labels,
+        loc="upper center",
+        ncol=6,
+        frameon=False,
+        bbox_to_anchor=(0.5, 0.995),
+        handlelength=2.25,
+        columnspacing=1.15,
+        handletextpad=0.45,
+        borderaxespad=0,
+    )
+    fig.subplots_adjust(
+        left=0.080,
+        right=0.995,
+        top=0.925,
+        bottom=0.105,
+        wspace=0.56,
+        hspace=0.86,
+    )
+    panel_letters = "abcdefghijklmnopqrstuvwxyz"
+    for row_index, environment in enumerate(environments):
+        left = axes[row_index, 0].get_position()
+        right = axes[row_index, -1].get_position()
+        fig.text(
+            0.5 * (left.x0 + right.x1),
+            left.y0 - 0.068,
+            f"({panel_letters[row_index]}) {environment}",
+            ha="center",
+            va="top",
+            fontweight="normal",
+        )
+    fig.savefig(destination)
+    fig.savefig(destination.with_suffix(".png"), dpi=300)
     plt.close(fig)
 
 
@@ -139,7 +260,11 @@ def plot_linear_geometry(curves, destination):
     ]
     rotation_rows = [row for row in curves if not math.isfinite(row["ratio"])]
 
-    fig, axes = plt.subplots(1, 4, figsize=(14.2, 3.25))
+    fig, axes = plt.subplots(
+        1,
+        4,
+        figsize=(DOUBLE_COLUMN_WIDTH, 1.95),
+    )
     for method in METHODS:
         selected = sorted(
             [row for row in ratio_data if row["method"] == method],
@@ -161,12 +286,17 @@ def plot_linear_geometry(curves, destination):
             label=method,
             color=STYLES[method][0],
             linestyle=STYLES[method][1],
+            linewidth=METHOD_LINE_WIDTH,
         )
-    axes[0].axvline(1.0, color="0.5", linewidth=1.0, linestyle=":")
+    axes[0].axvline(
+        1.0,
+        color="0.45",
+        linewidth=REFERENCE_LINE_WIDTH,
+        linestyle=":",
+    )
     axes[0].set(
-        xlabel=r"rotation ratio $\sigma/\mu$",
-        ylabel=r"final $V/V_0$ (log scale)",
-        title="phase diagram",
+        xlabel=r"Rotation ratio $\sigma/\mu$",
+        ylabel=r"Final field energy $\phi_K/\phi_0$",
     )
 
     analytic, numeric = [], []
@@ -184,20 +314,44 @@ def plot_linear_geometry(curves, destination):
         )
         analytic.append(row["analytic_d"] / max(scale, 1e-15))
         numeric.append(row["d"] / max(scale, 1e-15))
-    axes[1].plot(ratio_values, analytic, color="black", label="analytic")
-    axes[1].plot(
+    analytic_line = axes[1].plot(
+        ratio_values,
+        analytic,
+        color="0.20",
+        linewidth=METHOD_LINE_WIDTH,
+        label="Analytical $d$",
+    )[0]
+    numerical_line = axes[1].plot(
         ratio_values,
         numeric,
         color="tab:red",
         linestyle="--",
-        label="computed",
+        linewidth=METHOD_LINE_WIDTH,
+        label="Numerical $d$",
+    )[0]
+    axes[1].axhline(0.0, color="0.45", linewidth=REFERENCE_LINE_WIDTH)
+    axes[1].axvline(
+        1.0,
+        color="0.45",
+        linewidth=REFERENCE_LINE_WIDTH,
+        linestyle=":",
     )
-    axes[1].axhline(0.0, color="0.5", linewidth=1.0)
-    axes[1].axvline(1.0, color="0.5", linewidth=1.0, linestyle=":")
     axes[1].set(
-        xlabel=r"rotation ratio $\sigma/\mu$",
-        ylabel="normalized curvature descent $d$",
-        title="exact skew threshold",
+        xlabel=r"Rotation ratio $\sigma/\mu$",
+        ylabel="Normalized curvature descent $d$",
+    )
+    axes[1].legend(
+        handles=[analytic_line, numerical_line],
+        loc="upper left",
+        frameon=True,
+        facecolor="white",
+        edgecolor="none",
+        framealpha=0.84,
+        handlelength=1.35,
+        handletextpad=0.35,
+        borderpad=0.20,
+        borderaxespad=0.25,
+        labelspacing=0.18,
     )
 
     for method in METHODS:
@@ -212,49 +366,118 @@ def plot_linear_geometry(curves, destination):
             label=method,
             color=STYLES[method][0],
             linestyle=STYLES[method][1],
+            linewidth=METHOD_LINE_WIDTH,
         )
     axes[2].set(
-        xlabel="joint update", ylabel=r"$V_k/V_0$", title="pure rotation"
+        xlabel=r"Joint update $k$",
+        ylabel=r"Normalized field energy $\phi_k/\phi_0$",
     )
 
-    selected = [
-        row
-        for row in rotation_rows
-        if row["method"] == "QP+G" and int(row["step"]) < steps
-    ]
-    axes[3].scatter(
-        [row["predicted_decrease"] for row in selected],
-        [row["realized_decrease"] for row in selected],
-        s=16,
-        color="black",
+    panel_d_rows = sorted(
+        [
+            row
+            for row in curves
+            if row["method"] == "QP+G"
+            and math.isfinite(row["ratio"])
+            and int(row["step"]) == 0
+        ],
+        key=lambda row: row["ratio"],
     )
-    limit = max([row["predicted_decrease"] for row in selected] + [1e-12])
+    panel_d_ratios = np.asarray(
+        [row["ratio"] for row in panel_d_rows], dtype=float
+    )
+    normalized_gamma = np.asarray(
+        [row["gamma"] / GAMMA_MAX for row in panel_d_rows], dtype=float
+    )
+    curvature_contribution = np.asarray(
+        [row["curvature_contribution"] for row in panel_d_rows], dtype=float
+    )
     axes[3].plot(
-        [0.0, limit],
-        [0.0, limit],
-        color="tab:red",
+        panel_d_ratios,
+        normalized_gamma,
+        color="black",
+        linewidth=METHOD_LINE_WIDTH,
+        marker="o",
+        markersize=2.8,
+        markevery=5,
+        label=r"$\gamma_0/\gamma_{\max}$",
+    )
+    axes[3].plot(
+        panel_d_ratios,
+        curvature_contribution,
+        color="tab:purple",
         linestyle="--",
-        linewidth=1.0,
+        linewidth=METHOD_LINE_WIDTH,
+        marker="s",
+        markersize=2.6,
+        markevery=5,
+        label=r"$C_0^G$",
+    )
+    axes[3].axvline(
+        1.0,
+        color="0.45",
+        linewidth=REFERENCE_LINE_WIDTH,
+        linestyle=":",
     )
     axes[3].set(
-        xlabel="QP predicted decrease",
-        ylabel="realized decrease",
-        title="quadratic-model identity",
+        xlabel=r"Rotation ratio $\sigma/\mu$",
+        ylabel="Normalized curvature use",
+        ylim=(0.0, 1.0),
+    )
+    axes[3].set_yticks([0.0, 0.5, 1.0])
+    axes[3].legend(
+        loc="upper left",
+        bbox_to_anchor=(0.02, 0.80),
+        frameon=True,
+        facecolor="white",
+        edgecolor="none",
+        framealpha=0.84,
+        handlelength=1.35,
+        handletextpad=0.35,
+        borderpad=0.20,
+        borderaxespad=0.0,
+        labelspacing=0.18,
     )
     for axis in axes:
-        axis.grid(alpha=0.25)
+        style_axis(axis)
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
         handles,
         labels,
-        loc="lower center",
+        loc="upper center",
         ncol=6,
         frameon=False,
-        bbox_to_anchor=(0.5, -0.04),
+        bbox_to_anchor=(0.5, 0.995),
+        handlelength=1.8,
+        columnspacing=0.75,
+        handletextpad=0.35,
+        borderaxespad=0,
     )
-    fig.tight_layout(rect=(0, 0.09, 1, 1))
-    fig.savefig(destination, bbox_inches="tight")
-    fig.savefig(destination.with_suffix(".png"), dpi=240, bbox_inches="tight")
+    fig.subplots_adjust(
+        left=0.060,
+        right=0.995,
+        top=0.77,
+        bottom=0.32,
+        wspace=0.38,
+    )
+    panel_labels = (
+        "(a) Rotation-ratio sweep",
+        "(b) Curvature-descent threshold",
+        "(c) Pure-rotation dynamics",
+        "(d) Adaptive curvature allocation",
+    )
+    for axis, panel_label in zip(axes, panel_labels):
+        position = axis.get_position()
+        fig.text(
+            0.5 * (position.x0 + position.x1),
+            position.y0 - 0.205,
+            panel_label,
+            ha="center",
+            va="top",
+            fontweight="normal",
+        )
+    fig.savefig(destination)
+    fig.savefig(destination.with_suffix(".png"), dpi=300)
     plt.close(fig)
 
 
@@ -268,11 +491,27 @@ def main():
     neu_summary, neu_decisions = summarize(neu_curves, neu_diag)
     write_csv(OUTPUT_DATA / "vi_b_tabular_summary.csv", tab_summary)
     write_csv(OUTPUT_DATA / "vi_c_neural_summary.csv", neu_summary)
-    plot(tab_curves, ["RPS", "CyclicControl", "FrequencyHopping"], OUTPUT_PDF / "fig_vi_b_tabular.pdf", (14.4, 8.9))
-    plot(neu_curves, ["CyclicControl", "FrequencyHopping", "RoutingInterdiction"], OUTPUT_PDF / "fig_vi_c_neural.pdf", (14.4, 8.9))
-    plot(neu_curves, ["SecurityPatrol", "PursuitEvasion"], OUTPUT_PDF / "fig_vi_c_additional.pdf", (14.4, 6.1))
+    plot(tab_curves, ["RPS", "CyclicControl", "FrequencyHopping"], OUTPUT_PDF / "fig_vi_b_tabular.pdf")
+    plot(neu_curves, ["CyclicControl", "FrequencyHopping", "RoutingInterdiction"], OUTPUT_PDF / "fig_vi_c_neural.pdf")
     source_files = [LINEAR / "curves.csv", LINEAR / "summary.json", TABULAR / "curves.csv", TABULAR / "diagnostics.csv", TABULAR / "summary.json", NEURAL / "curves.csv", NEURAL / "diagnostics.csv", NEURAL / "summary.json"]
-    manifest = {"frozen_sources": {str(path.relative_to(PROJECT)): {"sha256": sha256(path), "bytes": path.stat().st_size} for path in source_files}, "vi_b_decisions": tab_decisions, "vi_c_decisions": neu_decisions, "main_vi_c_environments": ["CyclicControl", "FrequencyHopping", "RoutingInterdiction"], "additional_confirmed_environment": "SecurityPatrol", "nonconfirmed_environment": "PursuitEvasion"}
+    manifest = {
+        "schema": "journal-artifact-manifest/1",
+        "frozen_sources": {
+            str(path.relative_to(PROJECT)).replace("\\", "/"): {
+                "sha256": sha256(path),
+                "canonical_bytes": len(canonical_bytes(path)),
+            }
+            for path in source_files
+        },
+        "vi_b_decisions": tab_decisions,
+        "vi_c_decisions": neu_decisions,
+        "displayed_vi_c_environments": [
+            "CyclicControl",
+            "FrequencyHopping",
+            "RoutingInterdiction",
+        ],
+        "additional_reported_environment": "SecurityPatrol",
+    }
     (OUTPUT_DATA / "final_experiment_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print(json.dumps(manifest, indent=2)); print("OUTPUT_PDF=" + str(OUTPUT_PDF)); print("OUTPUT_DATA=" + str(OUTPUT_DATA))
 

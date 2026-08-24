@@ -5,23 +5,19 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
 import time
 from pathlib import Path
 from scipy import stats
 
 
 HERE = Path(__file__).resolve().parent
-OLD = HERE.parent / "neural_markov_games_20260723"
-sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(OLD))
-
-from markov_game_suite import ENTROPY_TAU, DISCOUNT, game_catalog, hard_game_value  # noqa: E402
+PROJECT = HERE.parent.parent
+from markov_game_suite import ENTROPY_TAU, DISCOUNT, game_catalog, hard_game_value
 
 
 SAVED = {
     "tabular": HERE / "results" / "tabular-exact-gap-20260723-113009" / "curves.csv",
-    "neural": HERE / "results" / "neural-exact-gap-20260723-113325" / "curves.csv",
+    "neural": HERE / "results" / "neural-journal-four-20260824" / "curves.csv",
 }
 
 REPORTED_ENVIRONMENTS = {
@@ -60,7 +56,7 @@ def main():
             upper = float(row["regularized_gap"]) + entropy_bias
             slacks.append(upper - deficiency)
         audits[mode] = {
-            "source": str(path),
+            "source": str(path.relative_to(PROJECT)).replace("\\", "/"),
             "reported_environments": sorted(REPORTED_ENVIRONMENTS[mode]),
             "checkpoint_rows": len(rows),
             "minimum_bridge_slack": min(slacks),
@@ -69,15 +65,18 @@ def main():
         saved_summary = json.loads((path.parent / "summary.json").read_text(encoding="utf-8"))
         decisions = []
         for item in saved_summary["decisions"]:
+            if item["environment"] not in REPORTED_ENVIRONMENTS[mode]:
+                continue
+            win_count = int(item.get("br_wins", item.get("br_win_count")))
             raw_p = float(
                 stats.binomtest(
-                    int(item["br_win_count"]), 10, p=0.5, alternative="greater"
+                    win_count, 10, p=0.5, alternative="greater"
                 ).pvalue
             )
             decisions.append(
                 {
                     "environment": item["environment"],
-                    "br_win_count": int(item["br_win_count"]),
+                    "br_win_count": win_count,
                     "raw_sign_p": raw_p,
                 }
             )

@@ -1,36 +1,37 @@
 {
+  "schema": "journal-artifact-manifest/1",
   "frozen_sources": {
-    "experiments\\paper_suite_20260723\\results\\linear-geometry-20260723-103816\\curves.csv": {
-      "sha256": "36c375afa86ee1da36c8a04bce0b235da812584ed8df3b1a609acee38b4d8c74",
-      "bytes": 8607378
+    "experiments/paper_suite_20260723/results/linear-geometry-20260823-234632/curves.csv": {
+      "sha256": "8251ee44d6b7cb7995d32015e14f9fc6160a2efa565a3e6253ebeab5df408950",
+      "canonical_bytes": 8973321
     },
-    "experiments\\paper_suite_20260723\\results\\linear-geometry-20260723-103816\\summary.json": {
-      "sha256": "aa442918d2fdd3532199e8c8420d761564597873d3ffbed774ffae6488f460dd",
-      "bytes": 498
+    "experiments/paper_suite_20260723/results/linear-geometry-20260823-234632/summary.json": {
+      "sha256": "2c446572fe47ab8d071ab79d365fa17ebef1638027953ebbc054205e186f84e2",
+      "canonical_bytes": 925
     },
-    "experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\curves.csv": {
-      "sha256": "acc25b88a8552e7d9de827a8300dbf4b65c72e1102a82e2b062003d3431751e1",
-      "bytes": 693585
+    "experiments/paper_suite_20260723/results/tabular-exact-gap-20260723-113009/curves.csv": {
+      "sha256": "7c7ae3e5d15fabd5e5c5fd819a131d07cc4f7c0fdb2be1245dbf630445754c40",
+      "canonical_bytes": 689804
     },
-    "experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\diagnostics.csv": {
-      "sha256": "3c3dce275f49b32c48ffc4090d5b719d49e189a1119bef7bcd7c294824a78656",
-      "bytes": 602206
+    "experiments/paper_suite_20260723/results/tabular-exact-gap-20260723-113009/diagnostics.csv": {
+      "sha256": "b9d9bb24791e710ff682904737c625ffae90cadd9f5f46abcb460f8b7fab06c7",
+      "canonical_bytes": 599205
     },
-    "experiments\\paper_suite_20260723\\results\\tabular-exact-gap-20260723-113009\\summary.json": {
-      "sha256": "c8e84fd152cb2c971eab2852a2194b593f50d931d5f61040c66ff439faa4a81c",
-      "bytes": 7590
+    "experiments/paper_suite_20260723/results/tabular-exact-gap-20260723-113009/summary.json": {
+      "sha256": "561b559d319401a79f7ad2c7b87361f0ae987f7065f0fbc79388dbfaf0688fd6",
+      "canonical_bytes": 7349
     },
-    "experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\curves.csv": {
-      "sha256": "2692638d59cb9a5a2a094594470f652f5d2aea07f815f5cec149080836d9d806",
-      "bytes": 721521
+    "experiments/paper_suite_20260723/results/neural-journal-four-20260824/curves.csv": {
+      "sha256": "d65bbae5a89d13ffe0d760e6705e6f6110a64fa623136091852f89e1e384b756",
+      "canonical_bytes": 575366
     },
-    "experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\diagnostics.csv": {
-      "sha256": "cef7c395dda32e47c1006ea8832e9ff826b326cd771f5f76171f5eb00e2f2d3b",
-      "bytes": 532470
+    "experiments/paper_suite_20260723/results/neural-journal-four-20260824/diagnostics.csv": {
+      "sha256": "0111e8ccce49e65ba9e24c2b3748bde93c69f468aab66cbb87bad09f91204071",
+      "canonical_bytes": 417199
     },
-    "experiments\\paper_suite_20260723\\results\\neural-exact-gap-20260723-113325\\summary.json": {
-      "sha256": "97b05761ed1c513f5e833891ce1ed58afb2efb3b0314ad46fc721006188c2fc9",
-      "bytes": 12194
+    "experiments/paper_suite_20260723/results/neural-journal-four-20260824/summary.json": {
+      "sha256": "4616a91644da954455fd06ddd7a5b27fbf87c257c00bd05d3f855134c330d1fc",
+      "canonical_bytes": 15805
     }
   },
   "vi_b_decisions": [
@@ -151,25 +152,6 @@
       "inflation_fraction": 0.0
     },
     {
-      "environment": "PursuitEvasion",
-      "seed_count": 10,
-      "br_wins": 7,
-      "paired_br_gain_mean": 0.03093196054760894,
-      "paired_br_gain_95ci": [
-        -0.007115254268082995,
-        0.06897917536330087
-      ],
-      "one_sided_exact_sign_test_p": 0.171875,
-      "qpg_exploitability_mean": 0.6595050135006445,
-      "nog_exploitability_mean": 0.7449362112651017,
-      "strict_all_seed_positive": false,
-      "confirmatory_positive": false,
-      "median_rotation": 3.139534260663421,
-      "gamma_activation": 1.0,
-      "mean_g_contribution": 0.33826893846271794,
-      "inflation_fraction": 0.0
-    },
-    {
       "environment": "SecurityPatrol",
       "seed_count": 10,
       "br_wins": 9,
@@ -189,11 +171,10 @@
       "inflation_fraction": 0.0
     }
   ],
-  "main_vi_c_environments": [
+  "displayed_vi_c_environments": [
     "CyclicControl",
     "FrequencyHopping",
     "RoutingInterdiction"
   ],
-  "additional_confirmed_environment": "SecurityPatrol",
-  "nonconfirmed_environment": "PursuitEvasion"
+  "additional_reported_environment": "SecurityPatrol"
 }

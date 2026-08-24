@@ -12,6 +12,15 @@
 /logs/
 /$build/
 /$out/
+/$reviewDir/
+/output/build/
+/output/qa/
+
+# Separate conference project and local presentation material
+/ICC/
+/plot/
+/system model.pptx
+/~$system model.pptx
 
 # LaTeX build products (the canonical release is RARL_final.pdf)
 /main.pdf
@@ -48,12 +57,12 @@
 # Keep only the frozen paper-suite result directories named by the release
 # manifest, together with the latest sentinel, tuning, and bridge audits.
 /experiments/paper_suite_20260723/results/*
-!/experiments/paper_suite_20260723/results/linear-geometry-20260723-103816/
+!/experiments/paper_suite_20260723/results/linear-geometry-20260823-234632/
 !/experiments/paper_suite_20260723/results/tabular-exact-gap-20260723-113009/
-!/experiments/paper_suite_20260723/results/neural-exact-gap-20260723-113325/
+!/experiments/paper_suite_20260723/results/neural-journal-four-20260824/
 !/experiments/paper_suite_20260723/results/theory-sentinels-20260728-142145/
-!/experiments/paper_suite_20260723/results/tuned-baselines-20260724-013019/
-!/experiments/paper_suite_20260723/results/saved-bridge-audit-20260728-143141/
+!/experiments/paper_suite_20260723/results/tuned-baselines-journal-four-20260824/
+!/experiments/paper_suite_20260723/results/saved-bridge-audit-20260824-214951/
 
 # Keep only the formal finite-trajectory result and its latest sentinel audit.
 /experiments/stochastic_oracle_validation_20260727/results/*
@@ -63,12 +72,31 @@
 # Experiment scratch files
 /experiments/**/*.log
 /experiments/**/*.pid
+/experiments/**/*.partial.csv
+/experiments/stochastic_oracle_validation_20260727/stochastic_actor_critic.py
+/experiments/stochastic_oracle_validation_20260727/sentinels.py
+/experiments/stochastic_oracle_validation_20260727/results/formal-CyclicControl-dice-20260727-124224/stochastic_oracle_validation.pdf
 
-# Keep only the current citation-integrity release gate
-/output/audit/*
-!/output/audit/citation_integrity_20260802_rollback/
-!/output/audit/citation_integrity_20260802_rollback/**
+# Citation checks are copied into docs/verification for the public release.
+/output/audit/
 /output/logs/
+
+# Unused exploratory figure variants are retained locally only.
+/output/pdf/fig_vi_c_additional.*
+/output/pdf/fig_vi_c_stochastic.*
+
+# Internal working notes are not part of the public research artifact.
+/AGENTS.md
+/CHANGELOG_CODEX_*.md
+/FINAL_IEEE_ARS_AUDIT_*.md
+/HANDOFF_*.md
+/MAJOR_REVISION_HANDOFF_*.md
+/STOCHASTIC_ORACLE_VALIDATION_HANDOFF_*.md
+/SUBMISSION_METADATA_TO_CONFIRM_*.md
+/TSP_*_HANDOFF_*.md
+/TSP_FINAL_SUBMISSION_AUDIT_*.md
+/TSP_REVIEWER_INSIGHT_AUDIT_*.md
+/ZERO_SUM_MARKOV_GAME_PROOF_AUDIT_*.md
 
 # Redundant root-level preview
 /neural_markov_games_main.png

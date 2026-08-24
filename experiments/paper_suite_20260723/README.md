@@ -1,34 +1,58 @@
-# Final paper experiment suite
+# Population-oracle experiment suite
 
-This directory is isolated from the recovered and diagnostic experiments.  It
-contains the final three-level experimental suite used by the revised paper:
+This directory contains the three population-oracle experiment layers used in
+the journal paper:
 
-1. `linear_geometry.py`: an exactly solvable normal linear saddle field that
-   verifies the skew threshold and the two-direction quadratic model.
-2. `markov_game_suite.py --mode tabular`: exact finite-state zero-sum Markov
-   games with tabular softmax policies.
-3. `markov_game_suite.py --mode neural`: the same exact Markov-game evaluator
-   with separate state-conditioned neural policies for both players.
+1. `linear_geometry.py` evaluates the exactly solvable normal linear saddle
+   field used in Section VI-A.
+2. `markov_game_suite.py --mode tabular` evaluates exact finite-state games
+   with tabular softmax policies.
+3. `markov_game_suite.py --mode neural` evaluates four finite-state games with
+   separate `4-8-3` tanh--softmax policies: `CyclicControl`,
+   `FrequencyHopping`, `RoutingInterdiction`, and `SecurityPatrol`.
 
-At every QP/noG stencil point, the entropy-regularized best responses are
-recomputed to the recorded Bellman tolerance.  The hard evaluation best
-responses are separate unregularized dynamic-programming solves.  Thus the
-performance component is the actual regularized policy-space Nash gap up to a
-reported numerical Bellman residual; it is not a frozen-response surrogate.
+`journal_games.py` is the self-contained source for those four game instances
+and the neural policy. At every QP/noG stencil point, the entropy-regularized
+best responses are recomputed to the recorded Bellman tolerance. Unregularized
+hard best responses are separate checkpoint-only evaluators. Thus the
+performance component is the regularized policy-space Nash gap, up to the
+reported Bellman residual, rather than a frozen-response surrogate.
 
-All runs write timestamped raw CSV/JSON artifacts below `results/`.  The paper
-figures are copied only by `assemble_paper_results.py`, which also creates a
-manifest containing the selected raw artifact paths and SHA-256 hashes.
+## Frozen journal artifacts
 
-Additional reviewer-grade checks:
+The paper figures are regenerated from the following immutable result sets:
 
-- `theory_sentinels.py` checks the symmetric/skew identities, cone and box QP
-  formulas, entropy performance bridge, centered-softplus properties, and the
-  normalized pure-rotation curvature margin.
-- `audit_saved_bridge.py` solves the unregularized Shapley equations and audits
-  the performance bridge at every saved final checkpoint; it also recomputes
-  exact sign tests and Holm adjustments.
-- `tune_fixed_baselines.py` selects one global learning rate per fixed baseline
-  on neural-game seeds 1000--1004 from the grid
-  `{0.001, 0.003, 0.01, 0.03}`, then evaluates the selected rates only on final
-  seeds 40--49.  QP+G/noG keep coefficient caps 0.03.
+- `results/linear-geometry-20260823-234632/`
+- `results/tabular-exact-gap-20260723-113009/`
+- `results/neural-journal-four-20260824/`
+
+Run `python reproduce.py figures` from the repository root to rebuild all paper
+figures, summary tables, and the SHA-256 manifest from these artifacts.
+
+The fixed baselines use one learning rate per method, selected on seeds
+1000--1004 from `{0.001, 0.003, 0.01, 0.03}` and evaluated on disjoint seeds
+40--49. The selected rates are `0.03` for GDA, EGM, and PPM-3, and `0.001` for
+Adam-GDA. QP+G and noG retain coefficient caps of `0.03`.
+
+## Full experiment commands
+
+From the repository root:
+
+```powershell
+python experiments/paper_suite_20260723/linear_geometry.py
+python experiments/paper_suite_20260723/markov_game_suite.py --mode tabular
+python experiments/paper_suite_20260723/markov_game_suite.py --mode neural
+python experiments/paper_suite_20260723/theory_sentinels.py
+python experiments/paper_suite_20260723/audit_saved_bridge.py
+```
+
+Each experiment creates a timestamped directory under `results/`; it never
+overwrites the frozen journal evidence. `tune_fixed_baselines.py` reruns the
+complete independent learning-rate screen and is substantially more expensive
+than regenerating the paper from frozen data.
+
+`theory_sentinels.py` checks the symmetric/skew identities, cone and box-QP
+formulas, entropy performance bridge, centered-softplus properties, and the
+pure-rotation curvature margin. `audit_saved_bridge.py` solves the
+unregularized Shapley equations at every saved final checkpoint and recomputes
+the paired sign tests and Holm adjustment.

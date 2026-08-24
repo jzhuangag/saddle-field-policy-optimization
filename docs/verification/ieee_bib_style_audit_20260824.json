@@ -1,0 +1,15 @@
+{
+  "schema": "ieee-bib-style-audit/1",
+  "generated_at": "2026-08-24",
+  "bibliography": "refs.bib",
+  "style": "project-dominant IEEEtran",
+  "cited_keys": 30,
+  "entries": 30,
+  "missing_citations": 0,
+  "uncited_entries": 0,
+  "duplicate_keys": 0,
+  "duplicate_titles": 0,
+  "bibtex_warnings": 0,
+  "definite_errors": [],
+  "status": "pass"
+}

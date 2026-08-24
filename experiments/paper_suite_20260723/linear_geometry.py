@@ -24,6 +24,47 @@ GAMMA_MAX = 0.03
 STEPS = 120
 METHODS = ("QP+G", "noG", "GDA", "Adam-GDA", "EGM", "PPM-3")
 RATIOS = np.linspace(0.0, 2.5, 51)
+FIG_FONT_SIZE = 7.2
+METHOD_LINE_WIDTH = 1.35
+REFERENCE_LINE_WIDTH = 0.85
+SPINE_WIDTH = 0.65
+GRID_LINE_WIDTH = 0.45
+GRID_ALPHA = 0.55
+DOUBLE_COLUMN_WIDTH = 7.16
+
+plt.rcParams.update(
+    {
+        "font.family": "Times New Roman",
+        "font.weight": "normal",
+        "font.size": FIG_FONT_SIZE,
+        "mathtext.fontset": "stix",
+        "axes.titlesize": FIG_FONT_SIZE,
+        "axes.titleweight": "normal",
+        "axes.labelsize": FIG_FONT_SIZE,
+        "axes.labelweight": "normal",
+        "xtick.labelsize": FIG_FONT_SIZE,
+        "ytick.labelsize": FIG_FONT_SIZE,
+        "legend.fontsize": FIG_FONT_SIZE,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
+        "figure.facecolor": "white",
+        "axes.facecolor": "white",
+        "savefig.facecolor": "white",
+    }
+)
+
+
+def style_axis(axis) -> None:
+    axis.grid(
+        True,
+        color="0.84",
+        linewidth=GRID_LINE_WIDTH,
+        alpha=GRID_ALPHA,
+    )
+    axis.set_axisbelow(True)
+    axis.tick_params(width=SPINE_WIDTH, length=2.6, pad=1.5)
+    for spine in axis.spines.values():
+        spine.set_linewidth(SPINE_WIDTH)
 
 
 def matrix(mu: float, sigma: float) -> np.ndarray:
@@ -138,9 +179,23 @@ def run_method(method: str, mu: float, sigma: float, steps: int = STEPS):
             break
         if method in ("QP+G", "noG"):
             beta, gamma, predicted = solve_box(c, method == "QP+G")
+            curvature_norm = float(np.linalg.norm(g))
+            curvature_contribution = gamma * curvature_norm / max(
+                beta * rows[-1]["field_norm"] + gamma * curvature_norm,
+                1.0e-15,
+            )
             candidate = z - beta * f + gamma * g
             realized = merit(z, a) - merit(candidate, a)
-            rows[-1].update({"beta": beta, "gamma": gamma, "predicted_decrease": -predicted, "realized_decrease": realized})
+            rows[-1].update(
+                {
+                    "beta": beta,
+                    "gamma": gamma,
+                    "curvature_norm": curvature_norm,
+                    "curvature_contribution": curvature_contribution,
+                    "predicted_decrease": -predicted,
+                    "realized_decrease": realized,
+                }
+            )
             z = candidate
         else:
             z, adam = classical_step(method, z, a, adam)
@@ -173,21 +228,35 @@ def main() -> None:
         "GDA": ("tab:orange", "--"), "Adam-GDA": ("tab:blue", "--"),
         "EGM": ("tab:purple", "-."), "PPM-3": ("tab:red", ":"),
     }
-    fig, axes = plt.subplots(1, 4, figsize=(14.2, 3.25))
+    fig, axes = plt.subplots(1, 4, figsize=(DOUBLE_COLUMN_WIDTH, 1.95))
     ratio_data = [r for r in rows if math.isfinite(r["ratio"]) and r["step"] == STEPS]
     for method in METHODS:
-        selected = [r for r in ratio_data if r["method"] == method]
-        axes[0].semilogy([r["ratio"] for r in selected], [max(r["merit"], 1e-30) for r in selected], label=method, color=styles[method][0], linestyle=styles[method][1])
-    axes[0].axvline(1.0, color="0.5", linewidth=1.0, linestyle=":")
-    axes[0].set(xlabel=r"rotation ratio $\sigma/\mu$", ylabel=r"final $V/V_0$ (log scale)", title="phase diagram")
-    # Normalize final merit by the common initial value for each ratio.
-    for line, method in zip(axes[0].lines[:len(METHODS)], METHODS):
-        selected = [r for r in ratio_data if r["method"] == method]
+        selected = sorted(
+            [r for r in ratio_data if r["method"] == method],
+            key=lambda row: row["ratio"],
+        )
         normalized = []
         for r in selected:
             initial = next(x["merit"] for x in rows if x["method"] == method and x["ratio"] == r["ratio"] and x["step"] == 0)
             normalized.append(max(r["merit"] / initial, 1e-30))
-        line.set_ydata(normalized)
+        axes[0].semilogy(
+            [r["ratio"] for r in selected],
+            normalized,
+            label=method,
+            color=styles[method][0],
+            linestyle=styles[method][1],
+            linewidth=METHOD_LINE_WIDTH,
+        )
+    axes[0].axvline(
+        1.0,
+        color="0.45",
+        linewidth=REFERENCE_LINE_WIDTH,
+        linestyle=":",
+    )
+    axes[0].set(
+        xlabel=r"Rotation ratio $\sigma/\mu$",
+        ylabel=r"Final field energy $\phi_K/\phi_0$",
+    )
 
     analytic = []
     numeric = []
@@ -199,33 +268,188 @@ def main() -> None:
         analytic_d = (mu * mu + sigma * sigma) * (sigma * sigma - mu * mu) * float(z0 @ z0)
         analytic.append(analytic_d / max(scale, 1e-15))
         numeric.append(c0["d"] / max(scale, 1e-15))
-    axes[1].plot(RATIOS, analytic, color="black", label="analytic")
-    axes[1].plot(RATIOS, numeric, color="tab:red", linestyle="--", label="computed")
-    axes[1].axhline(0.0, color="0.5", linewidth=1.0); axes[1].axvline(1.0, color="0.5", linewidth=1.0, linestyle=":")
-    axes[1].set(xlabel=r"rotation ratio $\sigma/\mu$", ylabel="normalized curvature descent $d$", title="exact skew threshold")
+    analytic_line = axes[1].plot(
+        RATIOS,
+        analytic,
+        color="0.20",
+        linewidth=METHOD_LINE_WIDTH,
+        label="Analytical $d$",
+    )[0]
+    numerical_line = axes[1].plot(
+        RATIOS,
+        numeric,
+        color="tab:red",
+        linestyle="--",
+        linewidth=METHOD_LINE_WIDTH,
+        label="Numerical $d$",
+    )[0]
+    axes[1].axhline(0.0, color="0.45", linewidth=REFERENCE_LINE_WIDTH)
+    axes[1].axvline(
+        1.0,
+        color="0.45",
+        linewidth=REFERENCE_LINE_WIDTH,
+        linestyle=":",
+    )
+    axes[1].set(
+        xlabel=r"Rotation ratio $\sigma/\mu$",
+        ylabel="Normalized curvature descent $d$",
+    )
+    axes[1].legend(
+        handles=[analytic_line, numerical_line],
+        loc="upper left",
+        frameon=True,
+        facecolor="white",
+        edgecolor="none",
+        framealpha=0.84,
+        handlelength=1.35,
+        handletextpad=0.35,
+        borderpad=0.20,
+        borderaxespad=0.25,
+        labelspacing=0.18,
+    )
 
     for method in METHODS:
         selected = [r for r in rotation_rows if r["method"] == method]
         initial = selected[0]["merit"]
-        axes[2].semilogy([r["step"] for r in selected], [max(r["merit"] / initial, 1e-30) for r in selected], label=method, color=styles[method][0], linestyle=styles[method][1])
-    axes[2].set(xlabel="joint update", ylabel=r"$V_k/V_0$", title="pure rotation")
+        axes[2].semilogy(
+            [r["step"] for r in selected],
+            [max(r["merit"] / initial, 1e-30) for r in selected],
+            label=method,
+            color=styles[method][0],
+            linestyle=styles[method][1],
+            linewidth=METHOD_LINE_WIDTH,
+        )
+    axes[2].set(
+        xlabel=r"Joint update $k$",
+        ylabel=r"Normalized field energy $\phi_k/\phi_0$",
+    )
 
-    selected = [r for r in rotation_rows if r["method"] == "QP+G" and r["step"] < STEPS]
-    axes[3].scatter([r["predicted_decrease"] for r in selected], [r["realized_decrease"] for r in selected], s=16, color="black")
-    limit = max([r["predicted_decrease"] for r in selected] + [1e-12])
-    axes[3].plot([0, limit], [0, limit], color="tab:red", linestyle="--", linewidth=1.0)
-    axes[3].set(xlabel="QP predicted decrease", ylabel="realized decrease", title="quadratic-model identity")
+    panel_d_rows = sorted(
+        [
+            r
+            for r in rows
+            if r["method"] == "QP+G"
+            and math.isfinite(r["ratio"])
+            and r["step"] == 0
+        ],
+        key=lambda row: row["ratio"],
+    )
+    if len(panel_d_rows) != len(RATIOS):
+        raise RuntimeError(
+            f"Panel (d) expected {len(RATIOS)} finite-ratio rows, got {len(panel_d_rows)}"
+        )
+    panel_d_ratios = np.asarray([r["ratio"] for r in panel_d_rows], dtype=float)
+    normalized_gamma_0 = np.asarray(
+        [r["gamma"] / GAMMA_MAX for r in panel_d_rows],
+        dtype=float,
+    )
+    curvature_contribution_0 = np.asarray(
+        [r["curvature_contribution"] for r in panel_d_rows],
+        dtype=float,
+    )
+    axes[3].plot(
+        panel_d_ratios,
+        normalized_gamma_0,
+        color="black",
+        linewidth=METHOD_LINE_WIDTH,
+        marker="o",
+        markersize=2.8,
+        markevery=5,
+        label=r"$\gamma_0/\gamma_{\max}$",
+    )
+    axes[3].plot(
+        panel_d_ratios,
+        curvature_contribution_0,
+        color="tab:purple",
+        linestyle="--",
+        linewidth=METHOD_LINE_WIDTH,
+        marker="s",
+        markersize=2.6,
+        markevery=5,
+        label=r"$C_0^G$",
+    )
+    axes[3].axvline(
+        1.0,
+        color="0.45",
+        linewidth=REFERENCE_LINE_WIDTH,
+        linestyle=":",
+    )
+    axes[3].set(
+        xlabel=r"Rotation ratio $\sigma/\mu$",
+        ylabel="Normalized curvature use",
+        ylim=(0.0, 1.0),
+    )
+    axes[3].set_yticks([0.0, 0.5, 1.0])
+    axes[3].legend(
+        loc="upper left",
+        bbox_to_anchor=(0.02, 0.80),
+        frameon=True,
+        facecolor="white",
+        edgecolor="none",
+        framealpha=0.84,
+        handlelength=1.35,
+        handletextpad=0.35,
+        borderpad=0.20,
+        borderaxespad=0.0,
+        labelspacing=0.18,
+    )
     for axis in axes:
-        axis.grid(alpha=0.25)
+        style_axis(axis)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=6, frameon=False, bbox_to_anchor=(0.5, -0.04))
-    fig.tight_layout(rect=(0, 0.09, 1, 1))
-    fig.savefig(output / "linear_geometry.pdf", bbox_inches="tight")
-    fig.savefig(output / "linear_geometry.png", dpi=240, bbox_inches="tight")
+    fig.legend(
+        handles,
+        labels,
+        loc="upper center",
+        ncol=6,
+        frameon=False,
+        bbox_to_anchor=(0.5, 0.995),
+        handlelength=1.8,
+        columnspacing=0.75,
+        handletextpad=0.35,
+        borderaxespad=0,
+    )
+    fig.subplots_adjust(
+        left=0.060,
+        right=0.995,
+        top=0.77,
+        bottom=0.32,
+        wspace=0.38,
+    )
+    panel_labels = (
+        "(a) Rotation-ratio sweep",
+        "(b) Curvature-descent threshold",
+        "(c) Pure-rotation dynamics",
+        "(d) Adaptive curvature allocation",
+    )
+    for axis, panel_label in zip(axes, panel_labels):
+        position = axis.get_position()
+        fig.text(
+            0.5 * (position.x0 + position.x1),
+            position.y0 - 0.205,
+            panel_label,
+            ha="center",
+            va="top",
+            fontweight="normal",
+        )
+    fig.savefig(output / "linear_geometry.pdf")
+    fig.savefig(output / "linear_geometry.png", dpi=300)
     plt.close(fig)
 
     max_d_error = max(abs(r["d"] - r["analytic_d"]) for r in rows)
     model_error = max(abs(r.get("predicted_decrease", 0.0) - r.get("realized_decrease", 0.0)) for r in rows if "predicted_decrease" in r)
+    gamma_positive_row = next(
+        (r for r in panel_d_rows if r["gamma"] > 0.0),
+        None,
+    )
+    normalized_gamma_in_range = bool(
+        np.all((normalized_gamma_0 >= 0.0) & (normalized_gamma_0 <= 1.0))
+    )
+    curvature_contribution_in_range = bool(
+        np.all(
+            (curvature_contribution_0 >= 0.0)
+            & (curvature_contribution_0 <= 1.0)
+        )
+    )
     summary = {
         "field": "F(z)=(mu I + sigma J)z",
         "merit": "V=0.5||F||^2",
@@ -235,6 +459,16 @@ def main() -> None:
         "qp_caps": [BETA_MAX, GAMMA_MAX],
         "steps": STEPS,
         "analytic_identity": "d=(mu^2+sigma^2)(sigma^2-mu^2)||z||^2",
+        "panel_d_definition": "QP+G first update over all 51 finite rotation-ratio runs: gamma_0/gamma_max and C_0^G=gamma_0||G_0||/(beta_0||F_0||+gamma_0||G_0||)",
+        "minimum_gamma_0_over_gamma_max": float(np.min(normalized_gamma_0)),
+        "maximum_gamma_0_over_gamma_max": float(np.max(normalized_gamma_0)),
+        "minimum_C_0_G": float(np.min(curvature_contribution_0)),
+        "maximum_C_0_G": float(np.max(curvature_contribution_0)),
+        "first_rotation_ratio_gamma_0_positive": (
+            None if gamma_positive_row is None else gamma_positive_row["ratio"]
+        ),
+        "check_gamma_0_over_gamma_max_in_unit_interval": normalized_gamma_in_range,
+        "check_C_0_G_in_unit_interval": curvature_contribution_in_range,
         "maximum_d_identity_error": max_d_error,
         "maximum_quadratic_model_error": model_error,
         "elapsed_seconds": time.time() - started,

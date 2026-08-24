@@ -1,0 +1,344 @@
+{
+  "schema": "journal-baseline-tuning/1",
+  "protocol": {
+    "environments": [
+      "CyclicControl",
+      "FrequencyHopping",
+      "RoutingInterdiction",
+      "SecurityPatrol"
+    ],
+    "methods": [
+      "GDA",
+      "Adam-GDA",
+      "EGM",
+      "PPM-3"
+    ],
+    "lr_grid": [
+      0.001,
+      0.003,
+      0.01,
+      0.03
+    ],
+    "selection": "one global learning rate per method maximizing mean final normalized worst-case-return gain across all environment-by-tuning-seed cells; lower normalized final exploitability and then smaller learning rate break ties",
+    "tuning_seeds": [
+      1000,
+      1001,
+      1002,
+      1003,
+      1004
+    ],
+    "final_seeds": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "steps": 60,
+    "simultaneous_updates": true,
+    "warmup": "none"
+  },
+  "selected_learning_rates": {
+    "GDA": 0.03,
+    "Adam-GDA": 0.001,
+    "EGM": 0.03,
+    "PPM-3": 0.03
+  },
+  "tuning_scores": {
+    "GDA": {
+      "0.001": {
+        "mean_normalized_br_gain": 0.0059493992700255585,
+        "mean_normalized_exploitability": 1.0018794879729478
+      },
+      "0.003": {
+        "mean_normalized_br_gain": 0.026268722071903387,
+        "mean_normalized_exploitability": 0.9946214863581186
+      },
+      "0.01": {
+        "mean_normalized_br_gain": 0.0702217534342787,
+        "mean_normalized_exploitability": 0.9660208384057795
+      },
+      "0.03": {
+        "mean_normalized_br_gain": 0.07058860746320687,
+        "mean_normalized_exploitability": 0.9173956795149036
+      }
+    },
+    "Adam-GDA": {
+      "0.001": {
+        "mean_normalized_br_gain": -0.008533984337883289,
+        "mean_normalized_exploitability": 1.063276513719678
+      },
+      "0.003": {
+        "mean_normalized_br_gain": -0.7013522032434866,
+        "mean_normalized_exploitability": 1.9440703140906326
+      },
+      "0.01": {
+        "mean_normalized_br_gain": -2.9338609250376186,
+        "mean_normalized_exploitability": 6.6253849232828115
+      },
+      "0.03": {
+        "mean_normalized_br_gain": -5.140256652841136,
+        "mean_normalized_exploitability": 10.741997205971305
+      }
+    },
+    "EGM": {
+      "0.001": {
+        "mean_normalized_br_gain": 0.006024710166310574,
+        "mean_normalized_exploitability": 1.001764768417208
+      },
+      "0.003": {
+        "mean_normalized_br_gain": 0.02688342433265008,
+        "mean_normalized_exploitability": 0.9936179393325958
+      },
+      "0.01": {
+        "mean_normalized_br_gain": 0.07591583319242264,
+        "mean_normalized_exploitability": 0.9556462449696645
+      },
+      "0.03": {
+        "mean_normalized_br_gain": 0.10772153016666967,
+        "mean_normalized_exploitability": 0.8545029891535629
+      }
+    },
+    "PPM-3": {
+      "0.001": {
+        "mean_normalized_br_gain": 0.006024664659395195,
+        "mean_normalized_exploitability": 1.001764780962285
+      },
+      "0.003": {
+        "mean_normalized_br_gain": 0.026881444535500176,
+        "mean_normalized_exploitability": 0.9936192316781135
+      },
+      "0.01": {
+        "mean_normalized_br_gain": 0.07589681705284065,
+        "mean_normalized_exploitability": 0.9556966506875568
+      },
+      "0.03": {
+        "mean_normalized_br_gain": 0.1078131095314536,
+        "mean_normalized_exploitability": 0.8543300555365445
+      }
+    }
+  },
+  "final_summaries": {
+    "GDA": [
+      {
+        "environment": "CyclicControl",
+        "method": "GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.34398593244677095,
+        "hard_br_return_sem": 0.05153098190287767,
+        "hard_exploitability_mean": 0.86678752594079,
+        "hard_exploitability_sem": 0.08388122011470277,
+        "regularized_gap_mean": 0.41844072957360884,
+        "regularized_gap_sem": 0.0657203423183297,
+        "field_norm_mean": 0.32805133957300137,
+        "field_norm_sem": 0.028709878036542315
+      },
+      {
+        "environment": "FrequencyHopping",
+        "method": "GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.4743481535128165,
+        "hard_br_return_sem": 0.06129965817331542,
+        "hard_exploitability_mean": 2.514120948406716,
+        "hard_exploitability_sem": 0.07195175487224001,
+        "regularized_gap_mean": 1.9544930696478553,
+        "regularized_gap_sem": 0.06350399608759968,
+        "field_norm_mean": 0.47577648973066433,
+        "field_norm_sem": 0.02392320291606935
+      },
+      {
+        "environment": "RoutingInterdiction",
+        "method": "GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -1.3285375088587092,
+        "hard_br_return_sem": 0.04230242356011695,
+        "hard_exploitability_mean": 2.0285159914391784,
+        "hard_exploitability_sem": 0.041655989469180865,
+        "regularized_gap_mean": 1.49056090734036,
+        "regularized_gap_sem": 0.03316170900766811,
+        "field_norm_mean": 0.33438762331702776,
+        "field_norm_sem": 0.018861243887471638
+      },
+      {
+        "environment": "SecurityPatrol",
+        "method": "GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.5370733704520615,
+        "hard_br_return_sem": 0.04537402031057469,
+        "hard_exploitability_mean": 1.386331138152165,
+        "hard_exploitability_sem": 0.05302426184086012,
+        "regularized_gap_mean": 0.9067083218422164,
+        "regularized_gap_sem": 0.031060816637004995,
+        "field_norm_mean": 0.268326886323454,
+        "field_norm_sem": 0.019081802115392132
+      }
+    ],
+    "Adam-GDA": [
+      {
+        "environment": "CyclicControl",
+        "method": "Adam-GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.5384394446496665,
+        "hard_br_return_sem": 0.04913639774450504,
+        "hard_exploitability_mean": 1.1651569441242031,
+        "hard_exploitability_sem": 0.07920271985166508,
+        "regularized_gap_mean": 0.6588409720140451,
+        "regularized_gap_sem": 0.060919774544448455,
+        "field_norm_mean": 0.4802768209592692,
+        "field_norm_sem": 0.029319722845413038
+      },
+      {
+        "environment": "FrequencyHopping",
+        "method": "Adam-GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.5104850678071763,
+        "hard_br_return_sem": 0.06809429180582781,
+        "hard_exploitability_mean": 2.5600974566851944,
+        "hard_exploitability_sem": 0.07977775834102518,
+        "regularized_gap_mean": 2.0009241822175277,
+        "regularized_gap_sem": 0.07254699424590234,
+        "field_norm_mean": 0.5660488526172258,
+        "field_norm_sem": 0.02929462747322953
+      },
+      {
+        "environment": "RoutingInterdiction",
+        "method": "Adam-GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -1.2987795041351526,
+        "hard_br_return_sem": 0.03578209135425915,
+        "hard_exploitability_mean": 1.912067100899004,
+        "hard_exploitability_sem": 0.03473011024275186,
+        "regularized_gap_mean": 1.3993443135728132,
+        "regularized_gap_sem": 0.029228233948555463,
+        "field_norm_mean": 0.40098229801373036,
+        "field_norm_sem": 0.01845171516188664
+      },
+      {
+        "environment": "SecurityPatrol",
+        "method": "Adam-GDA",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.54961098285354,
+        "hard_br_return_sem": 0.0360856905983177,
+        "hard_exploitability_mean": 1.4666144508772785,
+        "hard_exploitability_sem": 0.05266668524413244,
+        "regularized_gap_mean": 0.9822901411267342,
+        "regularized_gap_sem": 0.040258365493261165,
+        "field_norm_mean": 0.39405639971065665,
+        "field_norm_sem": 0.023336701213981487
+      }
+    ],
+    "EGM": [
+      {
+        "environment": "CyclicControl",
+        "method": "EGM",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.264970792576193,
+        "hard_br_return_sem": 0.037904361092301206,
+        "hard_exploitability_mean": 0.6656760091611839,
+        "hard_exploitability_sem": 0.0640690140799097,
+        "regularized_gap_mean": 0.26941463365578583,
+        "regularized_gap_sem": 0.04346429969173567,
+        "field_norm_mean": 0.24861573352192864,
+        "field_norm_sem": 0.022026411125844955
+      },
+      {
+        "environment": "FrequencyHopping",
+        "method": "EGM",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.43141280941854265,
+        "hard_br_return_sem": 0.04593587448306452,
+        "hard_exploitability_mean": 2.4564614511491207,
+        "hard_exploitability_sem": 0.05522705888387462,
+        "regularized_gap_mean": 1.9016174248048903,
+        "regularized_gap_sem": 0.04725374180487222,
+        "field_norm_mean": 0.42820546499660794,
+        "field_norm_sem": 0.018254760751674766
+      },
+      {
+        "environment": "RoutingInterdiction",
+        "method": "EGM",
+        "seed_count": 10,
+        "hard_br_return_mean": -1.3098928898364008,
+        "hard_br_return_sem": 0.038597776531388454,
+        "hard_exploitability_mean": 2.011081742407381,
+        "hard_exploitability_sem": 0.03763287534872069,
+        "regularized_gap_mean": 1.4747884250644974,
+        "regularized_gap_sem": 0.028945208761778324,
+        "field_norm_mean": 0.3183035930782839,
+        "field_norm_sem": 0.01760715743507097
+      },
+      {
+        "environment": "SecurityPatrol",
+        "method": "EGM",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.5007853585139943,
+        "hard_br_return_sem": 0.039135115915438445,
+        "hard_exploitability_mean": 1.3437895235302582,
+        "hard_exploitability_sem": 0.04669486654306737,
+        "regularized_gap_mean": 0.8749755794797938,
+        "regularized_gap_sem": 0.025792369250759475,
+        "field_norm_mean": 0.2396699137408317,
+        "field_norm_sem": 0.015907189519331382
+      }
+    ],
+    "PPM-3": [
+      {
+        "environment": "CyclicControl",
+        "method": "PPM-3",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.2641806984079799,
+        "hard_br_return_sem": 0.03742074498748541,
+        "hard_exploitability_mean": 0.6664502248138189,
+        "hard_exploitability_sem": 0.06406037431794369,
+        "regularized_gap_mean": 0.2699629044099377,
+        "regularized_gap_sem": 0.04362481042831534,
+        "field_norm_mean": 0.24901575087997668,
+        "field_norm_sem": 0.0220458766508865
+      },
+      {
+        "environment": "FrequencyHopping",
+        "method": "PPM-3",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.4325747732718169,
+        "hard_br_return_sem": 0.045669832888168845,
+        "hard_exploitability_mean": 2.4580269196174926,
+        "hard_exploitability_sem": 0.05507588706832531,
+        "regularized_gap_mean": 1.9026724765454346,
+        "regularized_gap_sem": 0.04713468029982474,
+        "field_norm_mean": 0.42863495812849417,
+        "field_norm_sem": 0.018300445054484183
+      },
+      {
+        "environment": "RoutingInterdiction",
+        "method": "PPM-3",
+        "seed_count": 10,
+        "hard_br_return_mean": -1.3099389153518133,
+        "hard_br_return_sem": 0.038606393463709546,
+        "hard_exploitability_mean": 2.011108918476003,
+        "hard_exploitability_sem": 0.037725898452050155,
+        "regularized_gap_mean": 1.474915546184213,
+        "regularized_gap_sem": 0.029043205287432258,
+        "field_norm_mean": 0.31844942754569505,
+        "field_norm_sem": 0.017611876631848995
+      },
+      {
+        "environment": "SecurityPatrol",
+        "method": "PPM-3",
+        "seed_count": 10,
+        "hard_br_return_mean": -0.5010734404038436,
+        "hard_br_return_sem": 0.03915005388528275,
+        "hard_exploitability_mean": 1.344271302373403,
+        "hard_exploitability_sem": 0.04676942723371856,
+        "regularized_gap_mean": 0.8751968771661833,
+        "regularized_gap_sem": 0.025828903922954352,
+        "field_norm_mean": 0.2398940226545725,
+        "field_norm_sem": 0.015938408364530747
+      }
+    ]
+  }
+}
