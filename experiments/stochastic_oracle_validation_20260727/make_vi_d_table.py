@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
@@ -13,11 +14,10 @@ from typing import Dict, List
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parents[1]
-SOURCE_CSV = (
+DEFAULT_SOURCE_DIR = (
     SCRIPT_DIR
     / "results"
     / "formal-CyclicControl-dice-20260727-124224"
-    / "curves.csv"
 )
 OUTPUT_JSON = (
     PROJECT_ROOT
@@ -25,6 +25,7 @@ OUTPUT_JSON = (
     / "data"
     / "vi_d_finite_trajectory_table.json"
 )
+OUTPUT_TEX = PROJECT_ROOT / "output" / "data" / "vi_d_table_rows.tex"
 
 METHODS = ("QP+G", "noG")
 EXPECTED_SEEDS = list(range(4100, 4110))
@@ -114,9 +115,22 @@ def assert_close(name: str, actual: float, expected: float, tolerance: float) ->
         )
 
 
-def load_filtered_rows() -> List[Dict[str, str]]:
+def resolve_source_dir(value: Path) -> Path:
+    """Resolve a result directory relative to the repository root."""
+    return value.resolve() if value.is_absolute() else (PROJECT_ROOT / value).resolve()
+
+
+def source_label(path: Path) -> str:
+    """Return a portable repository-relative path when possible."""
+    try:
+        return str(path.relative_to(PROJECT_ROOT)).replace("\\", "/")
+    except ValueError:
+        return str(path)
+
+
+def load_filtered_rows(source_csv: Path) -> List[Dict[str, str]]:
     """Load only the prespecified CyclicControl final-checkpoint comparison."""
-    with SOURCE_CSV.open("r", encoding="utf-8-sig", newline="") as handle:
+    with source_csv.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         required = {
             "environment",
@@ -142,7 +156,20 @@ def load_filtered_rows() -> List[Dict[str, str]]:
 
 
 def main() -> None:
-    rows = load_filtered_rows()
+    parser = argparse.ArgumentParser(
+        description="Reconstruct the finite-trajectory Table I statistics and rows."
+    )
+    parser.add_argument(
+        "--source-dir",
+        type=Path,
+        default=DEFAULT_SOURCE_DIR,
+        help="result directory containing curves.csv (default: frozen formal run)",
+    )
+    args = parser.parse_args()
+    source_csv = resolve_source_dir(args.source_dir) / "curves.csv"
+    if not source_csv.is_file():
+        raise FileNotFoundError(f"Missing finite-trajectory source: {source_csv}")
+    rows = load_filtered_rows(source_csv)
     if len(rows) != 20:
         raise AssertionError(f"Expected 20 filtered rows, found {len(rows)}")
 
@@ -256,14 +283,14 @@ def main() -> None:
         5e-12,
     )
 
-    source_payload = SOURCE_CSV.read_bytes().replace(b"\r\n", b"\n").replace(
+    source_payload = source_csv.read_bytes().replace(b"\r\n", b"\n").replace(
         b"\r", b"\n"
     )
     source_hash = hashlib.sha256(source_payload).hexdigest()
     output = {
         "schema": "journal-vi-d-table/1",
         "source": {
-            "path": str(SOURCE_CSV.relative_to(PROJECT_ROOT)).replace("\\", "/"),
+            "path": source_label(source_csv),
             "sha256": source_hash,
             "canonical_bytes": len(source_payload),
         },
@@ -297,7 +324,27 @@ def main() -> None:
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_JSON.open("w", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(output, indent=2) + "\n")
+    tex_labels = {
+        "hard_br_return": r"Worst-case return $\uparrow$",
+        "hard_exploitability": r"Exploitability $\downarrow$",
+        "field_norm": r"Population $\norm{\bF}\downarrow$",
+    }
+    tex_lines = []
+    for metric in METRICS:
+        row = latex_rows[metric]
+        qpg_latex = row["QP+G_latex"].replace(r"\pm ", r"\pm")
+        nog_latex = row["noG_latex"].replace(r"\pm ", r"\pm")
+        paired_latex = row["paired_latex"].replace("$ $", r"\,")
+        tex_lines.append(
+            f"{tex_labels[metric]} & {qpg_latex} & {nog_latex} "
+            f"& {paired_latex}"
+        )
+    with OUTPUT_TEX.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(r"\providecommand{\VIDTableRows}{%" + "\n")
+        handle.write("\\\\\n".join(tex_lines) + "\\\\%\n")
+        handle.write("}\n")
     print(f"Wrote {OUTPUT_JSON}")
+    print(f"Wrote {OUTPUT_TEX}")
     for metric in METRICS:
         row = latex_rows[metric]
         print(

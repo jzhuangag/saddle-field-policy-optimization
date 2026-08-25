@@ -49,7 +49,11 @@ python experiments/paper_suite_20260723/audit_saved_bridge.py
 Each experiment creates a timestamped directory under `results/`; it never
 overwrites the frozen journal evidence. `tune_fixed_baselines.py` reruns the
 complete independent learning-rate screen and is substantially more expensive
-than regenerating the paper from frozen data.
+than regenerating the paper from frozen data. After a separate QP+G/noG run and
+the baseline screen, `merge_neural_journal.py --controller-dir DIR
+--tuning-summary TUNING_DIR/summary.json` validates and combines the six
+methods into a new four-environment journal dataset. The root command
+`python reproduce.py full` executes this complete chain automatically.
 
 `theory_sentinels.py` checks the symmetric/skew identities, cone and box-QP
 formulas, entropy performance bridge, centered-softplus properties, and the

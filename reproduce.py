@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Verify and reconstruct the released journal artifacts.
+"""Verify, reconstruct, or fully rerun the released journal artifacts.
 
-The fast modes operate on frozen CSV/JSON results. Full experiment rerun
-commands are documented in REPRODUCIBILITY.md.
+The fast modes operate on frozen CSV/JSON results; ``full`` executes the
+experiment-to-paper pipeline documented in REPRODUCIBILITY.md.
 """
 
 from __future__ import annotations
@@ -20,6 +20,13 @@ import sys
 
 ROOT = Path(__file__).resolve().parent
 MANIFEST = ROOT / "output" / "data" / "final_experiment_manifest.json"
+LINEAR_RESULTS = (
+    ROOT
+    / "experiments"
+    / "paper_suite_20260723"
+    / "results"
+    / "linear-geometry-20260823-234632"
+)
 NEURAL_RESULTS = (
     ROOT
     / "experiments"
@@ -45,6 +52,7 @@ STOCHASTIC_PROTOCOL = (
 STOCHASTIC_TABLE = (
     ROOT / "output" / "data" / "vi_d_finite_trajectory_table.json"
 )
+STOCHASTIC_TABLE_ROWS = ROOT / "output" / "data" / "vi_d_table_rows.tex"
 NEURAL_ENVIRONMENTS = {
     "CyclicControl",
     "FrequencyHopping",
@@ -135,18 +143,34 @@ def verify_manifest(manifest) -> None:
         print("[ok] {}".format(relative))
 
 
+def selected_result_dir(manifest, key: str, default: Path) -> Path:
+    relative = manifest.get("selected_results", {}).get(key)
+    if relative is None:
+        return default
+    path = (ROOT / relative).resolve()
+    try:
+        path.relative_to(ROOT.resolve())
+    except ValueError as error:
+        raise VerificationError(
+            "selected result path escapes repository root: {}".format(relative)
+        ) from error
+    return path
+
+
 def verify_environment_scope(manifest) -> None:
+    neural_results = selected_result_dir(manifest, "neural", NEURAL_RESULTS)
+    tabular_results = selected_result_dir(manifest, "tabular", TABULAR_RESULTS)
     require_environment_set(
         "neural curves",
-        csv_environments(NEURAL_RESULTS / "curves.csv"),
+        csv_environments(neural_results / "curves.csv"),
         NEURAL_ENVIRONMENTS,
     )
     require_environment_set(
         "neural diagnostics",
-        csv_environments(NEURAL_RESULTS / "diagnostics.csv"),
+        csv_environments(neural_results / "diagnostics.csv"),
         NEURAL_ENVIRONMENTS,
     )
-    neural_summary = load_json(NEURAL_RESULTS / "summary.json")
+    neural_summary = load_json(neural_results / "summary.json")
     require_environment_set(
         "neural summary protocol",
         neural_summary.get("protocol", {}).get("environments", []),
@@ -160,17 +184,25 @@ def verify_environment_scope(manifest) -> None:
 
     require_environment_set(
         "tabular curves",
-        csv_environments(TABULAR_RESULTS / "curves.csv"),
+        csv_environments(tabular_results / "curves.csv"),
         TABULAR_ENVIRONMENTS,
     )
-    tabular_summary = load_json(TABULAR_RESULTS / "summary.json")
+    tabular_summary = load_json(tabular_results / "summary.json")
     require_environment_set(
         "tabular summary protocol",
         tabular_summary.get("protocol", {}).get("environments", []),
         TABULAR_ENVIRONMENTS,
     )
 
-    protocol = load_json(STOCHASTIC_PROTOCOL)
+    protocol_path = STOCHASTIC_PROTOCOL
+    if STOCHASTIC_TABLE.is_file():
+        table = load_json(STOCHASTIC_TABLE)
+        source_path = table.get("source", {}).get("path")
+        if source_path:
+            candidate = (ROOT / source_path).resolve().parent / "protocol.json"
+            if candidate.is_file():
+                protocol_path = candidate
+    protocol = load_json(protocol_path)
     stochastic_environment = protocol.get("environment")
     if stochastic_environment not in NEURAL_ENVIRONMENTS:
         raise VerificationError(
@@ -210,37 +242,104 @@ def verify_stochastic_table() -> None:
         )
     if table.get("all_assertions_passed") is not True:
         raise VerificationError("finite-trajectory table assertions did not pass")
-    print("[ok] finite-trajectory table source and assertions")
+    latex_rows = table.get("latex_three_decimal_rows", {})
+    labels = {
+        "hard_br_return": r"Worst-case return $\uparrow$",
+        "hard_exploitability": r"Exploitability $\downarrow$",
+        "field_norm": r"Population $\norm{\bF}\downarrow$",
+    }
+    rendered = []
+    for metric in ("hard_br_return", "hard_exploitability", "field_norm"):
+        row = latex_rows.get(metric)
+        if not isinstance(row, dict):
+            raise VerificationError(
+                "finite-trajectory table has no LaTeX row for {}".format(metric)
+            )
+        qpg = str(row.get("QP+G_latex", "")).replace(r"\pm ", r"\pm")
+        nog = str(row.get("noG_latex", "")).replace(r"\pm ", r"\pm")
+        paired = str(row.get("paired_latex", "")).replace("$ $", r"\,")
+        if not qpg or not nog or not paired:
+            raise VerificationError(
+                "finite-trajectory LaTeX row is incomplete for {}".format(metric)
+            )
+        rendered.append("{} & {} & {} & {}".format(labels[metric], qpg, nog, paired))
+    expected_tex = (
+        r"\providecommand{\VIDTableRows}{%"
+        + "\n"
+        + "\\\\\n".join(rendered)
+        + "\\\\%\n}\n"
+    ).encode("utf-8")
+    if not STOCHASTIC_TABLE_ROWS.is_file():
+        raise VerificationError(
+            "missing finite-trajectory LaTeX rows: {}".format(
+                STOCHASTIC_TABLE_ROWS.relative_to(ROOT)
+            )
+        )
+    actual_tex = canonical_text_bytes(STOCHASTIC_TABLE_ROWS)
+    if actual_tex != expected_tex:
+        raise VerificationError(
+            "finite-trajectory LaTeX rows do not match the audited table JSON"
+        )
+    print("[ok] finite-trajectory table source, assertions, and LaTeX rows")
 
 
-def verify_required_files() -> None:
-    required = [
+def require_files(paths, label: str) -> None:
+    missing = [str(path.relative_to(ROOT)) for path in paths if not path.is_file()]
+    if missing:
+        raise VerificationError(
+            "missing required {}: {}".format(label, ", ".join(missing))
+        )
+
+
+def verify_required_inputs() -> None:
+    require_files(
+        [
         ROOT / "main.tex",
         ROOT / "refs.bib",
-        ROOT / "RARL_final.pdf",
+        MANIFEST,
         ROOT / "experiments" / "paper_suite_20260723" / "journal_games.py",
         ROOT
         / "experiments"
         / "paper_suite_20260723"
         / "motivation_geometry_abd_wide.py",
+        ROOT
+        / "experiments"
+        / "paper_suite_20260723"
+        / "assemble_paper_results.py",
+        ROOT
+        / "experiments"
+        / "stochastic_oracle_validation_20260727"
+        / "make_vi_d_table.py",
+        STOCHASTIC_PROTOCOL,
+        ],
+        "reconstruction inputs",
+    )
+
+
+def verify_generated_files(include_release_pdf: bool) -> None:
+    required = [
         ROOT / "output" / "pdf" / "fig_motivation_geometry_abd_wide.pdf",
         ROOT / "output" / "pdf" / "fig_vi_a_geometry.pdf",
         ROOT / "output" / "pdf" / "fig_vi_b_tabular.pdf",
         ROOT / "output" / "pdf" / "fig_vi_c_neural.pdf",
         STOCHASTIC_TABLE,
+        STOCHASTIC_TABLE_ROWS,
     ]
-    missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
-    if missing:
-        raise VerificationError(
-            "missing required release files: {}".format(", ".join(missing))
-        )
+    if include_release_pdf:
+        required.append(ROOT / "RARL_final.pdf")
+    require_files(required, "generated release files")
 
 
-def verify() -> None:
-    verify_required_files()
+def verify_inputs() -> None:
+    verify_required_inputs()
     manifest = load_json(MANIFEST)
     verify_manifest(manifest)
     verify_environment_scope(manifest)
+
+
+def verify() -> None:
+    verify_inputs()
+    verify_generated_files(include_release_pdf=True)
     verify_stochastic_table()
     print("Verification passed.")
 
@@ -248,6 +347,7 @@ def verify() -> None:
 def command_environment():
     environment = os.environ.copy()
     environment.setdefault("MPLBACKEND", "Agg")
+    environment["PYTHONUTF8"] = "1"
     mpl_directory = ROOT / "output" / "build" / "reproduce" / ".mplconfig"
     mpl_directory.mkdir(parents=True, exist_ok=True)
     environment.setdefault("MPLCONFIGDIR", str(mpl_directory))
@@ -264,8 +364,53 @@ def run(command) -> None:
     )
 
 
+def run_for_path(command, marker: str) -> Path:
+    """Run a command, stream its output, and return its declared artifact path."""
+
+    print("$ {}".format(" ".join(str(part) for part in command)), flush=True)
+    process = subprocess.Popen(
+        [str(part) for part in command],
+        cwd=str(ROOT),
+        env=command_environment(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    declared = None
+    assert process.stdout is not None
+    for line in process.stdout:
+        print(line, end="", flush=True)
+        stripped = line.strip()
+        if stripped.startswith(marker):
+            declared = stripped.split("=", 1)[1]
+    return_code = process.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, command)
+    if not declared:
+        raise RuntimeError(
+            "command completed without declaring {}".format(marker.rstrip("="))
+        )
+    path = Path(declared)
+    if not path.is_absolute():
+        path = ROOT / path
+    path = path.resolve()
+    try:
+        path.relative_to(ROOT.resolve())
+    except ValueError as error:
+        raise RuntimeError(
+            "declared artifact lies outside the repository: {}".format(path)
+        ) from error
+    if not path.is_dir():
+        raise RuntimeError("declared artifact directory does not exist: {}".format(path))
+    return path
+
+
 def figures() -> None:
-    verify()
+    # Generated PDFs and table files are deliberately not prerequisites here:
+    # this path must work after they have been removed from a clean clone.
+    verify_inputs()
     run(
         [
             sys.executable,
@@ -293,12 +438,16 @@ def figures() -> None:
             / "make_vi_d_table.py",
         ]
     )
-    verify()
+    verify_inputs()
+    verify_generated_files(include_release_pdf=False)
+    verify_stochastic_table()
     print("Figure and table reconstruction passed.")
 
 
 def paper() -> None:
-    verify()
+    verify_inputs()
+    verify_generated_files(include_release_pdf=False)
+    verify_stochastic_table()
     latexmk = shutil.which("latexmk")
     if latexmk is None:
         raise RuntimeError(
@@ -322,13 +471,143 @@ def paper() -> None:
     print("Paper compiled to {}".format(compiled.relative_to(ROOT)))
 
 
+def full_rerun() -> None:
+    """Rerun every reported experiment and rebuild the manuscript artifacts."""
+
+    paper_suite = ROOT / "experiments" / "paper_suite_20260723"
+    stochastic_suite = (
+        ROOT / "experiments" / "stochastic_oracle_validation_20260727"
+    )
+
+    linear = run_for_path(
+        [sys.executable, paper_suite / "linear_geometry.py"], "RESULT_DIR="
+    )
+    run_for_path(
+        [sys.executable, paper_suite / "theory_sentinels.py"], "RESULT_DIR="
+    )
+    tabular = run_for_path(
+        [
+            sys.executable,
+            paper_suite / "markov_game_suite.py",
+            "--mode",
+            "tabular",
+            "--environments",
+            "RPS",
+            "CyclicControl",
+            "FrequencyHopping",
+            "--seeds",
+            "10",
+            "--seed-start",
+            "200",
+            "--steps",
+            "100",
+        ],
+        "RESULT_DIR=",
+    )
+    controller = run_for_path(
+        [
+            sys.executable,
+            paper_suite / "markov_game_suite.py",
+            "--mode",
+            "neural",
+            "--environments",
+            "CyclicControl",
+            "FrequencyHopping",
+            "RoutingInterdiction",
+            "SecurityPatrol",
+            "--seeds",
+            "10",
+            "--seed-start",
+            "40",
+            "--steps",
+            "60",
+            "--fixed-lr",
+            "0.03",
+            "--methods",
+            "QP+G",
+            "noG",
+        ],
+        "RESULT_DIR=",
+    )
+    tuning = run_for_path(
+        [sys.executable, paper_suite / "tune_fixed_baselines.py"], "RESULT_DIR="
+    )
+    neural = run_for_path(
+        [
+            sys.executable,
+            paper_suite / "merge_neural_journal.py",
+            "--controller-dir",
+            controller,
+            "--tuning-summary",
+            tuning / "summary.json",
+        ],
+        "RESULT_DIR=",
+    )
+    run_for_path(
+        [
+            sys.executable,
+            paper_suite / "audit_saved_bridge.py",
+            "--tabular-dir",
+            tabular,
+            "--neural-dir",
+            neural,
+        ],
+        "RESULT_DIR=",
+    )
+
+    run_for_path(
+        [sys.executable, stochastic_suite / "sentinels_dice.py"], "OUTPUT="
+    )
+    stochastic = run_for_path(
+        [
+            sys.executable,
+            stochastic_suite / "stochastic_dice_policy.py",
+            "--phase",
+            "formal",
+        ],
+        "OUTPUT=",
+    )
+    run([sys.executable, stochastic_suite / "audit_formal.py", stochastic])
+
+    run([sys.executable, paper_suite / "motivation_geometry_abd_wide.py"])
+    run(
+        [
+            sys.executable,
+            paper_suite / "assemble_paper_results.py",
+            "--linear-dir",
+            linear,
+            "--tabular-dir",
+            tabular,
+            "--neural-dir",
+            neural,
+        ]
+    )
+    run(
+        [
+            sys.executable,
+            stochastic_suite / "make_vi_d_table.py",
+            "--source-dir",
+            stochastic,
+        ]
+    )
+    verify_inputs()
+    verify_generated_files(include_release_pdf=False)
+    verify_stochastic_table()
+    paper()
+    print("Full experiment-to-paper rerun passed.")
+    print("LINEAR_RESULT={}".format(linear.relative_to(ROOT)))
+    print("TABULAR_RESULT={}".format(tabular.relative_to(ROOT)))
+    print("NEURAL_RESULT={}".format(neural.relative_to(ROOT)))
+    print("FINITE_TRAJECTORY_RESULT={}".format(stochastic.relative_to(ROOT)))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Verify and reconstruct the released journal artifacts."
     )
     parser.add_argument(
         "mode",
-        choices=("verify", "figures", "paper", "all"),
+        choices=("verify", "figures", "paper", "all", "full"),
         help="artifact operation to perform",
     )
     args = parser.parse_args()
@@ -340,9 +619,11 @@ def main() -> None:
             figures()
         elif args.mode == "paper":
             paper()
-        else:
+        elif args.mode == "all":
             figures()
             paper()
+        else:
+            full_rerun()
     except (VerificationError, RuntimeError, subprocess.CalledProcessError) as error:
         print("ERROR: {}".format(error), file=sys.stderr)
         raise SystemExit(1) from error

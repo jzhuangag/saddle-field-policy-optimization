@@ -2,8 +2,9 @@
 
 This guide separates fast reconstruction from frozen data and complete
 experiment reruns. The fast path reproduces the manuscript artifacts without
-retraining. Full reruns write new timestamped directories for independent
-comparison and do not modify the frozen release.
+retraining. Full reruns write new timestamped raw-result directories without
+overwriting the frozen raw evidence; their final assembly intentionally
+refreshes the derived files under `output/pdf/` and `output/data/`.
 
 ## 1. Environment
 
@@ -59,7 +60,9 @@ python experiments/stochastic_oracle_validation_20260727/make_vi_d_table.py
 The vector manuscript figures are written to `output/pdf/`. Population
 summaries and the refreshed manifest are written to `output/data/`. The
 finite-trajectory table audit is written to
-`output/data/vi_d_finite_trajectory_table.json`.
+`output/data/vi_d_finite_trajectory_table.json`, and its three data-driven
+LaTeX rows are written to `output/data/vi_d_table_rows.tex` for direct
+inclusion by `main.tex`.
 
 ### Compile the manuscript
 
@@ -125,8 +128,20 @@ disjoint from the tuning seeds.
 
 ## 4. Complete experiment reruns
 
-Every command below creates a new timestamped result directory and prints its
-path when complete.
+The complete experiment-to-paper workflow is automated by:
+
+```bash
+python reproduce.py full
+```
+
+This command reruns every reported experiment, performs the independent
+fixed-baseline screen, merges the controller and selected-baseline results,
+reruns both formal audits, rebuilds the figures and Table I from the newly
+created directories, and compiles the manuscript. It is substantially more
+expensive than `reproduce.py all`, which uses frozen data. Every experiment
+stage creates a new timestamped result directory and prints its path.
+
+The component commands below expose the same workflow for selective reruns.
 
 ### Analytical geometry and numerical sentinels
 
@@ -164,6 +179,21 @@ selects one global rate per fixed method, and evaluates the selected rates on
 seeds 40--49. Its output `summary.json` records all selected rates, tuning
 scores, and timestamped source directories.
 
+Merge a newly generated controller directory and tuning result into the
+six-method journal dataset:
+
+```bash
+python experiments/paper_suite_20260723/merge_neural_journal.py --controller-dir PATH_TO_CONTROLLER_RESULT --tuning-summary PATH_TO_TUNING_RESULT/summary.json
+```
+
+The merger validates the exact four-environment, ten-seed, 60-update protocol
+before writing a new `neural-journal-four-*` directory. To build population
+figures from selected rerun directories rather than the frozen defaults, run:
+
+```bash
+python experiments/paper_suite_20260723/assemble_paper_results.py --linear-dir PATH_TO_LINEAR_RESULT --tabular-dir PATH_TO_TABULAR_RESULT --neural-dir PATH_TO_MERGED_NEURAL_RESULT
+```
+
 ### Performance-bridge audit on frozen checkpoints
 
 ```bash
@@ -181,6 +211,12 @@ The formal runner prints an `OUTPUT=` path. Pass that directory to the audit:
 
 ```bash
 python experiments/stochastic_oracle_validation_20260727/audit_formal.py PATH_PRINTED_AFTER_OUTPUT
+```
+
+Then reconstruct the table and its LaTeX rows from that same run:
+
+```bash
+python experiments/stochastic_oracle_validation_20260727/make_vi_d_table.py --source-dir PATH_PRINTED_AFTER_OUTPUT
 ```
 
 The formal run is the most computationally intensive component. It uses only

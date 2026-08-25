@@ -1,7 +1,8 @@
-"""Audit Proposition 1 on the saved final tabular and neural trajectories."""
+"""Audit the performance bridge on saved tabular and neural trajectories."""
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
@@ -32,6 +33,21 @@ REPORTED_ENVIRONMENTS = {
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Audit the policy-space performance bridge on saved curves."
+    )
+    parser.add_argument(
+        "--tabular-dir", type=Path, default=SAVED["tabular"].parent
+    )
+    parser.add_argument(
+        "--neural-dir", type=Path, default=SAVED["neural"].parent
+    )
+    args = parser.parse_args()
+    saved = {
+        "tabular": args.tabular_dir.resolve() / "curves.csv",
+        "neural": args.neural_dir.resolve() / "curves.csv",
+    }
+
     catalog = game_catalog()
     values = {}
     maximum_shapley_residual = 0.0
@@ -43,7 +59,7 @@ def main():
     entropy_bias = ENTROPY_TAU * (math.log(3) + math.log(3)) / (1.0 - DISCOUNT)
     audits = {}
     multiple_testing = {}
-    for mode, path in SAVED.items():
+    for mode, path in saved.items():
         with path.open(newline="", encoding="utf-8") as handle:
             rows = [
                 row

@@ -71,6 +71,8 @@
 \newcommand{\cE}{\mathcal{E}}
 \newcommand{\cP}{\mathcal{P}}
 
+\input{output/data/vi_d_table_rows.tex}
+
 % ---------- Title ----------
 \title{Saddle-Field Policy Optimization for Zero-Sum Markov Games: Adaptive Lyapunov-Drift Control with Finite-Time Stationarity Guarantees}
 
@@ -1106,9 +1108,7 @@ Entries are mean $\pm$ standard error with paired $95\%$ confidence intervals; p
 \toprule
 Metric & QP+G & noG & Paired $\Delta$\\
 \midrule
-Worst-case return $\uparrow$ & $-0.203\pm0.032$ & $-0.546\pm0.078$ & $0.342\,[0.123,0.561]$\\
-Exploitability $\downarrow$ & $0.429\pm0.047$ & $0.932\pm0.096$ & $0.503\,[0.274,0.732]$\\
-Population $\norm{\bF}\downarrow$ & $0.169\pm0.025$ & $0.377\pm0.037$ & $0.207\,[0.134,0.281]$\\
+\VIDTableRows
 \bottomrule
 \end{tabular}
 \end{table}

@@ -1,5 +1,10 @@
 {
   "schema": "journal-artifact-manifest/1",
+  "selected_results": {
+    "linear": "experiments/paper_suite_20260723/results/linear-geometry-20260823-234632",
+    "tabular": "experiments/paper_suite_20260723/results/tabular-exact-gap-20260723-113009",
+    "neural": "experiments/paper_suite_20260723/results/neural-journal-four-20260824"
+  },
   "frozen_sources": {
     "experiments/paper_suite_20260723/results/linear-geometry-20260823-234632/curves.csv": {
       "sha256": "8251ee44d6b7cb7995d32015e14f9fc6160a2efa565a3e6253ebeab5df408950",

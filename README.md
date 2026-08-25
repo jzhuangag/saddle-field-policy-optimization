@@ -64,13 +64,15 @@ the commands below. A TeX distribution containing `IEEEtran`, BibTeX, and
 
 ## Frozen-data reproduction
 
-The root entry point provides four fast modes:
+The root entry point provides four fast frozen-data modes and one complete
+experiment-to-paper mode:
 
 ```bash
 python reproduce.py verify
 python reproduce.py figures
 python reproduce.py paper
 python reproduce.py all
+python reproduce.py full
 ```
 
 | Mode | Action |
@@ -79,9 +81,12 @@ python reproduce.py all
 | `figures` | Verify the frozen data, regenerate all manuscript figures, and reconstruct the finite-trajectory table statistics. |
 | `paper` | Verify the frozen data and compile `main.tex` with `latexmk`. |
 | `all` | Run verification, figure/table reconstruction, and paper compilation in sequence. |
+| `full` | Rerun every reported experiment, tune and merge the neural baselines, rebuild all figures and Table I, audit the new outputs, and compile the paper. |
 
 The paper build is written to `output/build/reproduce/main.pdf`; it does not
-overwrite the released `RARL_final.pdf`.
+overwrite the released `RARL_final.pdf`. The `full` mode is substantially more
+expensive than the frozen-data modes; it writes new timestamped result
+directories and passes them explicitly through the assembly pipeline.
 
 ## Experiment map
 
@@ -89,7 +94,7 @@ overwrite the released `RARL_final.pdf`.
 |---|---|---|
 | Rotational linear geometry | `linear_geometry.py` | `linear-geometry-20260823-234632/` |
 | Tabular population games | `markov_game_suite.py --mode tabular` | `tabular-exact-gap-20260723-113009/` |
-| Neural population games | `markov_game_suite.py --mode neural` | `neural-journal-four-20260824/` |
+| Neural population games | `markov_game_suite.py --mode neural`, `tune_fixed_baselines.py`, and `merge_neural_journal.py` | `neural-journal-four-20260824/` |
 | Finite-trajectory validation | `stochastic_dice_policy.py --phase formal` | `formal-CyclicControl-dice-20260727-124224/` |
 
 All experiment programs create timestamped result directories and leave the

@@ -19,6 +19,7 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
+PROJECT = HERE.parent.parent
 SUITE = HERE / "markov_game_suite.py"
 RESULTS = HERE / "results"
 ENVIRONMENTS = (
@@ -32,6 +33,17 @@ LR_GRID = (0.001, 0.003, 0.01, 0.03)
 TUNING_SEEDS = tuple(range(1000, 1005))
 FINAL_SEEDS = tuple(range(40, 50))
 STEPS = 60
+
+
+def repository_relative(path: Path) -> str:
+    """Return a portable POSIX path rooted at the repository."""
+
+    try:
+        return path.resolve().relative_to(PROJECT.resolve()).as_posix()
+    except ValueError as error:
+        raise RuntimeError(
+            "result directory is outside the repository: {}".format(path)
+        ) from error
 
 
 def run_suite(lr: float, methods: tuple[str, ...], seed_start: int, seed_count: int, label: str):
@@ -54,7 +66,7 @@ def run_suite(lr: float, methods: tuple[str, ...], seed_start: int, seed_count: 
         *methods,
     ]
     log_path = HERE / f"{label}.log"
-    with log_path.open("w", encoding="utf-8") as log:
+    with log_path.open("w", encoding="utf-8", newline="\n") as log:
         completed = subprocess.run(
             command,
             cwd=HERE.parent.parent,
@@ -108,7 +120,7 @@ def main():
     for lr in LR_GRID:
         label = f"tune_neural_lr_{lr:g}".replace(".", "p")
         result_dir = run_suite(lr, METHODS, TUNING_SEEDS[0], len(TUNING_SEEDS), label)
-        tuning_runs[str(lr)] = str(result_dir)
+        tuning_runs[str(lr)] = repository_relative(result_dir)
         rows = read_rows(result_dir)
         for method in METHODS:
             tuning_scores[method][str(lr)] = tuning_score(rows, method)
@@ -131,7 +143,7 @@ def main():
         lr = selected_lrs[method]
         label = f"final_neural_{method.replace('-', '_')}_lr_{lr:g}".replace(".", "p")
         result_dir = run_suite(lr, (method,), FINAL_SEEDS[0], len(FINAL_SEEDS), label)
-        final_runs[method] = str(result_dir)
+        final_runs[method] = repository_relative(result_dir)
         report = json.loads((result_dir / "summary.json").read_text(encoding="utf-8"))
         final_summaries[method] = report["summaries"]
         minimum_bridge_slack = min(
@@ -165,7 +177,10 @@ def main():
     }
     output = RESULTS / ("tuned-baselines-" + time.strftime("%Y%m%d-%H%M%S"))
     output.mkdir(parents=True)
-    (output / "summary.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    with (output / "summary.json").open(
+        "w", encoding="utf-8", newline="\n"
+    ) as handle:
+        handle.write(json.dumps(report, indent=2) + "\n")
     print("SELECTED_LRS=" + json.dumps(selected_lrs, sort_keys=True), flush=True)
     print("RESULT_DIR=" + str(output), flush=True)
 

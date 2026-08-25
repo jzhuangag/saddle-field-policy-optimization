@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
@@ -485,23 +486,60 @@ def plot_linear_geometry(curves, destination):
     plt.close(fig)
 
 
+def project_relative(path: Path) -> str:
+    """Return a portable repository-relative artifact path."""
+
+    resolved = path.resolve()
+    try:
+        relative = resolved.relative_to(PROJECT.resolve())
+    except ValueError as error:
+        raise ValueError(
+            "experiment inputs must be located inside the repository: {}".format(
+                resolved
+            )
+        ) from error
+    return str(relative).replace("\\", "/")
+
+
 def main():
-    OUTPUT_PDF.mkdir(parents=True, exist_ok=True); OUTPUT_DATA.mkdir(parents=True, exist_ok=True)
-    linear_curves = read_csv(LINEAR / "curves.csv")
-    plot_linear_geometry(linear_curves, OUTPUT_PDF / "fig_vi_a_geometry.pdf")
-    tab_curves, tab_diag = read_csv(TABULAR / "curves.csv"), read_csv(TABULAR / "diagnostics.csv")
-    neu_curves, neu_diag = read_csv(NEURAL / "curves.csv"), read_csv(NEURAL / "diagnostics.csv")
+    parser = argparse.ArgumentParser(
+        description="Regenerate journal figures from selected result directories."
+    )
+    parser.add_argument("--linear-dir", type=Path, default=LINEAR)
+    parser.add_argument("--tabular-dir", type=Path, default=TABULAR)
+    parser.add_argument("--neural-dir", type=Path, default=NEURAL)
+    parser.add_argument("--output-pdf-dir", type=Path, default=OUTPUT_PDF)
+    parser.add_argument("--output-data-dir", type=Path, default=OUTPUT_DATA)
+    args = parser.parse_args()
+
+    linear_dir = args.linear_dir.resolve()
+    tabular_dir = args.tabular_dir.resolve()
+    neural_dir = args.neural_dir.resolve()
+    output_pdf = args.output_pdf_dir.resolve()
+    output_data = args.output_data_dir.resolve()
+    output_pdf.mkdir(parents=True, exist_ok=True)
+    output_data.mkdir(parents=True, exist_ok=True)
+
+    linear_curves = read_csv(linear_dir / "curves.csv")
+    plot_linear_geometry(linear_curves, output_pdf / "fig_vi_a_geometry.pdf")
+    tab_curves, tab_diag = read_csv(tabular_dir / "curves.csv"), read_csv(tabular_dir / "diagnostics.csv")
+    neu_curves, neu_diag = read_csv(neural_dir / "curves.csv"), read_csv(neural_dir / "diagnostics.csv")
     tab_summary, tab_decisions = summarize(tab_curves, tab_diag)
     neu_summary, neu_decisions = summarize(neu_curves, neu_diag)
-    write_csv(OUTPUT_DATA / "vi_b_tabular_summary.csv", tab_summary)
-    write_csv(OUTPUT_DATA / "vi_c_neural_summary.csv", neu_summary)
-    plot(tab_curves, ["RPS", "CyclicControl", "FrequencyHopping"], OUTPUT_PDF / "fig_vi_b_tabular.pdf")
-    plot(neu_curves, ["CyclicControl", "FrequencyHopping", "RoutingInterdiction"], OUTPUT_PDF / "fig_vi_c_neural.pdf")
-    source_files = [LINEAR / "curves.csv", LINEAR / "summary.json", TABULAR / "curves.csv", TABULAR / "diagnostics.csv", TABULAR / "summary.json", NEURAL / "curves.csv", NEURAL / "diagnostics.csv", NEURAL / "summary.json"]
+    write_csv(output_data / "vi_b_tabular_summary.csv", tab_summary)
+    write_csv(output_data / "vi_c_neural_summary.csv", neu_summary)
+    plot(tab_curves, ["RPS", "CyclicControl", "FrequencyHopping"], output_pdf / "fig_vi_b_tabular.pdf")
+    plot(neu_curves, ["CyclicControl", "FrequencyHopping", "RoutingInterdiction"], output_pdf / "fig_vi_c_neural.pdf")
+    source_files = [linear_dir / "curves.csv", linear_dir / "summary.json", tabular_dir / "curves.csv", tabular_dir / "diagnostics.csv", tabular_dir / "summary.json", neural_dir / "curves.csv", neural_dir / "diagnostics.csv", neural_dir / "summary.json"]
     manifest = {
         "schema": "journal-artifact-manifest/1",
+        "selected_results": {
+            "linear": project_relative(linear_dir),
+            "tabular": project_relative(tabular_dir),
+            "neural": project_relative(neural_dir),
+        },
         "frozen_sources": {
-            str(path.relative_to(PROJECT)).replace("\\", "/"): {
+            project_relative(path): {
                 "sha256": sha256(path),
                 "canonical_bytes": len(canonical_bytes(path)),
             }
@@ -516,11 +554,11 @@ def main():
         ],
         "additional_reported_environment": "SecurityPatrol",
     }
-    with (OUTPUT_DATA / "final_experiment_manifest.json").open(
+    with (output_data / "final_experiment_manifest.json").open(
         "w", encoding="utf-8", newline="\n"
     ) as handle:
         handle.write(json.dumps(manifest, indent=2) + "\n")
-    print(json.dumps(manifest, indent=2)); print("OUTPUT_PDF=" + str(OUTPUT_PDF)); print("OUTPUT_DATA=" + str(OUTPUT_DATA))
+    print(json.dumps(manifest, indent=2)); print("OUTPUT_PDF=" + str(output_pdf)); print("OUTPUT_DATA=" + str(output_data))
 
 
 if __name__ == "__main__":
