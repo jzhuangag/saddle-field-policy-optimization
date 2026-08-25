@@ -295,7 +295,8 @@ def main() -> None:
     }
 
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_JSON.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
+    with OUTPUT_JSON.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(output, indent=2) + "\n")
     print(f"Wrote {OUTPUT_JSON}")
     for metric in METRICS:
         row = latex_rows[metric]

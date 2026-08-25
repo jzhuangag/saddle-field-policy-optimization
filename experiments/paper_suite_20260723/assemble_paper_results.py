@@ -127,8 +127,12 @@ def summarize(curves, diagnostics):
 
 
 def write_csv(path, rows):
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
+    with path.open("w", newline="\n", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def plot(curves, environments, destination):
@@ -239,7 +243,7 @@ def plot(curves, environments, destination):
             va="top",
             fontweight="normal",
         )
-    fig.savefig(destination)
+    fig.savefig(destination, metadata={"CreationDate": None, "ModDate": None})
     fig.savefig(destination.with_suffix(".png"), dpi=300)
     plt.close(fig)
 
@@ -476,7 +480,7 @@ def plot_linear_geometry(curves, destination):
             va="top",
             fontweight="normal",
         )
-    fig.savefig(destination)
+    fig.savefig(destination, metadata={"CreationDate": None, "ModDate": None})
     fig.savefig(destination.with_suffix(".png"), dpi=300)
     plt.close(fig)
 
@@ -512,7 +516,10 @@ def main():
         ],
         "additional_reported_environment": "SecurityPatrol",
     }
-    (OUTPUT_DATA / "final_experiment_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    with (OUTPUT_DATA / "final_experiment_manifest.json").open(
+        "w", encoding="utf-8", newline="\n"
+    ) as handle:
+        handle.write(json.dumps(manifest, indent=2) + "\n")
     print(json.dumps(manifest, indent=2)); print("OUTPUT_PDF=" + str(OUTPUT_PDF)); print("OUTPUT_DATA=" + str(OUTPUT_DATA))
 
 

@@ -374,7 +374,12 @@ def main():
         bottom=0.185,
         wspace=0.31,
     )
-    fig.savefig(OUT_PDF, bbox_inches="tight", pad_inches=0.025)
+    fig.savefig(
+        OUT_PDF,
+        bbox_inches="tight",
+        pad_inches=0.025,
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     fig.savefig(OUT_PNG, bbox_inches="tight", pad_inches=0.025, dpi=360)
     print(f"saved {OUT_PDF}")
     print(f"saved {OUT_PNG}")
