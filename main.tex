@@ -125,6 +125,8 @@ Our controller instead treats the field and Jacobian-induced curvature direction
 We represent the parameterized game as a saddle field with two complementary update directions.
 The saddle field $\bF(\bz)$ defines the joint first-order update direction $-\bF(\bz)$, while the curvature direction $+\bG(\bz)=\nabla\bF(\bz)\bF(\bz)$ captures the local effect of rotational coupling.
 An exact symmetric--antisymmetric Jacobian condition shows that $+\bG$ decreases the squared field norm precisely when the antisymmetric action dominates the symmetric action along $\bF$.
+This separation exposes two coupled design questions: when does the curvature direction improve the local stationarity measure, and how should its magnitude be balanced with the field step when policy performance and stochastic estimation are included?
+The first question is geometric; the second requires an online control criterion that compares both directions on a common scale.
 
 Because the effective balance also changes along the trajectory and under stochastic noise, we extend Lyapunov-drift step-size design to select both magnitudes online using their local geometry \cite{Zhang2025AdaptivePolyak,Yuan2025StepSizeSDE}.
 
@@ -236,7 +238,7 @@ We write $\Id_n$ for the $n\times n$ identity matrix and $\Id$ when its dimensio
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=\textwidth]{fig_motivation_geometry_abd_wide.pdf}
+\includegraphics[width=0.86\textwidth]{fig_motivation_geometry_abd_wide.pdf}
 \caption{Geometry of two-direction saddle updates.
 (a) GDA spirals outward, whereas PPM and EGM contract at the displayed step size.
 (b) On the bilinear game, the first-order field step is tangential to the residual contours, whereas the shared second-order correction points inward.
@@ -394,6 +396,7 @@ This model covers unbiased mini-batch estimators and bounded bias from truncated
 Section~\ref{sec:prelim} shows that the field and curvature directions have different local effects on field energy.
 We now encode stationarity and policy performance in a nonnegative Lyapunov function.
 This extension is necessary because field energy alone cannot reveal whether a locally stabilizing parameter update improves policy-space performance.
+Using one Lyapunov function places both effects on a common scale, allowing the controller to compare candidate field and curvature steps without prescribing a fixed ratio between their step sizes.
 We then distinguish its realized one-step change from its conditional Lyapunov drift and construct an implementable local model for selecting the two step sizes.
 
 \subsection{Lyapunov Merit Function}\label{subsec:V_drift}
