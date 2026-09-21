@@ -1,0 +1,14 @@
+{
+  "manuscript": "main_13pages.tex",
+  "bibliography": "refs.bib",
+  "style": "IEEEtran.bst",
+  "entry_count": 34,
+  "cited_key_count": 34,
+  "missing_cited_keys": [],
+  "unused_entries": [],
+  "duplicate_titles": [],
+  "duplicate_dois": [],
+  "definite_errors": [],
+  "judgment_calls": [],
+  "status": "pass"
+}

@@ -1,0 +1,48 @@
+{
+  "study": "finite-trajectory attack-strength baseline robustness",
+  "environments": [
+    "FrequencyHopping"
+  ],
+  "attack_strength_values": [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0
+  ],
+  "methods": [
+    "GDA",
+    "Adam-GDA",
+    "EGM",
+    "PPM-3"
+  ],
+  "seeds": [
+    6100,
+    6101,
+    6102,
+    6103,
+    6104
+  ],
+  "steps": 60,
+  "checkpoint_every": 10,
+  "transitions_per_update": 8192,
+  "trajectories_per_update": 512,
+  "horizon": 16,
+  "shared_learning_rate": 0.03,
+  "adam_learning_rate": 0.001,
+  "learning_rate_selection": "frozen from independent population-oracle tuning seeds 1000--1004; candidate grid {0.001,0.003,0.01,0.03}",
+  "same_batch_internal_queries": true,
+  "equal_transition_budget_per_update": true,
+  "field_queries_per_update": {
+    "GDA": 1,
+    "Adam-GDA": 1,
+    "EGM": 2,
+    "PPM-3": 3
+  },
+  "oracle": "finite trajectories with per-decision prefix importance ratios; EGM and PPM-3 reuse the current update batch",
+  "checkpoint_evaluation": "exact population unregularized best responses, regularized gap, and regularized field norm",
+  "nominal_equivalence_max_error": 0.0,
+  "elapsed_seconds": 59561.0830078125
+}

@@ -1,0 +1,115 @@
+{
+  "protocol": {
+    "study": "finite-trajectory attack-severity robustness",
+    "environments": [
+      "SecurityPatrol"
+    ],
+    "attack_severity_values": [
+      2.0
+    ],
+    "nominal_attack_severity": 1.0,
+    "methods": [
+      "QP+G",
+      "noG"
+    ],
+    "seeds": [
+      6103,
+      6104
+    ],
+    "steps": 60,
+    "checkpoint_every": 10,
+    "transitions_per_update": 8192,
+    "trajectories_per_update": 512,
+    "horizon": 16,
+    "discount": 0.9,
+    "entropy_tau": 0.03,
+    "fixed_learning_rate": 0.03,
+    "qp_caps": [
+      0.03,
+      0.03
+    ],
+    "policy_parameterization": "two separate 4-8-3 tanh-softmax policies",
+    "oracle": "finite trajectories with per-decision prefix importance ratios; at behavior parameters repeated differentiation is DiCE",
+    "curvature": "same-batch autograd Jacobian-vector action G=DF F",
+    "controller_merit": "normalized same-batch stochastic field energy",
+    "training_best_response_calls": 0,
+    "checkpoint_evaluation": "exact population unregularized best responses, regularized gap, and regularized field norm",
+    "nominal_equivalence_max_error": 0.0,
+    "elapsed_seconds": 447.2637667655945
+  },
+  "summaries": [
+    {
+      "environment": "SecurityPatrol",
+      "eta": 2.0,
+      "method": "QP+G",
+      "seed_count": 2,
+      "hard_br_return_mean": -3.8093413394903357,
+      "hard_br_return_sem": 0.05431986723957705,
+      "hard_br_return_ci95_lower": -4.499540693892213,
+      "hard_br_return_ci95_upper": -3.119141985088459,
+      "hard_exploitability_mean": 2.0991288555105636,
+      "hard_exploitability_sem": 0.10234390064573105,
+      "hard_exploitability_ci95_lower": 0.7987263003808398,
+      "hard_exploitability_ci95_upper": 3.3995314106402876,
+      "regularized_gap_mean": 1.5220191407997525,
+      "regularized_gap_sem": 0.10167293794868958,
+      "regularized_gap_ci95_lower": 0.23014197506914646,
+      "regularized_gap_ci95_upper": 2.8138963065303586,
+      "field_norm_mean": 0.31095904856566303,
+      "field_norm_sem": 0.037971076969459255,
+      "field_norm_ci95_lower": -0.1715092294711078,
+      "field_norm_ci95_upper": 0.7934273266024339
+    },
+    {
+      "environment": "SecurityPatrol",
+      "eta": 2.0,
+      "method": "noG",
+      "seed_count": 2,
+      "hard_br_return_mean": -3.9905436163796915,
+      "hard_br_return_sem": 0.22526104268762068,
+      "hard_br_return_ci95_lower": -6.85275654391077,
+      "hard_br_return_ci95_upper": -1.1283306888486133,
+      "hard_exploitability_mean": 2.341577169098221,
+      "hard_exploitability_sem": 0.27075576734792883,
+      "hard_exploitability_ci95_lower": -1.098701044394339,
+      "hard_exploitability_ci95_upper": 5.781855382590781,
+      "regularized_gap_mean": 1.7734435902090517,
+      "regularized_gap_sem": 0.25700341493781265,
+      "regularized_gap_ci95_lower": -1.4920944179530062,
+      "regularized_gap_ci95_upper": 5.03898159837111,
+      "field_norm_mean": 0.46583442382988005,
+      "field_norm_sem": 0.16218956958095745,
+      "field_norm_ci95_lower": -1.5949794533795645,
+      "field_norm_ci95_upper": 2.526648301039325
+    }
+  ],
+  "paired": [
+    {
+      "environment": "SecurityPatrol",
+      "eta": 2.0,
+      "seed_count": 2,
+      "return_gain_mean": 0.18120227688935575,
+      "return_gain_sem": 0.17094117544804366,
+      "return_gain_ci95_lower": -1.9908112962398463,
+      "return_gain_ci95_upper": 2.353215850018558,
+      "return_gain_positive_seed_count": 2,
+      "exploitability_reduction_mean": 0.24244831358765728,
+      "exploitability_reduction_sem": 0.16841186670219774,
+      "exploitability_reduction_ci95_lower": -1.8974273447751786,
+      "exploitability_reduction_ci95_upper": 2.382323971950493,
+      "exploitability_reduction_positive_seed_count": 2,
+      "regularized_gap_reduction_mean": 0.2514244494092992,
+      "regularized_gap_reduction_sem": 0.15533047698912306,
+      "regularized_gap_reduction_ci95_lower": -1.7222363930221527,
+      "regularized_gap_reduction_ci95_upper": 2.225085291840751,
+      "regularized_gap_reduction_positive_seed_count": 2,
+      "field_norm_reduction_mean": 0.15487537526421702,
+      "field_norm_reduction_sem": 0.20016064655041668,
+      "field_norm_reduction_ci95_lower": -2.388406779981998,
+      "field_norm_reduction_ci95_upper": 2.698157530510432,
+      "field_norm_reduction_positive_seed_count": 1,
+      "gamma_activation": 1.0,
+      "positive_curvature_signal_rate": 1.0
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "protocol": {
+    "study": "finite-trajectory attack-strength baseline robustness",
+    "environments": [
+      "CyclicControl"
+    ],
+    "attack_strength_values": [
+      1.0
+    ],
+    "methods": [
+      "GDA",
+      "Adam-GDA",
+      "EGM",
+      "PPM-3"
+    ],
+    "seeds": [
+      9999
+    ],
+    "steps": 1,
+    "checkpoint_every": 10,
+    "transitions_per_update": 32,
+    "trajectories_per_update": 2,
+    "horizon": 16,
+    "shared_learning_rate": 0.03,
+    "adam_learning_rate": 0.001,
+    "learning_rate_selection": "frozen from independent population-oracle tuning seeds 1000--1004; candidate grid {0.001,0.003,0.01,0.03}",
+    "same_batch_internal_queries": true,
+    "equal_transition_budget_per_update": true,
+    "field_queries_per_update": {
+      "GDA": 1,
+      "Adam-GDA": 1,
+      "EGM": 2,
+      "PPM-3": 3
+    },
+    "oracle": "finite trajectories with per-decision prefix importance ratios; EGM and PPM-3 reuse the current update batch",
+    "checkpoint_evaluation": "exact population unregularized best responses, regularized gap, and regularized field norm",
+    "nominal_equivalence_max_error": 0.0,
+    "elapsed_seconds": 0.5677280426025391
+  },
+  "summaries": [
+    {
+      "environment": "CyclicControl",
+      "eta": 1.0,
+      "method": "GDA",
+      "seed_count": 1,
+      "hard_br_return_mean": -0.4779992359780837,
+      "hard_br_return_sem": 0.0,
+      "hard_br_return_ci95_lower": -0.4779992359780837,
+      "hard_br_return_ci95_upper": -0.4779992359780837,
+      "hard_exploitability_mean": 0.7235304712709476,
+      "hard_exploitability_sem": 0.0,
+      "hard_exploitability_ci95_lower": 0.7235304712709476,
+      "hard_exploitability_ci95_upper": 0.7235304712709476,
+      "regularized_gap_mean": 0.27442606897052196,
+      "regularized_gap_sem": 0.0,
+      "regularized_gap_ci95_lower": 0.27442606897052196,
+      "regularized_gap_ci95_upper": 0.27442606897052196,
+      "field_norm_mean": 0.2471608820351039,
+      "field_norm_sem": 0.0,
+      "field_norm_ci95_lower": 0.2471608820351039,
+      "field_norm_ci95_upper": 0.2471608820351039
+    },
+    {
+      "environment": "CyclicControl",
+      "eta": 1.0,
+      "method": "Adam-GDA",
+      "seed_count": 1,
+      "hard_br_return_mean": -0.3392900533350245,
+      "hard_br_return_sem": 0.0,
+      "hard_br_return_ci95_lower": -0.3392900533350245,
+      "hard_br_return_ci95_upper": -0.3392900533350245,
+      "hard_exploitability_mean": 0.5044531502375107,
+      "hard_exploitability_sem": 0.0,
+      "hard_exploitability_ci95_lower": 0.5044531502375107,
+      "hard_exploitability_ci95_upper": 0.5044531502375107,
+      "regularized_gap_mean": 0.15042585023103233,
+      "regularized_gap_sem": 0.0,
+      "regularized_gap_ci95_lower": 0.15042585023103233,
+      "regularized_gap_ci95_upper": 0.15042585023103233,
+      "field_norm_mean": 0.18596744355008912,
+      "field_norm_sem": 0.0,
+      "field_norm_ci95_lower": 0.18596744355008912,
+      "field_norm_ci95_upper": 0.18596744355008912
+    },
+    {
+      "environment": "CyclicControl",
+      "eta": 1.0,
+      "method": "EGM",
+      "seed_count": 1,
+      "hard_br_return_mean": -0.474654790779697,
+      "hard_br_return_sem": 0.0,
+      "hard_br_return_ci95_lower": -0.474654790779697,
+      "hard_br_return_ci95_upper": -0.474654790779697,
+      "hard_exploitability_mean": 0.7235606215370247,
+      "hard_exploitability_sem": 0.0,
+      "hard_exploitability_ci95_lower": 0.7235606215370247,
+      "hard_exploitability_ci95_upper": 0.7235606215370247,
+      "regularized_gap_mean": 0.2733209553467618,
+      "regularized_gap_sem": 0.0,
+      "regularized_gap_ci95_lower": 0.2733209553467618,
+      "regularized_gap_ci95_upper": 0.2733209553467618,
+      "field_norm_mean": 0.24682093404151273,
+      "field_norm_sem": 0.0,
+      "field_norm_ci95_lower": 0.24682093404151273,
+      "field_norm_ci95_upper": 0.24682093404151273
+    },
+    {
+      "environment": "CyclicControl",
+      "eta": 1.0,
+      "method": "PPM-3",
+      "seed_count": 1,
+      "hard_br_return_mean": -0.47461441429709844,
+      "hard_br_return_sem": 0.0,
+      "hard_br_return_ci95_lower": -0.47461441429709844,
+      "hard_br_return_ci95_upper": -0.47461441429709844,
+      "hard_exploitability_mean": 0.723669608294331,
+      "hard_exploitability_sem": 0.0,
+      "hard_exploitability_ci95_lower": 0.723669608294331,
+      "hard_exploitability_ci95_upper": 0.723669608294331,
+      "regularized_gap_mean": 0.27335701477328844,
+      "regularized_gap_sem": 0.0,
+      "regularized_gap_ci95_lower": 0.27335701477328844,
+      "regularized_gap_ci95_upper": 0.27335701477328844,
+      "field_norm_mean": 0.24681801208950022,
+      "field_norm_sem": 0.0,
+      "field_norm_ci95_lower": 0.24681801208950022,
+      "field_norm_ci95_upper": 0.24681801208950022
+    }
+  ]
+}

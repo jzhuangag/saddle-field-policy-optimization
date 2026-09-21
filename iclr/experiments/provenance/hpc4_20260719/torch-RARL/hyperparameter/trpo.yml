@@ -1,0 +1,54 @@
+atari:
+  env_wrapper:
+    - stable_baselines3.common.atari_wrappers.AtariWrapper
+  frame_stack: 4
+  policy: 'CnnPolicy'
+  n_envs: 8
+  n_steps: 128
+  n_epochs: 4
+  batch_size: 256
+  n_timesteps: !!float 1e7
+  learning_rate: lin_2.5e-4
+  clip_range: lin_0.1
+  vf_coef: 0.5
+  ent_coef: 0.01
+
+LunarLanderContinuous-v2:
+  n_envs: 16
+  n_timesteps: !!float 1e6
+  policy: 'MlpPolicy'
+  batch_size: 128
+  n_steps: 128
+  gamma: 0.999
+  learning_rate: 0.007807660745967545
+  n_critic_updates: 5
+  cg_max_steps: 10
+  target_kl: 0.005
+  gae_lambda: 0.92
+  policy_kwargs: "dict(activation_fn=torch.nn.ReLU,
+                      net_arch=[dict(pi=[64, 64], vf=[64, 64])]
+                      )"
+
+# === Mujoco Envs ===
+Ant-v3: &mujoco-defaults
+  normalize: true
+  n_timesteps: !!float 1e6
+  policy: 'MlpPolicy'
+
+HalfCheetah-v3:
+  normalize: true
+  n_envs: 1
+  n_timesteps: !!float 5e6
+  policy: 'MlpPolicy'
+  batch_size: 128
+  n_steps: 2048
+  gamma: 0.99
+  learning_rate: 1.9904955094948545e-05
+  n_critic_updates: 25
+  cg_max_steps: 30
+  target_kl: 0.01
+  gae_lambda: 0.95
+  policy_kwargs: "dict(
+                  activation_fn=torch.nn.ReLU,
+                  net_arch=[dict(pi=[64, 64], vf=[64, 64])]
+                  )"

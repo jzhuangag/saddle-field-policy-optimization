@@ -13,13 +13,18 @@
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage{xcolor}
+\usepackage{placeins}
 \usepackage[shortlabels]{enumitem}
 \setlist[enumerate]{nosep,leftmargin=*}
 
 \allowdisplaybreaks
+\renewcommand{\topfraction}{0.90}
 \renewcommand{\dbltopfraction}{0.95}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.80}
 \renewcommand{\dblfloatpagefraction}{0.99}
-\setcounter{dbltopnumber}{1}
+\setcounter{topnumber}{2}
+\setcounter{dbltopnumber}{2}
 \setlength{\dbltextfloatsep}{4pt plus 2pt minus 2pt}
 \setlength{\textfloatsep}{4pt plus 2pt minus 2pt}
 
@@ -77,1031 +82,1088 @@
 \title{Saddle-Field Policy Optimization for Zero-Sum Markov Games: Adaptive Lyapunov-Drift Control with Finite-Time Stationarity Guarantees}
 
 \author{Jialin~Zhuang,~\IEEEmembership{Member,~IEEE,}
-and~Vincent~K.~N.~Lau,~\IEEEmembership{Fellow,~IEEE}%
-\thanks{J.~Zhuang and V.~Lau are with the Department of Electronic and Computer Engineering, The Hong Kong University of Science and Technology, Clear Water Bay, Hong Kong Special Administrative Region, China (e-mail: jzhuangag@connect.ust.hk; eeknlau@ece.ust.hk).
-This work was supported by the Research Grants Council (RGC), Hong Kong, under the Areas of Excellence Scheme Grant AoE/E-101/23-N and AoE/E-601/22-R.
-(\em{Corresponding author: Vincent K. N. LAU}.)}
+	and~Vincent~K.~N.~Lau,~\IEEEmembership{Fellow,~IEEE}%
+	\thanks{J.~Zhuang and V.~Lau are with the Department of Electronic and Computer Engineering, The Hong Kong University of Science and Technology, Clear Water Bay, Hong Kong Special Administrative Region, China (e-mail: jzhuangag@connect.ust.hk; eeknlau@ece.ust.hk).
+		This work was supported by the Research Grants Council (RGC), Hong Kong, under the Areas of Excellence Scheme Grant AoE/E-101/23-N and AoE/E-601/22-R.
+		(\em{Corresponding author: Vincent K. N. LAU}.)}
 }
 
 \begin{document}
-\maketitle
-\setlength{\abovedisplayskip}{4pt plus 2pt minus 2pt}
-\setlength{\belowdisplayskip}{4pt plus 2pt minus 2pt}
-\setlength{\abovedisplayshortskip}{1pt plus 1pt}
-\setlength{\belowdisplayshortskip}{4pt plus 2pt minus 2pt}
-
-% ============================================================
-\begin{abstract}
-Two-player zero-sum Markov games model robust reinforcement learning and competitive policy optimization.
-Rotational components in their saddle fields can hinder first-order updates.
-We identify the policy field $\bF(\bz)$ and a Jacobian-induced curvature direction $\bG(\bz)=\nabla\bF(\bz)\bF(\bz)$ for rotational coupling.
-A symmetric--antisymmetric Jacobian decomposition characterizes when the curvature direction decreases field energy.
-We then develop a geometry-aware controller that assigns separate step sizes to the two directions.
-Minimizing a local model of the one-step change in a composite Lyapunov function $\Vk$ yields the two step sizes through a box-constrained quadratic program (QP).
-Under local geometric coverage, the controller attains an $O(1/K)$ bound over $K$ joint updates on the time-average expected stationarity residual, plus an explicit residual floor.
-A positive-semidefinite symmetric part and nonsingularity of the metric-transformed Jacobian at the target stationary point are shown to imply neighborhood coverage, including the nonsingular pure-rotation case.
-Under a local policy-space error bound, this stationarity result transfers to guarantees on the unregularized Nash gap and the maximizing player's worst-case-return loss.
-Experiments across four settings validate the predicted geometry; at the final checkpoint of every Markov-game task, the controller has higher mean worst-case return and lower mean exploitability than the matched field-only ablation, including a $79.1\%$ exploitability reduction on neural CyclicControl.
-\end{abstract}
-
-\begin{IEEEkeywords}
-Zero-sum Markov games, robust reinforcement learning, stochastic saddle fields, Lyapunov drift, adaptive step size.
-\end{IEEEkeywords}
-
-% ============================================================
-\section{Introduction}\label{sec:intro}
-% ============================================================
-\IEEEPARstart{T}{wo-player} zero-sum Markov games provide a mathematical model for competitive sequential decisions \cite{Shapley1953StochasticGames,Littman1994MarkovGames,Alacaoglu2022NACMG}.
-They also underpin robust reinforcement learning (RL), where a maximizing policy must retain performance against model uncertainty, disturbances, or adversarial actions represented by a minimizing policy \cite{SuttonBarto2018,MorimotoDoya2005RobustRL,Iyengar2005RobustDP,NilimElGhaoui2005,Pinto2017RARL,Kamalaruban2020LangevinRARL}.
-
-Policy parameterization yields joint ascent--descent dynamics estimated from stochastic trajectories.
-Unlike an ordinary minimization gradient, the resulting saddle field may contain a strong rotational component that makes gradient descent--ascent (GDA) cycle or diverge even on bilinear games; related instability arises in robust-control formulations of adversarial RL \cite{ZhangHuBasar2020StabilityRARL}.
-
-The proximal point method (PPM) and extragradient-type methods, including the classical extragradient method (EGM), Mirror-Prox, and policy extragradient, introduce corrections that can suppress rotational dynamics at suitable step sizes \cite{Rockafellar1976PPM,Korpelevich1976Extragradient,Nemirovski2004MirrorProx,Mokhtari2020UnifiedEG,CenWeiChi2024FastPolicyEG}.
-Recent analyses of saddle algorithms relate these corrections to Jacobian-induced dynamics in the underlying game field \cite{Lu2022ODE,Balduzzi2018Mechanics,Letcher2019DifferentiableGameMechanics,Mescheder2018GANConvergence,Loizou2020SHGD}.
-Adaptive variational-inequality and extra-gradient methods adjust the extrapolation and update scales from observed operator information \cite{Hsieh2020DSEG,Antonakopoulos2021AdaProx}.
-Our controller instead treats the field and Jacobian-induced curvature directions as separate search coordinates and selects their step sizes by minimizing a local model of composite Lyapunov change.
-
-We represent the parameterized game as a saddle field with two complementary update directions.
-The saddle field $\bF(\bz)$ defines the joint first-order update direction $-\bF(\bz)$, while the curvature direction $+\bG(\bz)=\nabla\bF(\bz)\bF(\bz)$ captures the local effect of rotational coupling.
-An exact symmetric--antisymmetric Jacobian condition shows that $+\bG$ decreases the squared field norm precisely when the antisymmetric action dominates the symmetric action along $\bF$.
-This separation exposes two coupled design questions: when does the curvature direction improve the local stationarity measure, and how should its magnitude be balanced with the field step when policy performance and stochastic estimation are included?
-The first question is geometric; the second requires an online control criterion that compares both directions on a common scale.
-
-Because the effective balance also changes along the trajectory and under stochastic noise, we extend Lyapunov-drift step-size design to select both magnitudes online using their local geometry \cite{Zhang2025AdaptivePolyak,Yuan2025StepSizeSDE}.
-
-The resulting controller minimizes a local second-order model of a composite Lyapunov function through a two-dimensional box-constrained quadratic program (QP), yielding closed-form step sizes, finite-time stationarity guarantees, and policy-space performance bounds.
-
-The main contributions are as follows.
-\begin{itemize}[leftmargin=*,nosep]
-\item \textbf{Curvature geometry.}
-We derive an exact symmetric--antisymmetric Jacobian criterion for curvature-induced field-energy descent and connect it to the correction shared by PPM and EGM but absent from GDA.
-\item \textbf{Adaptive Lyapunov-drift control.}
-A composite merit combining weighted field energy and a regularized policy-space gap yields separate field and curvature step sizes through a closed-form box QP.
-Its local model dominates every feasible field-only, curvature-only, or fixed-coupling comparator in the same box, with strict interior improvement characterized by a reduced gradient.
-\item \textbf{Finite-time and policy-space guarantees.}
-For biased stochastic oracles, two-direction geometric coverage yields an $O(1/K)$ transient in the time-average expected stationarity residual plus an explicit error floor.
-We derive neighborhood coverage from a positive-semidefinite symmetric part and nonsingularity of the metric-transformed Jacobian at the target, including pure rotation; under a local policy-space error bound, the stationarity estimate transfers to ergodic Nash-gap and worst-case-return bounds.
-\end{itemize}
-
-% ============================================================
-\section{Saddle-Field Dynamics in Zero-Sum Markov Games}\label{sec:prelim}
-
-% ============================================================
-
-\subsection{Zero-Sum Markov Game and Saddle-Field Formulation}\label{subsec:formulation}
-
-We consider an infinite-horizon discounted two-player zero-sum Markov game with state space $\mathcal{S}$, maximizing-player action space $\mathcal{A}$, minimizing-player action space $\mathcal{B}$, transition kernel $P$, bounded reward $r$ to the maximizing player, discount factor $\alpha\in(0,1)$, and initial-state distribution $\rho$.
-For a maximizing-player policy $\pi$ and a minimizing-player policy $\nu$, the maximizing player's discounted return is
-\[
-J(\pi,\nu)
-\triangleq
-\E_{\rho,\pi,\nu}
-\!\left[
-\textstyle\sum_{t=0}^{\infty}\alpha^{t}r(s_{t},a_{t},b_{t})
-\right].
-\]
-Here $\E_{\rho,\pi,\nu}$ denotes expectation under the initial-state distribution and the two policies.
-The policy-space saddle objective is $\sup_{\pi}\inf_{\nu} J(\pi,\nu)$.
-When $\mathcal A$ and $\mathcal B$ are finite, define the discounted causal entropies
-\begin{align*}
-\mathsf H_{\alpha}^{\pi}(\pi,\nu)
-&\triangleq \E_{\rho,\pi,\nu}\!\left[\sum_{t\ge0}\alpha^t
-\bigl(-\log\pi(a_t\mid s_t)\bigr)\right],\\
-\mathsf H_{\alpha}^{\nu}(\pi,\nu)
-&\triangleq \E_{\rho,\pi,\nu}\!\left[\sum_{t\ge0}\alpha^t
-\bigl(-\log\nu(b_t\mid s_t)\bigr)\right],
-\end{align*}
-with $0\log0=0$.
-For entropy weight $\varepsilon\ge0$, the corresponding regularized return is
-\begin{equation}\label{eq:entropic_return}
-J_{\varepsilon}(\pi,\nu)
-\triangleq J(\pi,\nu)
-+\varepsilon\mathsf H_{\alpha}^{\pi}(\pi,\nu)
--\varepsilon\mathsf H_{\alpha}^{\nu}(\pi,\nu).
-\end{equation}
-The opposite entropy signs follow the saddle convention: the maximizing player raises $J_\varepsilon$ by increasing its entropy, while the minimizing player lowers $J_\varepsilon$ by increasing its own entropy.
-Thus, entropy encourages stochastic responses for both players and replaces potentially set-valued hard best responses by soft best responses in finite games.
-Without regularization, the supremum or infimum defining a best-response value can kink when its optimizer switches, invalidating the gradient--Hessian quadratic model used by the controller.
-For $\varepsilon>0$, this smoothing supplies the differentiable policy-space gap needed by the first- and second-order Lyapunov model; Proposition~\ref{prop:smooth_entropy_gap} formalizes the required local regularity.
-Because regularization perturbs the original performance criterion, Proposition~\ref{prop:performance_bridge} later transfers the regularized guarantee to the unregularized Nash gap and worst-case return with an explicit entropy-bias term.
-Let $J_{\rm alg}\in\{J,J_\varepsilon\}$ denote the differentiable saddle objective.
-This notation separates the objective differentiated by the controller from the performance measure used for final evaluation.
-The finite-game controller and all Markov-game experiments use $J_{\rm alg}=J_\varepsilon$, while Section~\ref{subsec:performance_guarantee} reserves $J$ for unregularized performance measures.
-In large finite or continuous state spaces, we adopt the standard parameterized formulation because exact policy-space optimization is generally intractable.
-The maximizing-player policy is represented by $\pi_{\btheta}(a\mid s)$ with $\btheta\in\R^{d_{\theta}}$, and the minimizing-player policy by $\nu_{\bpsi}(b\mid s)$ with $\bpsi\in\R^{d_{\psi}}$, giving
-\[
-\begin{aligned}
-J_{\rm alg}(\btheta,\bpsi)
-&\triangleq
-J_{\rm alg}(\pi_{\btheta},\nu_{\bpsi}),\\
-&\hspace{3em}
-\max_{\btheta}\min_{\bpsi}J_{\rm alg}(\btheta,\bpsi).
-\end{aligned}
-\]
-Write $\bz\triangleq(\btheta,\bpsi)\in\R^d$, where $d\triangleq d_\theta+d_\psi$.
-The joint policy ascent--descent dynamics define the saddle field
-\begin{equation}\label{eq:Fdef}
-\bF(\bz)
-\triangleq
-\begin{bmatrix}
--\nabla_{\btheta}J_{\rm alg}(\btheta,\bpsi)\\[0.2em]
-\phantom{-}\nabla_{\bpsi}J_{\rm alg}(\btheta,\bpsi)
-\end{bmatrix}.
-\end{equation}
-The first-order stationary set is $\mathcal Z^{\star}\triangleq\{\bz:\bF(\bz)=\bzero\}$, where $\bzero$ is the zero vector.
-Every $\bz^\star\in\mathcal Z^\star$ satisfies the unconstrained first-order Karush--Kuhn--Tucker (KKT) conditions for the parameterized zero-sum objective.
-Under neural policy parameterization, $\mathcal Z^\star$ is the parameter-space first-order stationary set.
-This distinction matters because a nonconvex or noninjective policy parameterization can satisfy $\bF(\bz)=\bzero$ even when a player can still improve by taking a best response in the full policy space.
-The policy-space results in Section~\ref{subsec:performance_guarantee} use the Nash gap to measure this remaining unilateral-improvement incentive and additionally bound the maximizing player's worst-case-return loss.
-
-\subsection{Curvature-Induced Dynamics and Jacobian Geometry}\label{subsec:saddle_field}
-
-The saddle-field formulation exposes the rotational component that can destabilize first-order updates.
-To understand how established saddle methods counter this effect, we examine the Jacobian-based correction generated by PPM and EGM.
-For a scalar step size $s>0$, GDA, PPM, and EGM use the representative updates
-\begin{equation}\label{eq:classical_updates}
-\begin{aligned}
-\textnormal{GDA:}&\quad
-\bz_{+}^{\rm GDA}=\bz-s\bF(\bz),\\
-\textnormal{PPM:}&\quad
-\bz_{+}^{\rm PPM}=\bz-s\bF(\bz_{+}^{\rm PPM}),\\
-\textnormal{EGM:}&\quad
-\widetilde{\bz}=\bz-s\bF(\bz),\quad
-\bz_{+}^{\rm EGM}=\bz-s\bF(\widetilde{\bz}),
-\end{aligned}
-\end{equation}
-where $\widetilde{\bz}$ is the EGM extrapolation point.
-GDA is explicit, PPM is implicit, and EGM uses an extrapolated field query.
-Below, $\norm{\cdot}$ denotes the Euclidean norm and its induced operator and tensor norms, $\inner{\cdot}{\cdot}$ the standard inner product, $\nabla\bF$ the Jacobian of $\bF$ with respect to $\bz$, and $\nabla^2\bF$ its second-derivative tensor.
-We write $\Id_n$ for the $n\times n$ identity matrix and $\Id$ when its dimension is clear; for a square matrix $\boldsymbol{X}$, $\sym(\boldsymbol{X})\triangleq(\boldsymbol{X}+\boldsymbol{X}^\top)/2$ and $\skewop(\boldsymbol{X})\triangleq(\boldsymbol{X}-\boldsymbol{X}^\top)/2$, while $\boldsymbol{X}\succeq0$ and $\boldsymbol{X}\succ0$ respectively denote positive semidefiniteness and positive definiteness when $\boldsymbol{X}$ is symmetric.
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=0.86\textwidth]{fig_motivation_geometry_abd_wide.pdf}
-\caption{Geometry of two-direction saddle updates.
-(a) GDA spirals outward, whereas PPM and EGM contract at the displayed step size.
-(b) On the bilinear game, the first-order field step is tangential to the residual contours, whereas the shared second-order correction points inward.
-(c) The curvature-to-field step-size ratio controls contraction and residual rotation.}
-\label{fig:motivation_geometry}
-\end{figure*}
-
-The following assumption states the local regularity required by the template expansion and one-step analysis.
-
-\begin{assumption}[Local smoothness]\label{ass:smooth}
-There exists an open set $\cD\subset\R^{d}$ such that:
-(a) all iterates and probing points used in the analysis lie in $\cD$;
-(b) $J_{\rm alg}:\R^{d}\to\R$ is four times continuously differentiable ($C^{4}$) on $\cD$;
-(c) all derivatives of $J_{\rm alg}$ up to order four are bounded on $\cD$.
-\end{assumption}
-
-Conditions~(b)--(c) imply that $\bF$ is three times continuously differentiable, i.e. $\bF\in C^{3}(\cD;\R^{d})$; after prescribing an implementable region $\mathcal T\subset\cD$, the safeguards of Section~\ref{sec:impl} can maintain Condition~(a).
-
-\begin{proposition}[Discrete-time second-order template expansions]\label{prop:DTA}
-Suppose Assumption~\ref{ass:smooth} holds and fix $\bz\in\cD$.
-There exists $\bar s>0$ such that, for every $s\in(0,\bar s]$, the PPM equation has a unique local solution, the EGM extrapolation and update points lie in $\cD$, and
-\begin{align*}
-\textnormal{GDA:}\quad \bz_{+}-\bz&=-s\bF(\bz),\\
-\textnormal{PPM:}\quad \bz_{+}-\bz&=-s\bF(\bz)+s^{2}\nabla\bF(\bz)\bF(\bz)+R^{\mathrm{PPM}}_{s}(\bz),\\
-\textnormal{EGM:}\quad \bz_{+}-\bz&=-s\bF(\bz)+s^{2}\nabla\bF(\bz)\bF(\bz)+R^{\mathrm{EGM}}_{s}(\bz),
-\end{align*}
-with $\norm{R^{\mathrm{PPM}}_{s}(\bz)}\le C_{\mathrm{PPM}}s^{3}$ and $\norm{R^{\mathrm{EGM}}_{s}(\bz)}\le C_{\mathrm{EGM}}s^{3}$ for finite constants depending only on local bounds of $\bF$, $\nabla\bF$, and $\nabla^{2}\bF$ on $\cD$.
-\end{proposition}
-
-Unlike GDA, PPM and EGM share the leading-order correction $+s^{2}\nabla\bF(\bz)\bF(\bz)$, which can suppress rotational saddle dynamics at suitable step sizes.
-This contrast motivates writing $\bA(\bz)\triangleq\nabla\bF(\bz)$ and isolating the curvature-induced direction
-\begin{equation}\label{eq:curvature_direction}
-\bG(\bz)\triangleq\bA(\bz)\bF(\bz).
-\end{equation}
-For any fixed symmetric positive-definite metric $\bM$, define the metric field energy $\cE_{\bM}(\bz)\triangleq\tfrac12\bF(\bz)^\top\bM\bF(\bz)$ and its exact-expectation (population) decrease signals
-\begin{equation}\label{eq:geometry_signals}
-\begin{aligned}
-\chi_F^{\bM}(\bz)
-&\triangleq-\inner{\nabla\cE_{\bM}(\bz)}{-\bF(\bz)}
-=\bF^\top\sym(\bM\bA)\bF,\\
-\chi_G^{\bM}(\bz)
-&\triangleq-\inner{\nabla\cE_{\bM}(\bz)}{\bG(\bz)}
-=-\bF^\top\bM\bA^2\bF.
-\end{aligned}
-\end{equation}
-Positive values certify first-order field-energy decrease along the corresponding directions.
-The Euclidean choice $\bM=\Id$ gives $\phi(\bz)\triangleq\cE_{\Id}(\bz)=\tfrac12\norm{\bF(\bz)}^{2}$, which is nonnegative and vanishes exactly on $\mathcal Z^\star$.
-
-We first illustrate this geometric criterion on the bilinear max--min saddle $L(x,y)=-xy$, which has field $\bF=J_{0}\bz$ with
-\[
-J_{0}
-\triangleq
-\begin{bmatrix}
-0&1\\
--1&0
-\end{bmatrix}.
-\]
-We denote the nonnegative step sizes along $-\bF$ and $+\bG$ by $\beta$ and $\gamma$, respectively.
-Fig.~\ref{fig:motivation_geometry} uses this bilinear saddle to connect the behavior of the classical updates with the separate control of the field and curvature directions.
-Panel (a) compares the update trajectories: GDA has eigenvalue modulus $\sqrt{1+s^{2}}>1$ and spirals outward, PPM contracts for every $s>0$, and EGM contracts for $0<s<1$ (is neutral at $s=1$ and expansive for $s>1$).
-Panel (b) explains this contrast geometrically.
-Since $J_{0}^{2}=-\Id_{2}$, $\bG=J_0^2\bz=-\bz=-\nabla\phi$ points inward, whereas $-\bF$ is tangent to the field-energy level sets; hence, the shared $+s^{2}\bG$ correction enables PPM and EGM to counter the rotational behavior that destabilizes GDA in this example.
-Panel (c) compares four field--curvature step-size combinations.
-Proposition~\ref{prop:DTA} and Eq.~\eqref{eq:curvature_direction} show that PPM and EGM couple these step sizes as $(s,s^2)$ to second order, whereas the distinct trajectories in panel (c) motivate selecting $\beta$ and $\gamma$ independently.
-
-To characterize when $+\bG$ decreases the Euclidean field energy, fix $\bz\in\cD$, write $\bA=\bA(\bz)$, and split it into its symmetric and antisymmetric parts
-\[
-\begin{aligned}
-\bA&=\bS+\bW,\quad \bS=\sym(\bA),\quad \bW=\skewop(\bA).
-\end{aligned}
-\]
-The symmetric part $\bS$ captures nonrotational dynamics, whereas the antisymmetric part $\bW$ captures rotational dynamics \cite{Balduzzi2018Mechanics}.
-The following lemma expresses the field-energy directional derivatives exactly in terms of $\bS$ and $\bW$.
-
-\begin{lemma}[Symmetric--antisymmetric decomposition of the field-energy derivatives]\label{lem:decomp}
-Let $\phi(\bz)=\tfrac12\norm{\bF(\bz)}^{2}$ and $\bA=\nabla\bF(\bz)$, so that $\nabla\phi(\bz)=\bA^{\top}\bF(\bz)$.
-The directional derivatives of $\phi$ along $-\bF$ and $+\bG=\bA\bF$ satisfy
-\begin{align}
-\inner{\nabla\phi(\bz)}{-\bF(\bz)}
-&=-\bF(\bz)^{\top}\bS\,\bF(\bz),
-\label{eq:dphi_F}\\
-\inner{\nabla\phi(\bz)}{\bG(\bz)}
-&=\norm{\bS\bF(\bz)}^{2}-\norm{\bW\bF(\bz)}^{2}.
-\label{eq:dphi_G}
-\end{align}
-\end{lemma}
-
-The compact form in Eq.~\eqref{eq:dphi_G} uses the cancellation $\bF^{\top}(\bS\bW+\bW\bS)\bF=0$, since $\bS\bW+\bW\bS$ is antisymmetric.
-Eq.~\eqref{eq:dphi_F} shows that the field direction decreases field energy through the symmetric part: in a purely rotational field ($\bS=0$), $-\bF$ is tangent to the level sets of $\phi$, exactly the GDA cycling mechanism.
-Eq.~\eqref{eq:dphi_G} balances the symmetric action $\norm{\bS\bF}^{2}$ against the antisymmetric action $\norm{\bW\bF}^{2}$ and yields the following skew-dominance criterion.
-
-\begin{theorem}[Skew-dominance characterization of curvature descent]\label{thm:skew_dominance}
-Fix $\bz\in\cD$ with $\bF(\bz)\neq\bzero$, and define $\bA=\nabla\bF(\bz)$, $\bS=\sym(\bA)$, and $\bW=\skewop(\bA)$.
-The curvature direction $+\bG(\bz)$ is a strict descent direction for the field energy $\phi$ at $\bz$, i.e. $\inner{\nabla\phi(\bz)}{\bG(\bz)}<0$, if and only if the antisymmetric action dominates the symmetric action along $\bF$:
-\begin{equation}\label{eq:skew_dominance}
-\norm{\bW\bF(\bz)}
->
-\norm{\bS\bF(\bz)}.
-\end{equation}
-In particular:
-\begin{enumerate}[(i)]
-\item if the field is purely rotational at $\bz$ ($\bS\bF(\bz)=\bzero$ and $\bW\bF(\bz)\neq\bzero$), then $\inner{\nabla\phi}{-\bF}=0$ and $\inner{\nabla\phi}{\bG}=-\norm{\bW\bF(\bz)}^{2}<0$; hence $+\bG$ strictly decreases $\phi$, whereas $-\bF$ is tangential and has zero first-order effect;
-\item if the field is symmetric at $\bz$ ($\bW=\bzero$), then $\inner{\nabla\phi}{\bG}=\norm{\bS\bF(\bz)}^{2}\ge0$; hence $+\bG$ preserves or increases $\phi$ to first order;
-\item if $\bA$ is normal ($\bA^\top\bA=\bA\bA^\top$) and its restriction to a two-dimensional real invariant subspace $\mathcal U$ has the orthonormal representation $\bA|_{\mathcal U}=\mu\Id_2+\sigma J_0$, with conjugate eigenvalues $\mu\pm\mathrm{i}\sigma$ ($\mathrm{i}^2=-1$) and $\bF(\bz)\in\mathcal U$, then the condition in Eq.~\eqref{eq:skew_dominance} reduces to $\lvert\sigma\rvert>\lvert\mu\rvert$.
-\end{enumerate}
-\end{theorem}
-
-This theorem provides the geometric criterion that motivates the two-direction controller developed in Section~\ref{sec:drift}.
-In part~(iii), $\mu$ and $\sigma$ are the real and imaginary parts of the conjugate eigenvalues: for a local coordinate $\bu\in\mathcal U$, the linearized flow $\dot{\bu}=-(\mu\Id_2+\sigma J_0)\bu$ shows that they control radial scaling and oriented angular motion, respectively.
-Moreover, $\bS|_{\mathcal U}=\mu\Id_2$ and $\bW|_{\mathcal U}=\sigma J_0$, so $\norm{\bS\bF}=\lvert\mu\rvert\norm{\bF}$ and $\norm{\bW\bF}=\lvert\sigma\rvert\norm{\bF}$ on $\mathcal U$.
-Part~(iii) is an interpretable normal-block specialization, not a structural assumption imposed on the general saddle field or on the controller.
-Jacobian--vector and Jacobian-transpose--vector products evaluate this condition and yield the measures $\norm{\bW\bF}$ and $\norm{\bS\bF}$ used in Section~\ref{sec:experiments}.
-
-For the local linear field $\bF(\bz)=\bA(\bz-\bz^\star)$ at $\bF(\bz)\neq\bzero$, $\bG=\bA\bF$ is collinear with $\bF$ exactly when $\bF$ is a real eigenvector of $\bA$.
-If also $\bA^\top=-\bA$, $\bA^2=-\sigma^2\Id$, and $\sigma\neq0$, then for $\bu=\bz-\bz^\star\neq\bzero$, $\bF=\bA\bu$ is tangential and $\bG=-\sigma^2\bu$ is orthogonally inward, with $\inner{\nabla\phi}{-\bF}=0$ and $\inner{\nabla\phi}{\bG}=-\sigma^4\norm{\bu}^2<0$.
-
-\subsection{From Classical Templates to a Stochastic Recursion}\label{subsec:oracle_model}
-Our aim is a simultaneous stochastic policy update for zero-sum Markov games that adapts to rotational coupling.
-Relative to GDA's step $-s\bF$, Proposition~\ref{prop:DTA} shows that PPM and EGM add $+s^2\bG+O(s^3)$; in the rotation-dominated regimes characterized above, this curvature action suppresses the rotational behavior of the field step.
-Accordingly, at joint update $k$, let $\hatF_k$ and $\hatG_k$ denote the observed field and curvature directions and let $\beta_k,\gamma_k\ge0$ denote their step sizes; the stochastic two-direction recursion is
-\begin{equation}\label{eq:update}
-\bz_{k+1}
-=
-\bz_{k}-\beta_{k}\hatF_{k}+\gamma_{k}\hatG_{k},
-\end{equation}
-With exact population directions, $(s,0)$ gives GDA and $(s,s^2)$ matches PPM/EGM to second order; finite-trajectory policy optimization instead uses stochastic observations \cite{Sutton2000PolicyGradient}.
-For the stochastic analysis, let $\{\mathscr F_k\}_{k\ge0}$ be the filtration generated by the algorithmic history revealed before the queries at joint update $k$.
-
-\begin{assumption}[Biased stochastic oracles]\label{ass:oracles}
-For every $k$, let $\biasF_k,\biasG_k$ be $\mathscr F_k$-measurable oracle biases and let $\noiseF_k,\noiseG_k$ be conditionally zero-mean noise variables, i.e. $\E[\noiseF_k\mid\mathscr F_k]=\E[\noiseG_k\mid\mathscr F_k]=\bzero$.
-The observed directions decompose as
-\[
-\hatF_{k}
-=
-\bF(\bz_{k})+\biasF_{k}+\noiseF_{k},
-\quad
-\hatG_{k}
-=
-\bG(\bz_{k})+\biasG_{k}+\noiseG_{k},
-\]
-There exist finite $\mathscr{F}_{k}$-measurable scalars $\bar b^{F}_{k},\bar b^{G}_{k},\sigma_{2,k},\sigma_{3,k}\ge 0$ such that, almost surely,
-\begin{enumerate}[(a)]
-\item $\norm{\biasF_{k}}\le \bar b^{F}_{k}$ and $\norm{\biasG_{k}}\le \bar b^{G}_{k}$;
-\item $\E[\norm{\noiseF_{k}}^{2}+\norm{\noiseG_{k}}^{2} \mid\mathscr{F}_{k}]\le \sigma_{2,k}^{2}$;
-\item $\E[\norm{\hatF_{k}}^{3}+\norm{\hatG_{k}}^{3} \mid\mathscr{F}_{k}]\le \sigma_{3,k}^{3}$.
-\end{enumerate}
-\end{assumption}
-
-Here $\bar b_k^F,\bar b_k^G$ are bias bounds, while $\sigma_{2,k},\sigma_{3,k}$ bound the conditional second noise moment and third oracle moment.
-This model covers unbiased mini-batch estimators and bounded bias from truncated trajectories, clipped surrogates, or approximate curvature actions.
-
-% ============================================================
-\section{Geometry-Aware Adaptive Lyapunov-Drift Control}\label{sec:drift}
-% ============================================================
-Section~\ref{sec:prelim} shows that the field and curvature directions have different local effects on field energy.
-We now encode stationarity and policy performance in a nonnegative Lyapunov function.
-This extension is necessary because field energy alone cannot reveal whether a locally stabilizing parameter update improves policy-space performance.
-Using one Lyapunov function places both effects on a common scale, allowing the controller to compare candidate field and curvature steps without prescribing a fixed ratio between their step sizes.
-We then distinguish its realized one-step change from its conditional Lyapunov drift and construct an implementable local model for selecting the two step sizes.
-
-\subsection{Lyapunov Merit Function}\label{subsec:V_drift}
-The field energy vanishes with the parameter-space stationarity residual, but it does not by itself rule out a parameterization-induced stationary point with positive policy-space exploitability.
-Conversely, the Nash gap measures unilateral policy improvement but neither directly measures the local saddle-field residual nor naturally shares its numerical scale.
-The following merit function therefore combines the two quantities: field energy guides local optimization, while the regularized gap retains policy-space performance in the step-size decision.
-
-\begin{definition}[Composite Lyapunov function]\label{def:Lyap}
-Let $\diag(\cdot)$ denote block-diagonal concatenation and let $\eta_{\psi}>0$ be the relative weight of the minimizing-player gradient block.
-Define the block-diagonal weight matrix
-\[
-\bW_{V}\triangleq\diag(\Id_{d_{\theta}},\,\eta_{\psi}\Id_{d_{\psi}})\in\R^{d\times d},
-\]
-The weighted field-energy component is $\cE_{F}(\bz)\triangleq\cE_{\bW_V}(\bz)=\tfrac12\bF(\bz)^{\top}\bW_{V}\bF(\bz)$.
-Henceforth, $\chi_F\triangleq\chi_F^{\bW_V}$ and $\chi_G\triangleq\chi_G^{\bW_V}$ denote the corresponding population decrease signals already defined in Eq.~\eqref{eq:geometry_signals}.
-For finite games, fix $\varepsilon>0$, write $J_\varepsilon=J_\varepsilon(\pi_{\btheta},\nu_{\bpsi})$, and define the performance component
-\[
-\begin{aligned}
-\cP(\bz)
-&\triangleq\operatorname{Gap}_{\varepsilon}(\pi_{\btheta},\nu_{\bpsi})\\
-&=\left[\sup_{\bar\pi}J_{\varepsilon}(\bar\pi,\nu_{\bpsi})-J_\varepsilon\right]
-+\left[J_\varepsilon-\inf_{\bar\nu}J_{\varepsilon}(\pi_{\btheta},\bar\nu)\right],
-\end{aligned}
-\]
-The extrema range over stationary randomized policies; Eq.~\eqref{eq:entropic_return} defines $J_\varepsilon$.
-The first bracket is the return improvement available to the maximizing player through a regularized best response, and the second is the return reduction available to the minimizing player, which seeks a smaller $J_\varepsilon$.
-Both gains are nonnegative, so $\cP(\bz)\ge0$, and $\cP(\bz)=0$ exactly at a regularized policy-space Nash equilibrium, where neither player can improve unilaterally.
-When this finite-game component is unavailable, taking $\cP\equiv0$ and $\lambda_P=0$ recovers field-energy-only control.
-For fixed normalizers $\kappa_{F},\kappa_{P}>0$ and weights $\lambda_{F}>0$, $\lambda_{P}\ge0$, define the composite Lyapunov function
-\begin{equation}\label{eq:Vdef}
-\Vk(\bz)
-\triangleq
-\lambda_{F}\frac{\cE_{F}(\bz)}{\kappa_{F}}
-+
-\lambda_{P}\frac{\cP(\bz)}{\kappa_{P}}.
-\end{equation}
-The normalizers place components with different numerical scales on a comparable basis, while the $\lambda$ weights specify their relative influence on the controller.
-\end{definition}
-
-For the recursion in Eq.~\eqref{eq:update}, define the realized one-step Lyapunov increment by $\mathscr I_k\triangleq\Vk(\bz_{k+1})-\Vk(\bz_k)$.
-Its conditional expectation
-\[
-\mathscr D_k\triangleq\E[\mathscr I_k\mid\mathscr F_k]
-\]
-is the Lyapunov drift at update $k$.
-The increment $\mathscr I_k$ is pathwise after the current stochastic queries are realized, whereas $\mathscr D_k$ averages this increment conditional on the pre-query history $\mathscr F_k$.
-Equivalently, $\mathscr D_k<0$ means that the next update decreases the composite merit $\Vk$ in conditional expectation; a more negative drift represents a larger expected one-step reduction in the combined stationarity and policy-performance measure.
-This interpretation makes minimizing $\mathscr D_k$ the ideal step-size design objective.
-
-The block weight $\bW_V$ is unrelated to the antisymmetric Jacobian part $\bW=\skewop(\nabla\bF)$.
-
-\begin{remark}[From field-energy geometry to Lyapunov control]\label{rem:geometry_merit}
-Theorem~\ref{thm:skew_dominance} analyzes $+\bG$ for the field energy $\phi$; Definition~\ref{def:Lyap} extends the same geometry to $\Vk$, whose local drift model determines how strongly curvature is combined with policy performance.
-\end{remark}
-
-\begin{lemma}[Properties of the composite Lyapunov function]\label{lem:Lyap_properties}
-Suppose Assumption~\ref{ass:smooth} holds and $\cP$ is nonnegative and $C^{3}$ on $\cD$.
-Then:
-(i) $\Vk(\bz)\ge 0$ on $\cD$, and since $\lambda_{F}>0$, $\Vk(\bz)=0$ implies $\bz\in\mathcal{Z}^{\star}$;
-(ii) $\Vk\in C^{3}(\cD)$;
-(iii) the gradient is $\nabla\Vk=(\lambda_F/\kappa_F)\nabla\cE_F +(\lambda_P/\kappa_P)\nabla\cP$, where $\nabla\cE_F=\nabla\bF^{\top}\bW_V\bF$;
-(iv) $\Phi(\bz)\triangleq\bF(\bz)^{\top}\bW_{V}\bF(\bz)$ is the weighted stationarity residual and satisfies $\Phi(\bz)\le2\kappa_{F}\Vk(\bz)/\lambda_{F}$.
-\end{lemma}
-
-The composite Lyapunov decrease signals along the two population directions are
-\begin{equation}\label{eq:composite_signals}
-\begin{aligned}
-D_F(\bz)
-&\triangleq\inner{\nabla\Vk(\bz)}{\bF(\bz)}
-\\[-2pt]
-&=\frac{\lambda_F}{\kappa_F}\chi_F(\bz)
-+\frac{\lambda_P}{\kappa_P}\inner{\nabla\cP(\bz)}{\bF(\bz)},\\
-D_G(\bz)
-&\triangleq-\inner{\nabla\Vk(\bz)}{\bG(\bz)}
-\\[-2pt]
-&=\frac{\lambda_F}{\kappa_F}\chi_G(\bz)
--\frac{\lambda_P}{\kappa_P}\inner{\nabla\cP(\bz)}{\bG(\bz)}.
-\end{aligned}
-\end{equation}
-Thus, $D_F>0$ and $D_G>0$ mean first-order decrease of $\Vk$ along $-\bF$ and $+\bG$, respectively.
-
-\subsection{Second-Order Surrogate for the One-Step Change}\label{subsec:two_direction}
-For a realized oracle pair and candidate step sizes $(\beta,\gamma)$, define the trial displacement $\Delta_{k}(\beta,\gamma)\triangleq -\beta\hatF_{k}+\gamma\hatG_{k}$ and the pathwise trial increment $\mathscr I_k(\beta,\gamma)\triangleq\Vk(\bz_k+\Delta_k(\beta,\gamma))-\Vk(\bz_k)$.
-The actual quantities satisfy $\mathscr I_k=\mathscr I_k(\beta_k,\gamma_k)$ and $\mathscr D_k=\E[\mathscr I_k(\beta_k,\gamma_k)\mid\mathscr F_k]$.
-Constructing a query-dependent rule that exactly minimizes $\mathscr D_k$ would require the full conditional oracle distribution and repeated evaluation of the nonlinear post-update function $\Vk(\bz_k+\Delta_k)$, neither of which is available from a single query.
-We therefore minimize, after observing $(\hatF_k,\hatG_k)$, a second-order pathwise surrogate of $\mathscr I_k(\beta,\gamma)$.
-The surrogate exposes the separate field curvature, curvature-direction curvature, and cross-curvature needed to select $(\beta_k,\gamma_k)$, while Section~\ref{sec:conv} bounds its mismatch from the realized increment and converts the pathwise choice into an expected finite-time guarantee.
-
-\begin{assumption}[Local regularity along the iterates]\label{ass:local_reg}
-For every $k$ and every feasible $(\beta,\gamma)$ produced by the step-size routine, the segment $\{\bz_{k}+t\Delta_{k}(\beta,\gamma):t\in[0,1]\}\subset\cD$.
-There exist $\mathscr{F}_{k}$-measurable $G_{V,k},H_{V,k},M_{3,k}\ge 0$ that, simultaneously for every feasible pair and almost every realization of the current stochastic queries, satisfy $\norm{\nabla\Vk(\bz_{k})}\le G_{V,k}$, $\norm{\nabla^{2}\Vk(\bz_{k})}\le H_{V,k}$, and $\sup_{t\in[0,1]}\norm{\nabla^{3}\Vk(\bz_{k}+t\Delta_{k}(\beta,\gamma))} \le M_{3,k}$.
-\end{assumption}
-
-\begin{lemma}[Second-order expansion of the one-step change in $\Vk$]\label{lem:drift_taylor}
-Under Assumption~\ref{ass:local_reg}, for every feasible $(\beta,\gamma)$,
-\begin{equation}\label{eq:drift_taylor}
-\begin{aligned}
-&\Vk(\bz_{k}+\Delta_{k}(\beta,\gamma))-\Vk(\bz_{k}) \\
-={}&-\beta\inner{\nabla\Vk(\bz_k)}{\hatF_k}
-+\gamma\inner{\nabla\Vk(\bz_k)}{\hatG_k}\\
-&+\tfrac12\beta^2\hatF_k^\top\nabla^2\Vk(\bz_k)\hatF_k
--\beta\gamma\hatF_k^\top\nabla^2\Vk(\bz_k)\hatG_k\\
-&+\tfrac12\gamma^2\hatG_k^\top\nabla^2\Vk(\bz_k)\hatG_k
-+\mathrm{rem}_{k}(\beta,\gamma),
-\end{aligned}
-\end{equation}
-with $\lvert \mathrm{rem}_{k}(\beta,\gamma)\rvert\le\frac{M_{3,k}}{6}(\beta\norm{\hatF_{k}}+\gamma\norm{\hatG_{k}})^{3}$.
-\end{lemma}
-
-Eq.~\eqref{eq:drift_taylor} is the pathwise second-order Taylor expansion for each realized oracle pair.
-Its linear and quadratic terms define the five scalar coefficients
-\begin{equation}\label{eq:drift_terms_def}
-\begin{aligned}
-e_{k}&\triangleq\inner{\nabla\Vk(\bz_{k})}{\hatF_{k}},
-\quad
-d_{k}\triangleq -\inner{\nabla\Vk(\bz_{k})}{\hatG_{k}},\\
-c_{k}&\triangleq\hatF_{k}^{\top}\nabla^{2}\Vk(\bz_{k})\hatF_{k},
-\quad
-a_{k}\triangleq\hatG_{k}^{\top}\nabla^{2}\Vk(\bz_{k})\hatG_{k},\\
-b_{k}&\triangleq\hatF_{k}^{\top}\nabla^{2}\Vk(\bz_{k})\hatG_{k}.
-\end{aligned}
-\end{equation}
-Eq.~\eqref{eq:drift_terms_def} is pathwise: it uses the realized oracle pair $(\hatF_k,\hatG_k)$ rather than the population directions $(\bF(\bz_k),\bG(\bz_k))$.
-Define its reference quadratic once as
-\begin{equation}\label{eq:qref}
-q_k(\beta,\gamma)
-\triangleq
--\beta e_k-\gamma d_k
-+\tfrac12c_k\beta^2-b_k\beta\gamma
-+\tfrac12a_k\gamma^2.
-\end{equation}
-Thus, Eq.~\eqref{eq:drift_taylor} is $\mathscr I_k(\beta,\gamma)=q_k(\beta,\gamma)+\mathrm{rem}_k(\beta,\gamma)$.
-Here $e_k,d_k$ are first-order predicted decreases along $-\hatF_k,+\hatG_k$, $c_k,a_k$ are their directional curvatures, and $b_k$ is the cross-curvature.
-Assumptions~\ref{ass:local_reg} and~\ref{ass:oracles} respectively control the third-order remainder and the conditional oracle errors used in the expected-drift analysis.
-
-\subsection{Closed-Form Step-Size Selection}\label{subsec:closed_form}
-Discarding the bounded third-order remainder in Eq.~\eqref{eq:drift_taylor} yields a bivariate quadratic model for selecting $(\beta,\gamma)$.
-Eq.~\eqref{eq:drift_terms_def} defines reference coefficients from $\nabla\Vk(\bz_k)$ and directional Hessian actions.
-We denote their evaluated counterparts returned by the local-model routine by $(\tilde e_k,\tilde d_k,\tilde c_k,\tilde a_k,\tilde b_k)$.
-Exact automatic differentiation gives $(\tilde e_k,\tilde d_k,\tilde c_k,\tilde a_k,\tilde b_k)=(e_k,d_k,c_k,a_k,b_k)$, whereas finite-difference or directional-secant implementations, possibly combined with moving averages, generally give estimates such as $\tilde e_k\approx e_k$ and $\tilde c_k\approx c_k$.
-The quadratic coefficient matrix assembled from the evaluated values is $\widetilde{\bH}_k\triangleq\left[\begin{smallmatrix}\tilde c_k&-\tilde b_k\\-\tilde b_k&\tilde a_k\end{smallmatrix}\right]$.
-Because local nonconvexity or evaluation error may make $\widetilde{\bH}_k$ indefinite or nearly singular, let $\lambda_{\min}(\cdot)$ denote the smallest eigenvalue, fix a positive-definiteness floor $\lambda_{\rm pd}>0$, define $[u]_+\triangleq\max\{u,0\}$, and apply the common spectral shift
-\begin{equation}\label{eq:spectral_shift}
-\lambda_k=[\lambda_{\rm pd}-\lambda_{\min}(\widetilde{\bH}_k)]_+,
-\quad
-\widehat{\bH}_k=\widetilde{\bH}_k+\lambda_k\Id_2.
-\end{equation}
-Here $\lambda_k$ is the smallest nonnegative common diagonal correction that raises the minimum eigenvalue to at least $\lambda_{\rm pd}$.
-We denote the resulting numerically stabilized coefficients by hats: $\hat e_k=\tilde e_k$, $\hat d_k=\tilde d_k$, $\hat b_k=\tilde b_k$, and $(\hat c_k,\hat a_k)=(\tilde c_k+\lambda_k,\tilde a_k+\lambda_k)$.
-Equivalently, $\rho_{c,k}=\rho_{a,k}=\lambda_k\ge0$ add $\tfrac12\rho_{c,k}\beta^2+\tfrac12\rho_{a,k}\gamma^2$ to the tilde-coefficient model while leaving its linear and cross terms unchanged.
-The implemented model is therefore
-\begin{equation}\label{eq:qhat}
-\begin{aligned}
-\hat q_{k}(\beta,\gamma)
-&\triangleq
--\beta\hat e_{k}-\gamma\hat d_{k}
-+\tfrac{1}{2}\hat c_{k}\beta^{2}-\hat b_{k}\beta\gamma\\
-&\quad+\tfrac{1}{2}\hat a_{k}\gamma^{2},
-\quad (\beta,\gamma)\in[0,\infty)^{2}.
-\end{aligned}
-\end{equation}
-Its stabilized Hessian is $\widehat{\bH}_k$, and $\hat\delta_k\triangleq\det\widehat{\bH}_k=\hat c_k\hat a_k-\hat b_k^2$.
-
-Eq.~\eqref{eq:spectral_shift} gives $\lambda_{\min}(\widehat{\bH}_k)=\max\{\lambda_{\min}(\widetilde{\bH}_k),\lambda_{\rm pd}\}\ge\lambda_{\rm pd}$.
-Thus, $\widehat{\bH}_k\succ0$, and its leading principal minors satisfy $\hat c_k>0$ and $\hat\delta_k>0$.
-The controller thus solves the strictly convex two-variable quadratic program $\min_{(\beta,\gamma)\in[0,\infty)^2}\hat q_k(\beta,\gamma)$.
-Its $2\times2$ Hessian permits an explicit interior solution together with a finite set of boundary candidates.
-The unconstrained critical point is
-\begin{equation}\label{eq:unconstrained_pair}
-(\beta_{k}^{\rm uc},\gamma_{k}^{\rm uc})
-\triangleq
-\Bigl(\tfrac{\hat a_{k}\hat e_{k}+\hat b_{k}\hat d_{k}}{\hat\delta_{k}},\,
-\tfrac{\hat b_{k}\hat e_{k}+\hat c_{k}\hat d_{k}}{\hat\delta_{k}}\Bigr),
-\end{equation}
-and the boundary candidates are $\bigl([\hat e_{k}/\hat c_{k}]_{+},0\bigr)$, $\bigl(0,[\hat d_{k}/\hat a_{k}]_{+}\bigr)$, $(0,0)$.
-
-\begin{proposition}[Closed-form two-direction surrogate controller]\label{prop:closed_form}
-The implemented problem in Eq.~\eqref{eq:qhat} admits a unique minimizer, given by Eq.~\eqref{eq:unconstrained_pair} when both components are nonnegative, and otherwise by the boundary candidate with smallest $\hat q_{k}$.
-When the unconstrained critical point belongs to $[0,\infty)^2$, the implemented predicted decrease $\widehat\Delta_{k}^{\star}\triangleq -\hat q_{k}(\beta_{k}^{\star},\gamma_{k}^{\star})$ is
-\begin{equation}\label{eq:Delta_hat_interior}
-\widehat\Delta_{k}^{\star}=\frac{\hat a_{k}\hat e_{k}^{2}+2\hat b_{k}\hat e_{k}\hat d_{k}+\hat c_{k}\hat d_{k}^{2}}{2\hat\delta_{k}}.
-\end{equation}
-\end{proposition}
-
-This gives the uncapped closed form; the practical step-size safeguards require the exact box solution below.
-
-\begin{proposition}[Exact box-constrained fallback]\label{prop:box_fallback}
-Fix finite caps $\beta_{\max},\gamma_{\max}>0$.
-The unique minimizer of $\hat q_k$ on $[0,\beta_{\max}]\times[0,\gamma_{\max}]$ is the member with smallest objective value among the feasible unconstrained point in Eq.~\eqref{eq:unconstrained_pair} and the four edge minimizers
-\begin{align*}
-&\left(\left[\hat e_k/\hat c_k\right]_{[0,\beta_{\max}]},0\right),\quad
-\left(0,\left[\hat d_k/\hat a_k\right]_{[0,\gamma_{\max}]}\right),\\
-&\left(\beta_{\max},
-\left[(\hat d_k+\hat b_k\beta_{\max})/\hat a_k\right]_{[0,\gamma_{\max}]}\right),\\
-&\left(\left[(\hat e_k+\hat b_k\gamma_{\max})/\hat c_k\right]_{[0,\beta_{\max}]},
-\gamma_{\max}\right),
-\end{align*}
-where $[u]_{[l,r]}\triangleq\min\{r,\max\{l,u\}\}$.
-Consequently, its predicted decrease is at least as large as that of every one-direction or fixed-coupling comparator whose step-size pair lies in the same box.
-\end{proposition}
-\begin{proof}
-Strict convexity gives a unique minimizer.
-If it is in the interior, the gradient equations give Eq.~\eqref{eq:unconstrained_pair}; otherwise it lies on one of the four edges, and differentiating the resulting one-dimensional strictly convex quadratic and clipping its stationary point to that edge gives the four displayed candidates.
-Set inclusion then proves the stated comparison.
-\end{proof}
-
-\subsection{Model-Level Curvature Improvement}\label{subsec:dominance}
-
-The closed-form rule makes the two-direction update computationally explicit.
-Its model-level benefit is determined by comparing the optimized quadratic decrease with the decreases attainable after restricting the feasible step-size pair.
-
-\begin{proposition}[Predicted-decrease comparison]\label{prop:dominance}
-Fix $s_{\max}>0$ and define
-\begin{align*}
-\widehat\Delta_{k}^{\bF}
-&\triangleq
--\min_{\beta\ge 0}\hat q_{k}(\beta,0)
-=
-\tfrac{[\hat e_{k}]_{+}^{2}}{2\hat c_{k}},\\
-\widehat\Delta_{k}^{\bG}
-&\triangleq
--\min_{\gamma\ge 0}\hat q_{k}(0,\gamma)
-=
-\tfrac{[\hat d_{k}]_{+}^{2}}{2\hat a_{k}},\\
-\widehat\Delta_{k}^{\mathrm{2nd}}
-&\triangleq
--\min_{s\in[0,s_{\max}]}\hat q_{k}(s,s^{2}),
-\end{align*}
-Here $\widehat\Delta_k^{\mathrm{2nd}}$ is the PPM/EGM-style second-order coupling comparator $(\beta,\gamma)=(s,s^2)$.
-Then $\widehat\Delta_{k}^{\star}\ge\max\{\widehat\Delta_{k}^{\bF},\widehat\Delta_{k}^{\bG},\widehat\Delta_{k}^{\mathrm{2nd}}\}$ almost surely.
-Moreover, when the unconstrained critical point in Eq.~\eqref{eq:unconstrained_pair} belongs to $[0,\infty)^2$, the gap over the pure-field rule is exactly
-\begin{equation}\label{eq:dominance_gap}
-\widehat\Delta_{k}^{\star}-\widehat\Delta_{k}^{\bF}
-=
-\frac{(\hat b_{k}\hat e_{k}+\hat c_{k}\hat d_{k})^{2}}{2\hat c_{k}\hat\delta_{k}}
-+\frac{[-\hat e_k]_{+}^{2}}{2\hat c_k}
-\ge 0,
-\end{equation}
-which is strictly positive if and only if either $\hat b_{k}\hat e_{k}+\hat c_{k}\hat d_{k}\neq 0$ or $\hat e_k<0$.
-In the usual field-descent regime $\hat e_k\ge0$, strict improvement is therefore equivalent to the curvature direction having a nonzero reduced gradient after projecting out the field direction in the $\widehat{\bH}_{k}$-metric.
-\end{proposition}
-
-Eq.~\eqref{eq:dominance_gap} measures the curvature step's extra predicted decrease through the reduced gradient $\hat b_k\hat e_k+\hat c_k\hat d_k$ left after accounting for the field direction.
-For collinear directions, the common spectral shift makes the Hessian nonsingular, but any gain then comes from step-size constraints or regularization because the direction span is unchanged.
-Section~\ref{sec:conv} combines this comparator dominance with the field-geometry certificate and explicitly propagates stochastic-oracle, model-estimation, Taylor-remainder, and safeguard errors into finite-time guarantees.
-
-% ============================================================
-\section{Finite-Time Stationarity Analysis}\label{sec:conv}
-% ============================================================
-Section~\ref{sec:drift} constructs the controller and characterizes its predicted quadratic decrease.
-We now bound its realized and conditional Lyapunov changes, combine geometric coverage with box-QP dominance for finite-time stationarity, and then transfer stationarity to policy-space performance.
-
-\subsection{From Field Geometry to Conditional Drift}\label{subsec:pathwise}
-
-\begin{assumption}[Local admissible region]\label{ass:local}
-There exist an open set $\cN$ whose compact closure satisfies $\overline{\cN}\subset\cD$ and an index $k_{0}\ge0$ such that $\cN$ contains the local stationary component of interest, $\cP$ is $C^3$ on a neighborhood of $\overline{\cN}$, and $\bz_k\in\cN$ for every $k\ge k_0$ almost surely.
-\end{assumption}
-
-This is a local-invariance condition: the safeguards in Section~\ref{sec:impl} keep the accepted trajectory in a prescribed implementable region, and the analysis applies when that trajectory remains in $\cN$.
-On this region, define the geometric coverage modulus
-\begin{equation}\label{eq:coverage_modulus}
-m_{\rm geo}
-\triangleq
-\inf_{\substack{\bz\in\cN\\\Phi(\bz)>0}}
-\frac{\max\{\chi_F(\bz),\chi_G(\bz)\}}{\Phi(\bz)}.
-\end{equation}
-The stationarity result below applies when $m_{\rm geo}>0$, meaning that at every nonstationary point at least one available coordinate supplies a uniformly proportional field-energy decrease.
-Unlike a gradient-aligned field, a general saddle field does not make the positivity in Eq.~\eqref{eq:coverage_modulus} automatic; the modulus is the quantitative step that converts directional field-energy decrease into the stationarity residual $\Phi$.
-
-The following condition derives neighborhood coverage from the linearization at the target stationary point; $\sigma_{\min}(\cdot)$ denotes the smallest singular value.
-\begin{proposition}[A sufficient condition for geometric coverage]\label{prop:coverage_sufficient}
-Fix a target stationary point $\bz^\star\in\mathcal Z^\star$ and define its metric-transformed Jacobian $\widetilde{\bA}_\star\triangleq\bW_V^{1/2}\bA(\bz^\star)\bW_V^{-1/2}$.
-If $\sym(\widetilde{\bA}_\star)\succeq0$ and $\sigma_{\min}(\widetilde{\bA}_\star)>0$, then there exist a constant $c_\star>0$ and an open neighborhood $\cN_\star$ of $\bz^\star$, with $\overline{\cN_\star}\subset\cD$, such that
-\(\max\{\chi_F(\bz),\chi_G(\bz)\}\ge c_\star\Phi(\bz)\) for every $\bz\in\cN_\star$.
-Consequently, if the admissible region in Assumption~\ref{ass:local} is chosen with $\overline{\cN}\subset\cN_\star$, then $m_{\rm geo}\ge c_\star>0$.
-\end{proposition}
-
-For $\bW_V=\Id$, max-variable concavity and min-variable convexity at $\bz^\star$ give the positive-semidefinite condition, while nonsingularity gives a nondegenerate target linearization; continuity then supplies neighborhood coverage, including pure rotation with $\sym(\widetilde{\bA}_\star)=0$.
-For the normal block $\bA=\mu\Id_2+\sigma J_0$, the exact ratio in Eq.~\eqref{eq:coverage_modulus} is $\max\{\mu,\sigma^2-\mu^2\}$; in particular, $\mu=0$ gives $m_{\rm geo}=\sigma^2$.
-
-Compactness and smoothness give the finite performance-direction bound
-\[
-B_{P,D}
-\triangleq
-\sup_{\bz\in\overline{\cN}}
-\max\!\left\{
-\left|\inner{\nabla\cP}{\bF}\right|,
-\left|\inner{\nabla\cP}{\bG}\right|
-\right\}.
-\]
-
-\begin{lemma}[Geometry-to-drift certificate]\label{lem:geometry_certificate}
-Under Assumption~\ref{ass:local}, suppose the modulus in Eq.~\eqref{eq:coverage_modulus} satisfies $m_{\rm geo}>0$.
-Define the geometric descent coefficient $\mu_{\rm geo}$ and policy-component perturbation $r_P$ by
-\[
-\mu_{\rm geo}\triangleq\frac{\lambda_Fm_{\rm geo}}{\kappa_F},
-\quad
-r_P\triangleq\frac{\lambda_PB_{P,D}}{\kappa_P}.
-\]
-Then, for every $\bz\in\cN$,
-\begin{equation}\label{eq:derived_drift_certificate}
-\max\{D_F(\bz),D_G(\bz)\}
-\ge
-\mu_{\rm geo}\Phi(\bz)-r_P.
-\end{equation}
-\end{lemma}
-
-Proposition~\ref{prop:coverage_sufficient} and Lemma~\ref{lem:geometry_certificate} form the first bridge: target-Jacobian conditions produce neighborhood coverage, which converts one of the two field-energy signals into the composite decrease in Eq.~\eqref{eq:derived_drift_certificate} without directly assuming uniform alignment with $-\nabla\Vk$.
-The policy component contributes only the finite perturbation $r_P$, which vanishes for $\lambda_P=0$ and otherwise enters the residual floor.
-
-Because $\overline{\cN}$ is compactly contained in $\cD$, continuity yields uniform constants $G_V,H_V,B_F,B_G\ge0$ such that $\norm{\nabla\Vk}\le G_V$, $\norm{\nabla^2\Vk}\le H_V$, $\norm{\bF}\le B_F$, and $\norm{\bG}\le B_G$ on $\cN$.
-In particular, $G_{V,k},H_{V,k}$ may be replaced by $G_V,H_V$ for $k\ge k_0$.
-
-Recall the pathwise reference quadratic $q_k$ in Eq.~\eqref{eq:qref} and the stabilized implemented quadratic $\hat q_k$ in Eq.~\eqref{eq:qhat}.
-For fixed caps $\beta_{\max},\gamma_{\max}>0$ and an implemented pair $(\beta_k,\gamma_k)\in[0,\beta_{\max}]\times[0,\gamma_{\max}]$, define the box-optimal predicted decrease
-\[
-\widehat\Delta_k^{\rm box}
-\triangleq
--\min_{0\le\beta\le\beta_{\max},\,0\le\gamma\le\gamma_{\max}}
-\hat q_k(\beta,\gamma).
-\]
-The implemented model $\hat q_k$ uses the stabilized coefficients, and one-sided residuals measure model discrepancy and accepted-step suboptimality.
-Define the cubic Taylor remainder $\varepsilon_{k}^{\mathrm{rem}}\triangleq M_{3,k} (\beta_{k}\norm{\hatF_{k}}+\gamma_{k}\norm{\hatG_{k}})^{3}/6$.
-Let $\varepsilon_k^{\rm model}\ge0$ be $\mathscr F_{k+1}$-measurable and satisfy $q_k(\beta_k,\gamma_k)\le\hat q_k(\beta_k,\gamma_k) +\varepsilon_k^{\rm model}$.
-For the implemented box problem, define $\varepsilon_k^{\rm step,box}\triangleq\hat q_k(\beta_k,\gamma_k)+\widehat\Delta_k^{\rm box}\ge0$ and
-\begin{equation}\label{eq:eps_tot}
-\varepsilon_{k}^{\mathrm{box}}
-\triangleq
-\varepsilon_{k}^{\mathrm{rem}}+\varepsilon_{k}^{\mathrm{model}}
-+\varepsilon_{k}^{\mathrm{step,box}}.
-\end{equation}
-
-\begin{proposition}[One-sided local-model perturbation bounds]\label{prop:model_approx}
-Suppose the raw evaluated coefficients satisfy $\lvert\tilde e_{k}-e_{k}\rvert\le\delta_{e,k}$, $\lvert\tilde d_{k}-d_{k}\rvert\le\delta_{d,k}$, $\lvert\tilde c_{k}-c_{k}\rvert\le\delta_{c,k}$, $\lvert\tilde a_{k}-a_{k}\rvert\le\delta_{a,k}$, and $\lvert\tilde b_{k}-b_{k}\rvert\le\delta_{b,k}$ for nonnegative error bounds.
-Then, for every feasible $(\beta,\gamma)$,
-\begin{equation}\label{eq:eps_model_bound}
-\begin{aligned}
-\varepsilon_k^{\rm model}(\beta,\gamma)
-&\triangleq\beta\delta_{e,k}+\gamma\delta_{d,k}
-+\tfrac12\beta^2\delta_{c,k}+\beta\gamma\delta_{b,k}
-+\tfrac12\gamma^2\delta_{a,k},\\
-\varepsilon_k^{\rm cmp}(\beta,\gamma)
-&\triangleq\varepsilon_k^{\rm model}(\beta,\gamma)
-+\tfrac12\rho_{c,k}\beta^2+\tfrac12\rho_{a,k}\gamma^2,\\
-q_k-\hat q_k&\le\varepsilon_k^{\rm model},
-\quad \hat q_k-q_k\le\varepsilon_k^{\rm cmp}.
-\end{aligned}
-\end{equation}
-In the last line, all arguments $(\beta,\gamma)$ are suppressed, and the superscript $\mathrm{cmp}$ denotes the comparator-side bound.
-In particular, the one-sided relation used in Eq.~\eqref{eq:eps_tot} holds with $\varepsilon_k^{\mathrm{model}}=\varepsilon_k^{\mathrm{model}}(\beta_k,\gamma_k)$.
-\end{proposition}
-
-Exact automatic differentiation makes the raw coefficient errors and the selected-step residual $\varepsilon_k^{\rm model}$ zero because the spectral shift only raises $\hat q_k$; the comparator-side bound retains its explicit shift cost, and an exact box-QP solution makes the box-step residual zero.
-
-\begin{lemma}[Pathwise one-step Lyapunov bound]\label{lem:pathwise_drift}
-Under Assumption~\ref{ass:local_reg}, for every $k$,
-\begin{equation}\label{eq:pathwise_drift}
-\Vk(\bz_{k+1})-\Vk(\bz_{k})
-\le -\widehat\Delta_{k}^{\rm box}+\varepsilon_{k}^{\rm box}
-\quad\text{almost surely}.
-\end{equation}
-\end{lemma}
-
-This inequality separates the decrease predicted by the QP from stochastic, modeling, and safeguard residuals.
-
-\begin{lemma}[Conditional Taylor-remainder bound]\label{lem:residual_budget}
-Suppose Assumptions~\ref{ass:oracles} and~\ref{ass:local_reg} hold and $\beta_{k}\le\beta_{\max}$, $\gamma_{k}\le\gamma_{\max}$.
-Then
-\begin{equation}\label{eq:eps_rem_cond}
-\E[\varepsilon_{k}^{\mathrm{rem}}\mid\mathscr{F}_{k}]
-\le
-\frac{2M_{3,k}}{3}(\beta_{\max}+\gamma_{\max})^{3}\sigma_{3,k}^{3}.
-\end{equation}
-If $M_{3,k}\le\bar M_{3}$ and $\sigma_{3,k}\le\bar\sigma_{3}$, then $\E[\varepsilon_{k}^{\mathrm{rem}}\mid\mathscr F_k]\le\bar R_{\rm rem}$ almost surely, where $\bar R_{\rm rem}\triangleq(2\bar M_3/3)(\beta_{\max}+\gamma_{\max})^3\bar\sigma_3^3$.
-\end{lemma}
-
-\begin{assumption}[Uniform local budgets]\label{ass:budget}
-There exist finite nonnegative constants appearing below such that, for every $k\ge k_0$, the following hold:
-(a) $\bar b_k^F\le\bar b_F$, $\bar b_k^G\le\bar b_G$, $\sigma_{2,k}\le\bar\sigma_2$, and $\sigma_{3,k}\le\bar\sigma_3$;
-(b) the common spectral shift satisfies $\rho_{c,k}=\rho_{a,k}\le\bar\rho$, and the raw coefficient-evaluation errors in Proposition~\ref{prop:model_approx} satisfy
-\[
-\begin{gathered}
-\E[\delta_{e,k}\mid\mathscr F_k]\le\bar\delta_e,
-\quad
-\E[\delta_{d,k}\mid\mathscr F_k]\le\bar\delta_d,\\
-\E[\delta_{c,k}\mid\mathscr F_k]\le\bar\delta_c,
-\quad
-\E[\delta_{a,k}\mid\mathscr F_k]\le\bar\delta_a,
-\quad
-\E[\delta_{b,k}\mid\mathscr F_k]\le\bar\delta_b;
-\end{gathered}
-\]
-(c) $M_{3,k}\le\bar M_3$ and $\E[\varepsilon_k^{\rm step,box}\mid\mathscr F_k]\le\bar R_{\rm step}$ almost surely.
-\end{assumption}
-
-Define the derived oracle-moment bounds and aggregate residual budgets
-\[
-\begin{gathered}
-M_F\triangleq3B_F^2+3\bar b_F^2+3\bar\sigma_2^2,
-\quad
-M_G\triangleq3B_G^2+3\bar b_G^2+3\bar\sigma_2^2,\\
-\bar b_D\triangleq\max\{\bar b_F,\bar b_G\},
-\quad
-M_D\triangleq\max\{M_F,M_G\},\\
-\bar\delta_1\triangleq\max\{\bar\delta_e,\bar\delta_d\},
-\quad
-\bar\delta_2\triangleq\max\{\bar\delta_c,\bar\delta_a\},\\
-\bar R_{\rm model}\triangleq{}
-\beta_{\max}\bar\delta_e+\gamma_{\max}\bar\delta_d
-+\tfrac12\beta_{\max}^2\bar\delta_c\\
-\quad{}+\beta_{\max}\gamma_{\max}\bar\delta_b
-+\tfrac12\gamma_{\max}^2\bar\delta_a,\\
-\bar R_{\rm box}\triangleq\bar R_{\rm rem}+\bar R_{\rm model}+\bar R_{\rm step}.
-\end{gathered}
-\]
-Lemma~\ref{lem:residual_budget}, Proposition~\ref{prop:model_approx}, the caps, and Assumption~\ref{ass:budget} give $\E[\varepsilon_k^{\rm box}\mid\mathscr F_k]\le\bar R_{\rm box}$ almost surely, so the aggregate is derived from its three displayed sources.
-For a comparator scale $s\in[0,\min\{\beta_{\max},\gamma_{\max}\}]$, let
-\begin{equation}\label{eq:R_direction}
-\mathcal R_D(s)
-\triangleq
-s(G_V\bar b_D+\bar\delta_1)
-+\tfrac12s^2(H_VM_D+\bar\rho+\bar\delta_2)
-+\bar R_{\rm box}.
-\end{equation}
-
-\begin{lemma}[Conditional Lyapunov-drift comparator bound]\label{lem:cond_drift}
-Suppose Assumptions~\ref{ass:smooth}, \ref{ass:oracles}, \ref{ass:local_reg}, \ref{ass:local}, and~\ref{ass:budget} hold.
-Let $\jmath_k\in\{F,G\}$ be any $\mathscr F_k$-measurable selector and write $D_{\jmath_k}=D_F$ or $D_G$ accordingly.
-Then, for every admissible deterministic comparator scale $s$,
-\begin{equation}\label{eq:cond_drift}
-\mathscr D_k
-\le
--sD_{\jmath_k}(\bz_k)
-+\mathcal R_D(s).
-\end{equation}
-Thus, the implemented update inherits, up to the explicit residual budget, the conditional drift decrease certified by either pure coordinate.
-\end{lemma}
-
-The selector is used only in the proof; the implemented box QP optimizes over both pure-coordinate comparators and their combinations.
-This second bridge uses QP optimality and the four explicit residual budgets to lift a comparison on each realized stochastic stencil to the conditional-drift bound in Eq.~\eqref{eq:cond_drift}.
-
-\subsection{Finite-Time Stationarity Guarantee}\label{subsec:ergodic}
-
-\begin{theorem}[Main Theorem: Geometry-Adaptive Finite-Time Stationarity]\label{thm:ergodic}
-Suppose Assumptions~\ref{ass:smooth}, \ref{ass:oracles}, \ref{ass:local_reg}, \ref{ass:local}, and~\ref{ass:budget} hold, and the modulus in Eq.~\eqref{eq:coverage_modulus} satisfies $m_{\rm geo}>0$.
-For any comparator scale $s\in(0,\min\{\beta_{\max},\gamma_{\max}\}]$, define $\mathcal R_{\rm geo}(s)\triangleq\mathcal R_D(s)+sr_P$.
-Then, for every integer $K>k_0$,
-\begin{equation}\label{eq:main_stationarity}
-\frac{1}{K-k_{0}}
-\sum_{k=k_{0}}^{K-1}\E[\Phi(\bz_{k})]
-\le
-\frac{\E[\Vk(\bz_{k_{0}})]}{s\mu_{\rm geo}(K-k_{0})}
-+
-\frac{\mathcal R_{\rm geo}(s)}{s\mu_{\rm geo}}.
-\end{equation}
-\end{theorem}
-
-For fixed admissible $s$ and $K$-independent budgets, Eq.~\eqref{eq:main_stationarity} gives an $O(1/K)$ transient to an explicit floor containing the oracle, model, Taylor-remainder, policy-component, and safeguard errors.
-The signals $\chi_F$ and $\chi_G$ respectively certify contractive symmetric fields and pure rotation, and box-QP dominance inherits either certificate.
-For an independent uniform index $I_K\in\{k_0,\ldots,K-1\}$, the left side is $\E[\Phi(\bz_{I_K})]$, so no parameter averaging is required.
-Increasing the analysis comparator $s$ strengthens nominal decrease but enlarges higher-order terms, whereas decreasing it magnifies any $s$-independent residual after normalization; the implemented controller itself still selects $(\beta_k,\gamma_k)$ from the box QP.
-The result is therefore local and ergodic, not a claim that curvature always descends or that convergence is global.
-
-\subsection{Policy-Space Performance Guarantee}\label{subsec:performance_guarantee}
-
-Exploitability and robust return are policy-space quantities beyond parameter-space stationarity.
-We therefore transfer Lyapunov control to these performance measures.
-For stationary randomized policies, define the maximizing player's worst-case return, game value, and unregularized Nash gap (reported below as exploitability), where the subscript ${\rm BR}$ denotes best response:
-\begin{align}
-R_{\rm BR}(\pi)&\triangleq\inf_{\bar\nu}J(\pi,\bar\nu),\notag\\
-v^{\star}&\triangleq\sup_{\bar\pi}R_{\rm BR}(\bar\pi),\notag\\
-\operatorname{Gap}_{0}(\pi,\nu)
-&\triangleq
-\sup_{\bar\pi}J(\bar\pi,\nu)-\inf_{\bar\nu}J(\pi,\bar\nu).
-\label{eq:global_gap}
-\end{align}
-The following proposition links the entropy-regularized gap used by the controller to the original zero-sum Markov-game objective.
-
-\begin{proposition}[Policy-space performance bridge]\label{prop:performance_bridge}
-Suppose $\mathcal A$ and $\mathcal B$ are finite.
-For every policy pair $(\pi,\nu)$ and $\varepsilon\ge0$,
-\begin{equation}\label{eq:performance_bridge}
-\begin{aligned}
-0&\le v^{\star}-R_{\rm BR}(\pi)
-\le \operatorname{Gap}_{0}(\pi,\nu)\\
-&\le \operatorname{Gap}_{\varepsilon}(\pi,\nu)
-+\frac{\varepsilon\bigl(\log|\mathcal A|+\log|\mathcal B|\bigr)}{1-\alpha}.
-\end{aligned}
-\end{equation}
-\end{proposition}
-\begin{proof}
-The definitions in Eq.~\eqref{eq:global_gap} give the first inequality, while $v^{\star}\le\sup_{\bar\pi}J(\bar\pi,\nu)$ gives the second.
-Write $A_\alpha=\log|\mathcal A|/(1-\alpha)$ and $B_\alpha=\log|\mathcal B|/(1-\alpha)$.
-The per-state entropy bound gives $0\le\mathsf H_\alpha^\pi\le A_\alpha$ and $0\le\mathsf H_\alpha^\nu\le B_\alpha$ for every policy pair.
-These bounds imply
-\begin{align*}
-\sup_{\bar\pi}J(\bar\pi,\nu)
-&\le \sup_{\bar\pi}J_\varepsilon(\bar\pi,\nu)+\varepsilon B_\alpha,\\
--\inf_{\bar\nu}J(\pi,\bar\nu)
-&\le -\inf_{\bar\nu}J_\varepsilon(\pi,\bar\nu)+\varepsilon A_\alpha.
-\end{align*}
-Adding the last two inequalities gives Eq.~\eqref{eq:performance_bridge}.
-\end{proof}
-
-Thus the regularized gap controls the maximizing player's unregularized worst-case-return loss up to the stated entropy term.
-
-\begin{proposition}[Smooth finite-game performance component]\label{prop:smooth_entropy_gap}
-Suppose $\mathcal S,\mathcal A,\mathcal B$ are finite, the one-stage rewards are bounded, $\varepsilon>0$, and, on the parameter neighborhood under consideration, the current policies are $C^3$ with action probabilities bounded away from zero.
-Then the entropy-regularized best-response values against either current player, and hence $\operatorname{Gap}_\varepsilon$, are $C^3$ functions of the current policy parameters.
-\end{proposition}
-\begin{proof}
-Fix the minimizing-player policy.
-The maximizing player's soft Bellman value satisfies $v=T_\varepsilon(v;\bpsi)$, where each component of $T_\varepsilon$ is an $\varepsilon\log\sum\exp$ of the action values induced by $\nu_{\bpsi}$.
-Explicitly,
-\begin{align*}
-[T_\varepsilon(v;\bpsi)]_s
-&=\varepsilon\log\sum_a \exp\!\left(\frac{Q_\psi^v(s,a)}
-{\varepsilon}\right),\\
-Q_\psi^v(s,a)
-&\triangleq \bar r_\psi(s,a)
-+\alpha\sum_{s'}\bar P_\psi(s'|s,a)v_{s'} .
-\end{align*}
-Here $\mathcal H(p)\triangleq-\sum_i p_i\log p_i$ is the per-state Shannon entropy, $\bar P_\psi$ averages $P$ over $\nu_\psi$, and $\bar r_\psi$ averages $r$ while including the opponent-entropy term $-\varepsilon\mathcal H(\nu_\psi(\cdot|s))$ from Eq.~\eqref{eq:entropic_return}.
-The map is $C^3$ in $(v,\bpsi)$, and its Jacobian with respect to $v$ is $\alpha P_{\pi_{\rm BR},\nu_{\bpsi}}$, where $\pi_{\rm BR}$ is the maximizing player's regularized best response and $P_{\pi_{\rm BR},\nu_{\bpsi}}$ is the induced transition matrix.
-Thus, with $D_v$ denoting differentiation in $v$, $\|D_vT_\varepsilon\|_\infty\le\alpha<1$.
-Hence $\Id-D_vT_\varepsilon$ is invertible by the Neumann series, and the implicit-function theorem makes the unique soft fixed point $C^3$ in $\bpsi$.
-The minimizing player's soft-min Bellman equation follows after replacing $\log\sum\exp$ by $-\log\sum\exp(-\cdot)$.
-Multiplication by $\rho$ gives the two regularized best-response values, whose difference is $\operatorname{Gap}_\varepsilon$.
-\end{proof}
-
-Consequently, choosing $\cP=\operatorname{Gap}_\varepsilon$ gives a concrete smooth performance component for Definition~\ref{def:Lyap} in finite Markov games.
-
-\begin{assumption}[Local policy-space error bound]\label{ass:performance_error_bound}
-There exist constants $c_{\rm gap}>0$ and $\xi_{\rm gap}\ge0$ such that
-\begin{equation}\label{eq:gap_error_bound}
-\operatorname{Gap}_\varepsilon(\bz)
-\le
-c_{\rm gap}\Phi(\bz)+\xi_{\rm gap},
-\quad
-\bz\in\cN.
-\end{equation}
-\end{assumption}
-
-Eq.~\eqref{eq:gap_error_bound} is a local Polyak--\L{}ojasiewicz-type policy error bound \cite{Karimi2016PL}.
-The slack $\xi_{\rm gap}$ permits parameter-stationary points with nonzero policy-space exploitability, so Eq.~\eqref{eq:gap_error_bound} does not require the two zero sets to coincide.
-
-\begin{corollary}[Ergodic policy-space performance]\label{cor:ergodic_performance}
-Suppose the assumptions of Theorem~\ref{thm:ergodic} and Assumption~\ref{ass:performance_error_bound} hold, and $\mathcal A$ and $\mathcal B$ are finite.
-Then
-\begin{equation}\label{eq:ergodic_performance}
-\begin{aligned}
-&\frac{1}{K-k_0}\sum_{k=k_0}^{K-1}
-\E[v^\star-R_{\rm BR}(\pi_{\btheta_k})]\\
-&\le
-\frac{1}{K-k_0}\sum_{k=k_0}^{K-1}
-\E[\operatorname{Gap}_0(\pi_{\btheta_k},\nu_{\bpsi_k})]\\
-&\le
-c_{\rm gap}\!\left[
-\frac{\E[\Vk(\bz_{k_0})]}{s\mu_{\rm geo}(K-k_0)}
-+\frac{\mathcal R_{\rm geo}(s)}{s\mu_{\rm geo}}
-\right]
-+\xi_{\rm gap}+B_\varepsilon,
-\end{aligned}
-\end{equation}
-where $B_\varepsilon\triangleq\varepsilon(\log|\mathcal A|+\log|\mathcal B|)/(1-\alpha)$ is the entropy-regularization bias bound.
-\end{corollary}
-\begin{proof}
-Average Eq.~\eqref{eq:gap_error_bound}, apply Theorem~\ref{thm:ergodic}, and then use Proposition~\ref{prop:performance_bridge} pointwise.
-\end{proof}
-
-Thus, Eq.~\eqref{eq:ergodic_performance} gives the policy-space consequence of the main stationarity theorem under the local error bound with slack.
-
-% ============================================================
-\section{Practical Implementation}\label{sec:impl}
-% ============================================================
-This section specifies how the local quantities required by the controller can be evaluated in practice.
-We consider exact automatic differentiation, directional-secant approximations, and safeguarded box-constrained updates.
-
-\subsection{Exact local-model evaluation}
-The reference pathwise terms in Eq.~\eqref{eq:drift_terms_def} are assembled from one field oracle $\hatF_{k}$, one curvature oracle $\hatG_{k}$, one gradient $\nabla\Vk(\bz_k)$, and the Hessian--vector products of $\Vk$ along $\hatF_k$ and $\hatG_k$.
-Automatic differentiation can pass through a fixed differentiable inner loop for $\cP$, while implicit differentiation handles an exact local envelope.
-Because $\cE_F$ contains $\bF^\top\bW_V\bF/2$, exact Hessian--vector products of $\Vk$ generally involve third derivatives of the game objective; the secant realization below avoids forming them.
-Exact automatic differentiation gives $(\tilde e_k,\tilde d_k,\tilde c_k,\tilde a_k,\tilde b_k)=(e_k,d_k,c_k,a_k,b_k)$.
-After exact coefficient evaluation, $\hat q_k-q_k=\lambda_k(\beta^2+\gamma^2)/2\ge0$; hence the selected-step one-sided model residual is zero, while the comparator-side bound retains the explicit shift.
-
-\subsection{Approximate local-model estimation}
-For probe radii $\delta_{F,k},\delta_{G,k}>0$, a directional-secant realization holds $(\hatF_k,\hatG_k)$ fixed and evaluates $V_{\pm F}=\Vk(\bz_k\pm\delta_{F,k}\hatF_k)$, $V_{\pm G}=\Vk(\bz_k\pm\delta_{G,k}\hatG_k)$, and $V_{\pm F,\pm G}=\Vk(\bz_k\pm\delta_{F,k}\hatF_k \pm\delta_{G,k}\hatG_k)$.
-Writing $V_0=\Vk(\bz_k)$, the central stencils give the tilde approximations
-\[
-\begin{gathered}
-\tilde e_k=\frac{V_{+F}-V_{-F}}{2\delta_{F,k}},\quad
-\tilde d_k=-\frac{V_{+G}-V_{-G}}{2\delta_{G,k}},\\
-\tilde c_k=\frac{V_{+F}-2V_0+V_{-F}}{\delta_{F,k}^2},\quad
-\tilde a_k=\frac{V_{+G}-2V_0+V_{-G}}{\delta_{G,k}^2},\\
-\tilde b_k=\frac{V_{+F,+G}-V_{+F,-G}-V_{-F,+G}+V_{-F,-G}}
-{4\delta_{F,k}\delta_{G,k}},
-\end{gathered}
-\]
-before the spectral shift in Section~\ref{subsec:closed_form} is applied.
-Writing $\hatF(\bz,\zeta)$ for the field oracle evaluated at $\bz$ with random seed $\zeta$, a shared seed $\zeta_k$ and radius $\epsilon_k>0$ give the Jacobian--vector finite-difference curvature oracle $\hatG_{k}^{\mathrm{fd}}=[\hatF(\bz_{k}+\epsilon_{k}\hatF_{k},\zeta_{k})-\hatF(\bz_{k},\zeta_{k})]/\epsilon_{k}$.
-A moment-based realization smooths the second-order terms by exponential moving averages while preserving the subproblem.
-
-The effect of these approximation errors on the one-step model is quantified by Proposition~\ref{prop:model_approx}.
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=1\textwidth]{fig_vi_a_geometry.pdf}
-\caption{Controlled normal-form results: (a) final normalized field energy; (b) analytical and computed curvature descent; (c) pure-rotation trajectories; and (d) first-update normalized curvature step and relative curvature contribution.
-Vertical lines in (a), (b), and (d) mark $\sigma/\mu=1$.}
-\label{fig:controlled_geometry}
-\end{figure*}
-
-\subsection{Safeguarded computation}\label{subsec:safeguard}
-With positive caps $\beta_{\max}$ and $\gamma_{\max}$, the implementation solves $\min_{(\beta,\gamma)\in[0,\beta_{\max}]\times[0,\gamma_{\max}]}\hat q_{k}(\beta,\gamma)$.
-Any loss from approximate solution or backtracking relative to the box optimum is recorded in $\varepsilon_k^{\rm step,box}$ in Theorem~\ref{thm:ergodic}.
-Each iteration queries $(\hatF_k,\hatG_k)$, evaluates the five tilde coefficients, applies the spectral shift, solves the two-dimensional box QP by Proposition~\ref{prop:box_fallback}, and applies Eq.~\eqref{eq:update}.
-If the trial segment leaves a prescribed implementable trust region $\mathcal T\subset\cD$, a common backtracking factor shrinks $(\beta_k,\gamma_k)$; the analysis assumes the accepted trajectory lies in $\cN$, and records lost model decrease in $\varepsilon_k^{\mathrm{step,box}}$.
-For bounded $\mathcal T$, the implementation reduces the probe radii as needed until every directional-stencil point lies in $\mathcal T$.
-
-% ============================================================
-\section{Experiments}\label{sec:experiments}
-% ============================================================
-
-The experiments follow the same hierarchy as the analysis.
-The normal-form study first isolates the symmetric--antisymmetric mechanism, the tabular and neural population-oracle studies then test policy-space behavior without trajectory noise, and the finite-trajectory study finally replaces exact expected directions by sampled stochastic oracles.
-This progression separates geometric adaptation, nonlinear policy parameterization, and sampling error rather than confounding all three effects in a single benchmark.
-Methods are the proposed box-QP controller with curvature (QP+G), its field-only ablation noG ($\gamma_k=0$), GDA, Adam-GDA \cite{KingmaBa2015Adam}, EGM, and three-inner-step PPM-3.
-All methods update both players simultaneously; unless noted, fixed steps and QP caps are $0.03$, $\eta_\psi=1$ gives $\cE_F=\phi$, and population normalizers are frozen at initialization with floor $10^{-10}$.
-For every Markov-game experiment, $J_{\rm alg}=J_\varepsilon$ with $(\alpha,\varepsilon)=(0.9,0.03)$; the regularized and unregularized value tolerances are $10^{-10}$ and $10^{-12}$, and the spectral floor is $10^{-8}$.
-Across matched seeds, all paired $95\%$ confidence intervals are two-sided Student-$t$ intervals for metric-oriented differences, with positive values favoring QP+G.
-
-\subsection{Controlled Normal-Form Geometry}\label{subsec:controlled_geometry}
-We test the mechanism on the exactly solvable normal linear field with $\lambda_P=0$, so Eq.~\eqref{eq:Vdef} retains only field energy.
-For radial contraction rate $\mu\ge0$ and angular rotation rate $\sigma\ge0$,
-\begin{align*}
-\bF(\bz)&=\bA\bz,
-&\bA&=\mu\Id_2+\sigma J_0,
-&\Vk(\bz)&=\tfrac12\norm{\bF(\bz)}^2.
-\end{align*}
-Here $\bS=\mu\Id_2$, $\bW=\sigma J_0$, and direct calculation gives
-\begin{align}
-e&=\inner{\nabla\Vk}{\bF}
-=\mu(\mu^2+\sigma^2)\norm{\bz}^2,\notag\\
-d&=-\inner{\nabla\Vk}{\bG}
-=(\mu^2+\sigma^2)(\sigma^2-\mu^2)\norm{\bz}^2.\label{eq:normal_d}
-\end{align}
-Eq.~\eqref{eq:normal_d} shows that $+\bG$ decreases the field energy exactly when $|\sigma|>|\mu|$, matching Theorem~\ref{thm:skew_dominance}; moreover, $\max\{\chi_F,\chi_G\}/\Phi=\max\{\mu,\sigma^2-\mu^2\}$ evaluates the coverage modulus in Eq.~\eqref{eq:coverage_modulus}.
-For this quadratic field-energy function, the two-dimensional Taylor model is exact.
-
-To quantify accepted curvature use, define its relative contribution as $C_k^G\triangleq\gamma_k\norm{\bG(\bz_k)}/\max\{\beta_k\norm{\bF(\bz_k)}+\gamma_k\norm{\bG(\bz_k)},10^{-15}\}$.
-Fig.~\ref{fig:controlled_geometry} sweeps $\sigma/\mu\in[0,2.5]$; panels (a)--(c) recover the threshold and pure-rotation decay, while panel (d) shows first-update $\gamma_0/\gamma_{\max}$ and $C_0^G$ from the common initial point.
-These quantities measure curvature-step activation and the curvature share of the additive nominal update magnitude; their threshold-like profile follows here from exact directions and $\lambda_P=0$.
-
-\subsection{Tabular Markov Games with Population Oracles}\label{subsec:tabular}
-We span a one-state normal-form benchmark and sequential finite-state games while removing function approximation, using rock--paper--scissors (RPS), five-state CyclicControl, and eight-state FrequencyHopping, each with three actions per player and tabular softmax logits.
-RPS is a standard multi-agent RL benchmark \cite{Terry2021PettingZoo}; Appendix~\ref{app:environments} specifies the games.
-For both the tabular and neural population experiments, the QP+G/noG controller uses the Markov-game composite Lyapunov function
-\begin{equation}\label{eq:vic_merit}
-V_{\rm MG}(\bz)
-=0.3\frac{\tfrac12\norm{\bF(\bz)}^{2}}{\kappa_F}
-+\frac{\operatorname{Gap}_{\varepsilon}(\bz)}{\kappa_P},
-\end{equation}
-This corresponds to $\lambda_F=0.3$ and $\lambda_P=1$, with both normalizers frozen at initialization.
-Population automatic differentiation computes $\bF$ as the saddle gradient of $J_\varepsilon$ and $\bG=\nabla\bF\,\bF$, each stencil recomputes both regularized BRs, and Eq.~\eqref{eq:performance_bridge} holds at every checkpoint.
-
-Across ten initializations and $100$ joint updates, QP+G raises worst-case return and lowers exploitability relative to noG in all three games.
-Exact one-sided paired sign tests of the return gains remain significant after Holm correction across the three games \cite{Holm1979}.
-Fig.~\ref{fig:tabular} shows that the same ordering extends to the regularized gap and field norm, linking the performance gain to improved saddle-field optimization.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.65\textwidth]{fig_vi_b_tabular.pdf}
-\caption{Tabular population-oracle games over ten seeds (mean $\pm$ standard error); boundary triangles mark Adam-GDA means outside the displayed range.}
-\label{fig:tabular}
-\end{figure*}
-
+	\maketitle
+	\setlength{\abovedisplayskip}{4pt plus 2pt minus 2pt}
+	\setlength{\belowdisplayskip}{4pt plus 2pt minus 2pt}
+	\setlength{\abovedisplayshortskip}{1pt plus 1pt}
+	\setlength{\belowdisplayshortskip}{4pt plus 2pt minus 2pt}
+	
+	% ============================================================
+	\begin{abstract}
+		Two-player zero-sum Markov games model robust reinforcement learning and competitive policy optimization.
+		Rotational components in their saddle fields can hinder first-order updates.
+		We identify the saddle field $\bF(\bz)$ over the joint policy parameter $\bz$ and a Jacobian-induced curvature direction $\bG(\bz)=\nabla\bF(\bz)\bF(\bz)$, where $\nabla\bF$ is the field Jacobian, for rotational coupling.
+		A symmetric--antisymmetric Jacobian decomposition characterizes when the curvature direction decreases field energy.
+		We then develop a geometry-aware controller that assigns separate step sizes to the two directions.
+		Minimizing a local model of the one-step change in a composite Lyapunov function yields the two step sizes through a box-constrained quadratic program (QP).
+		Under local geometric coverage, the controller attains an $O(1/K)$ bound over $K$ joint updates on the time-average expected stationarity residual, plus an explicit residual floor.
+		A positive-semidefinite symmetric part and nonsingularity of the metric-transformed Jacobian at the target stationary point are shown to imply neighborhood coverage, including the nonsingular pure-rotation case.
+		Under a local policy-space error bound, this stationarity result transfers to guarantees on the unregularized Nash gap and the maximizing player's worst-case-return loss.
+		Experiments across four settings validate the predicted geometry; at the final checkpoint of every Markov-game task, the controller has higher mean worst-case return and lower mean exploitability than the matched field-only ablation, including a $79.1\%$ exploitability reduction on neural CyclicControl.
+	\end{abstract}
+	
+	\begin{IEEEkeywords}
+		Zero-sum Markov games, robust reinforcement learning, stochastic saddle fields, Lyapunov drift, adaptive step size.
+	\end{IEEEkeywords}
+	
+	% ============================================================
+	\section{Introduction}\label{sec:intro}
+	% ============================================================
+	\IEEEPARstart{A}{two-player} zero-sum Markov game describes a sequential interaction in which two decision makers optimize opposing objectives \cite{Shapley1953StochasticGames,Littman1994MarkovGames}.
+	The state records the information needed for the next decision, such as a controlled system's physical configuration, operating condition, or interaction history.
+	Each player follows a policy that maps the current state to a distribution over its available actions.
+	Their joint action determines both the instantaneous payoff and the next-state distribution, and the players respectively maximize and minimize the same expected cumulative return.
+	Key applications include robust control under uncertain dynamics, adversarial reinforcement learning (RL), and competitive multi-agent decision making, where the maximizing policy selects control or decision actions and the minimizing policy represents uncertainty, disturbances, or an adaptive opponent \cite{SuttonBarto2018,MorimotoDoya2005RobustRL,Iyengar2005RobustDP,NilimElGhaoui2005,Pinto2017RARL,Kamalaruban2020LangevinRARL}.
+	
+	Policy optimization in a zero-sum Markov game is more involved than in a single-agent Markov decision process (MDP).
+	An MDP optimizes one policy under fixed reward and transition mechanisms, whereas both policies in a Markov game adapt and jointly determine the state distribution, return, and policy gradients.
+	An update by either player therefore changes the objective encountered by the other and produces coupled ascent--descent dynamics rather than a single policy-improvement direction.
+	Neural policy parameterization further yields a generally nonconvex--nonconcave objective, while trajectory sampling introduces noise and bias into its gradient observations.
+	The Jacobian of the joint policy dynamics can also contain a large antisymmetric component that rotates the update around a stationary point.
+	Consequently, simultaneous gradient descent--ascent (GDA) or single timescale primal-dual updates can cycle or diverge even with small step sizes; related stability effects arise in linear--quadratic robust RL \cite{ZhangHuBasar2020StabilityRARL}.
+	
+	Classical dynamic-programming and value-based methods solve finite games through Bellman--Shapley operators or minimax value updates \cite{Shapley1953StochasticGames,Littman1994MarkovGames,Iyengar2005RobustDP,NilimElGhaoui2005}.
+	However, their tabular implementations suffer from the curse of dimensionality because the computational and storage requirements grow with the state and joint-action spaces.
+		This limitation motivates parameterized, trajectory-based policy optimization for larger games.
+	Policy-gradient, actor--critic, optimistic, and natural-gradient schemes update the two policies directly and provide convergence or sample-complexity guarantees under different information and regularity models \cite{Sutton2000PolicyGradient,Wei2021LastIterate,Zhao2022EfficientPO,Zhang2022UnifiedPO,Alacaoglu2022NACMG}.
+	These methods establish policy optimization as a scalable approach to Markov games, while the interaction between simultaneous player updates remains central to their stability.
+	Competitive policy optimization incorporates this interaction through a local bilinear model of the two objectives \cite{Prajapat2021CoPO}.
+	
+	Proximal and extrapolation methods provide a complementary route for controlling coupled saddle dynamics.
+	The proximal point method (PPM), the extragradient method (EGM), Mirror-Prox, and policy extragradient introduce corrections that can suppress rotational motion under suitable regularity and step-size conditions \cite{Rockafellar1976PPM,Korpelevich1976Extragradient,Nemirovski2004MirrorProx,Mokhtari2020UnifiedEG,CenWeiChi2024FastPolicyEG}.
+	Local expansions identify a Jacobian-induced term as the leading correction shared by PPM and EGM beyond the GDA field direction \cite{Lu2022ODE,Mokhtari2020UnifiedEG}.
+	Variable-step-size extragradient methods tune the extrapolation and update step sizes from observed operator information \cite{Hsieh2020DSEG,Antonakopoulos2021AdaProx}, while differentiable-game methods construct Hamiltonian, consensus, or symplectic adjustments from the game Jacobian \cite{Balduzzi2018Mechanics,Letcher2019DifferentiableGameMechanics,Mescheder2018GANConvergence,Loizou2020SHGD}.
+	These developments expose curvature as a mechanism for controlling rotation, and they leave a concrete policy-optimization question: how should the field and curvature contributions be balanced as the local game geometry and stochastic oracle quality change along training?
+	
+	In this paper, we aim to develop a geometry-adaptive stochastic policy optimizer for stochastic zero-sum Markov game that answers this question through two search directions with independently dynamic step sizes.
+	Note that the step sizes of the policy optimization algorithm play a critical role in determining the convergence and convergence rate in stochastic game.
+	The saddle-field analysis supplies a first-order field direction and a Jacobian-induced curvature direction, and an exact symmetric--antisymmetric decomposition characterizes when the curvature direction decreases field energy.
+	At each joint policy update, stochastic observations of these directions are combined with two independently selected nonnegative step sizes.
+	A composite Lyapunov function measures both parameter-space stationarity and the policy-space improvement available through unilateral deviations.
+	The controller selects the two step sizes by minimizing a second-order local model of the conditional Lyapunov drift over a two-dimensional box.
+	Thus, the saddle geometry determines the search directions, whereas the Lyapunov-drift model determines their adaptive step sizes.
+	The construction extends Lyapunov-drift step-size design for stochastic optimization \cite{Zhang2025AdaptivePolyak,Yuan2025StepSizeSDE} to a bi-direction saddle-field update and yields a closed-form box-constrained quadratic program (QP).
+	The main contributions of this paper are summarized as follows.
+	\begin{itemize}[leftmargin=*,nosep]
+		\item \textbf{Adaptive Bi-directional Policy Optimization.}
+		We propose a generic single timescale policy optimization algorithm with dynamic and state-dependent step sizes to balance the field and curvature directions.
+		The step sizes are dynamically determined by minimizing a composite Lyapunov drift function, which combines first-order stationarity with regularized policy-space performance on a common scale. The drift minimization problem is equivalent to a two-variable box QP and closed-form step size solution can be obtained.
+		Specifically, the QP dominates every feasible field-only, curvature-only, or prescribed-coupling update in the same box, with a reduced-gradient condition for strict improvement.
+		\item \textbf{Geometric Characterization of the Curvature Direction.}
+		We show that the curvature correction shared by PPM and EGM decreases field energy exactly when the antisymmetric Jacobian action exceeds the symmetric action.
+		The resulting criterion identifies the local rotational geometry that motivates adaptive curvature use.
+		\item \textbf{Finite-time Guarantees.}
+		For biased stochastic policy oracles, bi-direction geometric coverage yields an $O(1/K)$ transient in the time-average expected stationarity residual over $K$ joint policy updates, together with an explicit stochastic error floor.
+		We establish neighborhood coverage from a positive-semidefinite symmetric Jacobian part and nonsingularity of the metric-transformed Jacobian at the target, including the nonsingular pure-rotation case.
+		Under a local policy-space error bound, the stationarity guarantee further yields bounds on the ergodic Nash gap and the maximizing player's worst-case-return loss.
+		\item \textbf{Evidence Across Four Levels of Policy Optimization.}
+		Controlled normal-form experiments verify the predicted curvature geometry, while tabular, neural-policy, and finite-trajectory Markov-game experiments evaluate optimization and policy performance.
+		Across the reported Markov-game tasks, the adaptive bi-direction update improves final mean worst-case return and reduces final mean exploitability compared to baselines.
+	\end{itemize}
+	
+	The remainder of the paper develops the argument as follows.
+	Section~\ref{sec:prelim} formulates the parameterized Markov game, derives the two search directions, and introduces their stochastic recursion.
+	Section~\ref{sec:drift} constructs the Lyapunov-drift step-size controller, Section~\ref{sec:conv} establishes the finite-time and policy-space guarantees, Section~\ref{sec:impl} gives the practical implementation, and Section~\ref{sec:experiments} presents the experiments.
+	
+	% ============================================================
+	\section{Zero-Sum Markov Games and Stochastic Bi-Direction Policy Dynamics}\label{sec:prelim}
+	
+	% ============================================================
+	
+	\subsection{Zero-Sum Markov Game and Saddle-Field Formulation}\label{subsec:formulation}
+	
+	\textcolor{blue}{We consider an infinite-horizon discounted two-player zero-sum Markov game with state space $\mathcal{S}$, finite maximizing- and minimizing-player action spaces $\mathcal{A}$ and $\mathcal{B}$, and discount factor $\alpha\in(0,1)$.}
+	\textcolor{blue}{For $s\in\mathcal{S}$, $a\in\mathcal{A}$, and $b\in\mathcal{B}$, the state-transition kernel is $P(\cdot\mid s,a,b)\triangleq\Pr(s_{t+1}\in\cdot\mid s_t=s,a_t=a,b_t=b)$, the bounded stage-reward function for the maximizing player is $r:\mathcal{S}\times\mathcal{A}\times\mathcal{B}\to\mathbb{R}$, and the initial-state distribution is $\rho(\cdot)\triangleq\Pr(s_0\in\cdot)$.}
+	For a maximizing-player policy $\pi$ and a minimizing-player policy $\nu$, the maximizing player's discounted return is
+	\[
+	J(\pi,\nu)
+	\triangleq
+	\E_{\rho,\pi,\nu}
+	\!\left[
+	\textstyle\sum_{t=0}^{\infty}\alpha^{t}r(s_{t},a_{t},b_{t})
+	\right].
+	\]
+	\textcolor{blue}{Here $s_t\in\mathcal{S}$, $a_t\in\mathcal{A}$, and $b_t\in\mathcal{B}$ denote the state, maximizing-player action, and minimizing-player action at time $t$, respectively.}
+	\textcolor{blue}{The expectation $\mathbb{E}_{\rho,\pi,\nu}$ is over trajectories generated by $s_0\sim\rho$, $a_t\sim\pi(\cdot\mid s_t)$, $b_t\sim\nu(\cdot\mid s_t)$, and $s_{t+1}\sim P(\cdot\mid s_t,a_t,b_t)$.}
+	% The expectation $\E_{\rho,\pi,\nu}$ is taken over the trajectory induced by the initial-state distribution, the two policies, and the transition kernel.
+	The policy-space saddle objective is $\sup_{\pi}\inf_{\nu} J(\pi,\nu)$.
+	Define the discounted causal entropies
+	\begin{align*}
+		\mathsf H_{\alpha}^{\pi}(\pi,\nu)
+		&\triangleq \E_{\rho,\pi,\nu}\!\left[\sum_{t\ge0}\alpha^t
+		\bigl(-\log\pi(a_t\mid s_t)\bigr)\right],\\
+		\mathsf H_{\alpha}^{\nu}(\pi,\nu)
+		&\triangleq \E_{\rho,\pi,\nu}\!\left[\sum_{t\ge0}\alpha^t
+		\bigl(-\log\nu(b_t\mid s_t)\bigr)\right],
+	\end{align*}
+	with $0\log0=0$.
+	For entropy weight $\varepsilon\ge0$, the corresponding regularized return is
+	\begin{equation}\label{eq:entropic_return}
+		J_{\varepsilon}(\pi,\nu)
+		\triangleq J(\pi,\nu)
+		+\varepsilon\mathsf H_{\alpha}^{\pi}(\pi,\nu)
+		-\varepsilon\mathsf H_{\alpha}^{\nu}(\pi,\nu).
+	\end{equation}
+	\textcolor{blue}{The opposite signs preserve the max--min convention, while the entropy terms encourage stochastic policies for both players and smooth policy-space best-response values when the active action changes \cite{CenWeiChi2024FastPolicyEG}.}
+	Setting $\varepsilon=0$ recovers the unregularized return $J$.
+	We use $J_\varepsilon$ to construct the policy-update field and retain $J$ for the final unregularized performance measures.
+	\textcolor{blue}{This smoothing supplies the differentiability required by the local step-size model in Section~\ref{sec:drift}.}
+	\textcolor{blue}{The bridge from the regularized guarantee to the unregularized Nash gap and worst-case return is established in Section~\ref{subsec:performance_guarantee}.}
+	In large finite or continuous state spaces, we adopt the standard parameterized formulation because exact policy-space optimization is generally intractable.
+	The maximizing-player policy is represented by $\pi_{\btheta}(a\mid s)$ with $\btheta\in\R^{d_{\theta}}$, and the minimizing-player policy by $\nu_{\bpsi}(b\mid s)$ with $\bpsi\in\R^{d_{\psi}}$, giving
+	\[
+	\begin{aligned}
+		J_{\varepsilon}(\btheta,\bpsi)
+		&\triangleq
+		J_{\varepsilon}(\pi_{\btheta},\nu_{\bpsi}),\\
+		\max_{\btheta}\min_{\bpsi}\quad
+		&J_{\varepsilon}(\btheta,\bpsi).
+	\end{aligned}
+	\]
+	Write $\bz\triangleq(\btheta,\bpsi)\in\R^d$, where $d\triangleq d_\theta+d_\psi$.
+	The joint policy ascent--descent dynamics define the saddle field
+	\begin{equation}\label{eq:Fdef}
+		\bF(\bz)
+		\triangleq
+		\begin{bmatrix}
+			-\nabla_{\btheta}J_{\varepsilon}(\btheta,\bpsi)\\[0.2em]
+			\phantom{-}\nabla_{\bpsi}J_{\varepsilon}(\btheta,\bpsi)
+		\end{bmatrix}.
+	\end{equation}
+	The first-order stationary set is $\mathcal Z^{\star}\triangleq\{\bz:\bF(\bz)=\bzero\}$, where $\bzero$ is the zero vector.
+	Every $\bz^\star\in\mathcal Z^\star$ satisfies the unconstrained first-order Karush--Kuhn--Tucker (KKT) conditions for the parameterized objective $J_\varepsilon$.
+	Under neural policy parameterization, $\mathcal Z^\star$ is the parameter-space first-order stationary set.
+	This distinction matters because a nonconvex or noninjective policy parameterization can satisfy $\bF(\bz)=\bzero$ even when a player can still improve by taking a best response in the full policy space.
+	The policy-space results in Section~\ref{subsec:performance_guarantee} use the Nash gap to measure this remaining unilateral-improvement incentive and additionally bound the maximizing player's worst-case-return loss.
+	
+	\subsection{Classical Saddle Updates and the Curvature Direction}\label{subsec:saddle_field}
+	
+	The saddle-field formulation exposes the rotational component that can destabilize first-order updates.
+	To understand how established saddle methods counter this effect, we examine the Jacobian-based correction generated by PPM and EGM.
+	For a scalar step size $s>0$, let $\bz_{k+1}$ denote the next joint policy parameter.
+	The representative GDA~\cite{Mokhtari2020UnifiedEG}, PPM~\cite{Rockafellar1976PPM}, and EGM~\cite{Korpelevich1976Extragradient} updates are
+	\begin{equation}\label{eq:classical_updates}
+		\begin{aligned}
+			\text{\normalfont GDA~\cite{Mokhtari2020UnifiedEG}:}\quad&
+			\bz_{k+1}^{\rm GDA}
+			=\bz_k-s\bF(\bz_k),\\
+			\text{\normalfont PPM~\cite{Rockafellar1976PPM}:}\quad&
+			\bz_{k+1}^{\rm PPM}
+			=\bz_k-s\bF(\bz_{k+1}^{\rm PPM}),\\
+			\text{\normalfont EGM~\cite{Korpelevich1976Extragradient}:}\quad&
+			\widetilde{\bz}_k
+			=\bz_k-s\bF(\bz_k),\quad
+			\bz_{k+1}^{\rm EGM}
+			=\bz_k-s\bF(\widetilde{\bz}_k).
+		\end{aligned}
+	\end{equation}
+	where $\widetilde{\bz}_k$ is the EGM extrapolation point.
+	GDA is explicit, PPM is implicit, and EGM uses an extrapolated field query.
+	
+	\begin{figure*}[!t]
+		\centering
+		\includegraphics[width=\textwidth]{fig_motivation_geometry_abd_wide.pdf}
+		\caption{Geometry of bi-direction saddle updates.
+			(a) GDA spirals outward, whereas PPM and EGM contract at the displayed step size.
+			(b) On the bilinear game, the first-order field direction is tangential to the residual contours, whereas the shared second-order correction points inward.
+			(c) The curvature-to-field step-size ratio controls contraction and residual rotation.}
+		\label{fig:motivation_geometry}
+	\end{figure*}
+	
+	The following assumption states the local regularity required by the template expansion and one-step analysis.
+	
+	\begin{assumption}[Local smoothness]\label{ass:smooth}
+		There exists an open set $\cD\subset\R^{d}$ such that:
+		(a) all iterates and probing points used in the analysis lie in $\cD$;
+		(b) $J_{\varepsilon}:\R^{d}\to\R$ is four times continuously differentiable ($C^{4}$) on $\cD$;
+		(c) all derivatives of $J_{\varepsilon}$ up to order four are bounded on $\cD$.
+	\end{assumption}
+	
+	Conditions~(b)--(c) imply that $\bF$ is three times continuously differentiable, i.e. $\bF\in C^{3}(\cD;\R^{d})$; after prescribing an implementable region $\mathcal T\subset\cD$, the safeguards of Section~\ref{sec:impl} can maintain Condition~(a).
+	Taylor expansion of the field uses its Jacobian $\nabla\bF$ and second-derivative tensor $\nabla^2\bF$, both taken with respect to $\bz$.
+	The remainder bounds use the Euclidean norm $\norm{\cdot}$ and its induced operator and tensor norms.
+	
+	\begin{proposition}[Discrete-time second-order template expansions]\label{prop:DTA}
+		Suppose Assumption~\ref{ass:smooth} holds.
+		Fix $k\ge0$ and $\bz_k\in\cD$.
+		There exists $\bar s_k>0$ such that, for every $s\in(0,\bar s_k]$, the PPM equation has a unique local solution, all displayed update and extrapolation points lie in $\cD$, and
+		\begin{align*}
+			\textnormal{GDA:}\quad \bz_{k+1}^{\rm GDA}
+			&=\bz_k-s\bF(\bz_k),\\
+			\textnormal{PPM:}\quad \bz_{k+1}^{\rm PPM}
+			&=\bz_k-s\bF(\bz_k)+s^{2}\nabla\bF(\bz_k)\bF(\bz_k)\\
+			&\quad{}+R^{\mathrm{PPM}}_{s}(\bz_k),\\
+			\textnormal{EGM:}\quad \bz_{k+1}^{\rm EGM}
+			&=\bz_k-s\bF(\bz_k)+s^{2}\nabla\bF(\bz_k)\bF(\bz_k)\\
+			&\quad{}+R^{\mathrm{EGM}}_{s}(\bz_k).
+		\end{align*}
+		The remainders satisfy $\norm{R^{\mathrm{PPM}}_{s}(\bz_k)}\le C_{\mathrm{PPM}}s^{3}$ and $\norm{R^{\mathrm{EGM}}_{s}(\bz_k)}\le C_{\mathrm{EGM}}s^{3}$ for finite constants depending only on local bounds of $\bF$, $\nabla\bF$, and $\nabla^{2}\bF$ around $\bz_k$.
+	\end{proposition}
+\textcolor{blue}{The proof, including local PPM solvability and the stated remainder bounds, is given in \hyperref[app:DTA]{Appendix~\ref*{app:proofs}, item~a)}.}
+	
+	Unlike GDA, PPM and EGM share the leading-order correction $+s^{2}\nabla\bF(\bz)\bF(\bz)$, which can suppress rotational saddle dynamics at suitable step sizes.
+	This contrast motivates writing $\bA(\bz)\triangleq\nabla\bF(\bz)$ and isolating the curvature direction
+	\begin{equation}\label{eq:curvature_direction}
+		\bG(\bz)\triangleq\bA(\bz)\bF(\bz).
+	\end{equation}
+	The expansion identifies the curvature direction shared by PPM and EGM, and the next step is to characterize how this direction changes the local saddle dynamics.
+	
+	\subsection{Curvature Descent and Independent Step Sizes}\label{subsec:curvature_geometry}
+	
+	Proposition~\ref{prop:DTA} identifies $+\bG$ as the leading correction shared by PPM and EGM.
+	Its effect on the stationarity residual is governed by the local Jacobian geometry, which motivates characterizing when $+\bG$ decreases the Euclidean field energy
+	\[
+	\phi(\bz)\triangleq\tfrac12\norm{\bF(\bz)}^2,
+	\]
+	which is nonnegative and vanishes exactly on $\mathcal Z^\star$.
+	
+	Fig.~\ref{fig:motivation_geometry} first illustrates the two directions on the bilinear max--min saddle $L(x,y)=-xy$.
+	Its field is $\bF=J_0\bz$, where
+	\[
+	J_0
+	\triangleq
+	\begin{bmatrix}
+		0&1\\
+		-1&0
+	\end{bmatrix}.
+	\]
+	Since $J_0^2=-\Id_2$, where $\Id_2$ is the $2\times2$ identity matrix, the field direction $-\bF$ is tangent to the level sets of $\phi$, whereas $+\bG=J_0^2\bz=-\bz=-\nabla\phi$ points inward.
+	This geometry explains why GDA rotates while PPM and EGM contract at the displayed step size in panel (a), and panel (b) shows the two directional roles directly.
+	Panel (c) further shows that changing the curvature-to-field step-size ratio changes both contraction and residual rotation, motivating separate selection of the two step sizes.
+	
+	To extend this observation beyond the bilinear game, fix $\bz\in\cD$, write $\bA=\nabla\bF(\bz)$, and decompose the Jacobian as
+	\[
+	\begin{aligned}
+		\bA&=\bS+\bW,\\
+		\bS&=\sym(\bA)\triangleq\tfrac12(\bA+\bA^\top),\\
+		\bW&=\skewop(\bA)\triangleq\tfrac12(\bA-\bA^\top).
+	\end{aligned}
+	\]
+	The symmetric part $\bS$ captures nonrotational dynamics, whereas the antisymmetric part $\bW$ captures rotational dynamics \cite{Balduzzi2018Mechanics}.
+	Using $\inner{\cdot}{\cdot}$ for the standard Euclidean inner product, the exact directional derivatives give the following criterion.
+	
+	\begin{theorem}[Skew-dominance characterization of curvature descent]\label{thm:skew_dominance}
+		Suppose Assumption~\ref{ass:smooth} holds.
+		For every $\bz\in\cD$ with $\bF(\bz)\neq\bzero$, the field and curvature directions satisfy
+		\begin{align}
+			\inner{\nabla\phi(\bz)}{-\bF(\bz)}
+			&=-\bF(\bz)^\top\bS\bF(\bz),
+			\label{eq:dphi_F}\\
+			\inner{\nabla\phi(\bz)}{\bG(\bz)}
+			&=\norm{\bS\bF(\bz)}^2-\norm{\bW\bF(\bz)}^2.
+			\label{eq:dphi_G}
+		\end{align}
+		Consequently, $+\bG(\bz)$ strictly decreases $\phi$ if and only if
+		\begin{equation}\label{eq:skew_dominance}
+			\norm{\bW\bF(\bz)}
+			>
+			\norm{\bS\bF(\bz)}.
+		\end{equation}
+	\end{theorem}
+	
+	Eq.~\eqref{eq:dphi_F} shows that the symmetric Jacobian action governs the first-order effect of the field direction.
+	For a purely rotational field, $\bS=0$ makes $-\bF$ tangential, while $\bW\bF\neq\bzero$ makes $+\bG$ a strict descent direction.
+	Conversely, when $\bW=0$, Eq.~\eqref{eq:dphi_G} shows that $+\bG$ preserves or increases the field energy to first order.
+	For a two-dimensional normal block $\bA=\mu\Id_2+\sigma J_0$, the criterion reduces to $\lvert\sigma\rvert>\lvert\mu\rvert$, directly comparing rotational and radial action.
+	
+	Because this balance changes with the local Jacobian geometry, we assign independent nonnegative step sizes $\beta$ and $\gamma$ to the two population directions:
+	\begin{equation}\label{eq:population_two_direction}
+		\bz_{k+1}
+		=
+		\bz_k-\beta\bF(\bz_k)+\gamma\bG(\bz_k),
+		\quad
+		\beta,\gamma\ge0.
+	\end{equation}
+	The pair $(\beta,\gamma)=(s,0)$ recovers GDA, whereas $(\beta,\gamma)=(s,s^2)$ matches the PPM and EGM templates through second order.
+	Eq.~\eqref{eq:population_two_direction} therefore retains the classical search directions while allowing their step sizes to adapt independently to the local game geometry.
+	
+	\subsection{Stochastic Bi-Direction Recursion and Oracle Model}\label{subsec:oracle_model}
+	
+	Eq.~\eqref{eq:population_two_direction} defines the joint-update family underlying the proposed recursion: the field direction retains the first-order GDA action, while the curvature direction generalizes the leading correction shared by PPM and EGM.
+	In trajectory-based policy optimization, both population directions are observed through stochastic policy oracles.
+	At joint update $k$, let $\hatF_k$ and $\hatG_k$ denote these observations and let $\beta_k,\gamma_k\ge0$ denote their step sizes.
+	The resulting implementable bi-direction recursion is
+	\begin{equation}\label{eq:update}
+		\bz_{k+1}
+		=
+		\bz_{k}-\beta_{k}\hatF_{k}+\gamma_{k}\hatG_{k},
+	\end{equation}
+	Section~\ref{subsec:trajectory_oracles} constructs both observations from finite trajectory batches.
+	For the stochastic analysis, let $\{\mathscr F_k\}_{k\ge0}$ be the filtration generated by the algorithmic history revealed before the queries at joint update $k$.
+	
+	\begin{assumption}[Biased stochastic oracles]\label{ass:oracles}
+		For every $k$, let $\biasF_k,\biasG_k$ be $\mathscr F_k$-measurable oracle biases and let $\noiseF_k,\noiseG_k$ be conditionally zero-mean noise variables, i.e. $\E[\noiseF_k\mid\mathscr F_k]=\E[\noiseG_k\mid\mathscr F_k]=\bzero$.
+		The observed directions decompose as
+		\[
+		\hatF_{k}
+		=
+		\bF(\bz_{k})+\biasF_{k}+\noiseF_{k},
+		\quad
+		\hatG_{k}
+		=
+		\bG(\bz_{k})+\biasG_{k}+\noiseG_{k},
+		\]
+		There exist finite $\mathscr{F}_{k}$-measurable scalars $\bar b^{F}_{k},\bar b^{G}_{k},\sigma_{2,k},\sigma_{3,k}\ge 0$ such that, almost surely,
+		\begin{enumerate}[(a)]
+			\item $\norm{\biasF_{k}}\le \bar b^{F}_{k}$ and $\norm{\biasG_{k}}\le \bar b^{G}_{k}$;
+			\item $\E[\norm{\noiseF_{k}}^{2}+\norm{\noiseG_{k}}^{2} \mid\mathscr{F}_{k}]\le \sigma_{2,k}^{2}$;
+			\item $\E[\norm{\hatF_{k}}^{3}+\norm{\hatG_{k}}^{3} \mid\mathscr{F}_{k}]\le \sigma_{3,k}^{3}$.
+		\end{enumerate}
+	\end{assumption}
+	
+	Here $\bar b_k^F,\bar b_k^G$ bound the conditional biases of the two population-direction estimates, while $\sigma_{2,k},\sigma_{3,k}$ bound their second noise moment and third oracle moment.
+	The model permits mini-batch estimates as well as bounded errors from trajectory truncation, clipped surrogates, and approximate curvature evaluations.
+	Eq.~\eqref{eq:update} specifies the search directions and their stochastic observations.
+	The remaining design task is to determine their two step sizes.
+	Independent selection of $\beta_k$ and $\gamma_k$ allows the two step sizes to respond separately to local rotation, policy-space performance, and oracle quality.
+	The next section therefore constructs a composite Lyapunov function and selects $(\beta_k,\gamma_k)$ from its local one-step model.
+	
+	% ============================================================
+	\section{Geometry-Aware Lyapunov-Drift Step-Size Selection}\label{sec:drift}
+	% ============================================================
+	Section~\ref{sec:prelim} determines the field and curvature directions of the stochastic policy update.
+	The remaining design problem is to select their two step sizes from the current game geometry and oracle observations.
+	Field energy measures parameter-space stationarity, while policy-space performance requires accounting for the improvement available through unilateral deviations.
+	We place these quantities on a common Lyapunov scale, model its conditional one-step change, and select the two step sizes from an implementable local approximation.
+	
+	\subsection{Composite Lyapunov Function}\label{subsec:V_drift}
+	The field energy measures parameter-space stationarity.
+	The regularized Nash gap measures unilateral policy improvement and can distinguish parameter-stationary policies that retain positive exploitability.
+	Because these quantities have different numerical scales, the following Lyapunov function combines them: field energy guides local optimization, while the regularized gap retains policy-space performance in the step-size decision.
+	
+	\textcolor{blue}{Let $\diag(\cdot)$ denote block-diagonal concatenation, set $\bW_{V}\triangleq\diag(\Id_{d_{\theta}},\eta_{\psi}\Id_{d_{\psi}})$ for a relative block weight $\eta_{\psi}>0$, and define $\cE_{F}(\bz)\triangleq\tfrac12\bF(\bz)^{\top}\bW_{V}\bF(\bz)$.}
+	\textcolor{blue}{Its population decrease signals along the field and curvature directions are}
+	\begin{equation}\label{eq:geometry_signals}
+		\begin{aligned}
+			\chi_F(\bz)
+			&\triangleq-\inner{\nabla\cE_F(\bz)}{-\bF(\bz)}\\
+			&=\tfrac12\bF^\top(\bW_V\bA+\bA^\top\bW_V)\bF,\\
+			\chi_G(\bz)
+			&\triangleq-\inner{\nabla\cE_F(\bz)}{\bG(\bz)}\\
+			&=-\bF^\top\bW_V\bA^2\bF.
+		\end{aligned}
+	\end{equation}
+	\textcolor{blue}{Positive values indicate first-order decrease of the weighted field energy along the corresponding direction.}
+	\textcolor{blue}{For $\varepsilon>0$, write $J_\varepsilon=J_\varepsilon(\pi_{\btheta},\nu_{\bpsi})$ and define the policy-performance component}
+	\[
+	\begin{aligned}
+		\cP(\bz)
+		&\triangleq\operatorname{Gap}_{\varepsilon}(\pi_{\btheta},\nu_{\bpsi})\\
+		&=\left[\sup_{\bar\pi}J_{\varepsilon}(\bar\pi,\nu_{\bpsi})-J_\varepsilon\right]
+		+\left[J_\varepsilon-\inf_{\bar\nu}J_{\varepsilon}(\pi_{\btheta},\bar\nu)\right].
+	\end{aligned}
+	\]
+	\textcolor{blue}{The extrema range over stationary randomized policies, so $\cP$ is the sum of the players' unilateral regularized improvements and vanishes when neither player can improve.}
+	\textcolor{blue}{Fix normalizers $\kappa_{F},\kappa_{P}>0$ and weights $\lambda_{F}>0$, $\lambda_{P}\ge0$.}
+	\begin{definition}[Composite Lyapunov function]\label{def:Lyap}
+		\textcolor{blue}{The composite Lyapunov function is}
+		\begin{equation}\label{eq:Vdef}
+			\Vk(\bz)
+			\triangleq
+			\lambda_{F}\frac{\cE_{F}(\bz)}{\kappa_{F}}
+			+
+			\lambda_{P}\frac{\cP(\bz)}{\kappa_{P}}.
+		\end{equation}
+	\end{definition}
+	\textcolor{blue}{Here $\bW_V$ is the metric weight, distinct from $\bW=\skewop(\nabla\bF)$ in Section~\ref{subsec:curvature_geometry}; $\cP\equiv0,\lambda_P=0$ give the field-energy-only controller.}
+	
+	For the recursion in Eq.~\eqref{eq:update}, define the realized one-step Lyapunov increment by $\mathscr I_k\triangleq\Vk(\bz_{k+1})-\Vk(\bz_k)$.
+	Its conditional expectation
+	\[
+	\mathscr D_k\triangleq\E[\mathscr I_k\mid\mathscr F_k]
+	\]
+	is the Lyapunov drift at update $k$.
+	The increment $\mathscr I_k$ is pathwise after the current queries are realized, whereas $\mathscr D_k$ averages it conditional on the pre-query history $\mathscr F_k$.
+	Hence, $\mathscr D_k<0$ represents expected one-step reduction of the combined stationarity and policy-performance measure, which makes its local minimization the step-size design objective.
+	
+	Theorem~\ref{thm:skew_dominance} analyzes $+\bG$ for the field energy $\phi$, whereas Definition~\ref{def:Lyap} extends the same geometry to $\Vk$ so that the local drift model can balance curvature use against policy performance.
+	
+	Since $\cP\ge0$, $\bW_V$ is positive definite, and $\lambda_F>0$, Definition~\ref{def:Lyap} gives $\Vk\ge0$ and $\Vk(\bz)=0$ only if $\bz\in\mathcal Z^\star$.
+	Under Assumption~\ref{ass:smooth} and $\cP\in C^3(\cD)$, the function $\Vk$ is $C^3$ with gradient $\nabla\Vk=(\lambda_F/\kappa_F)\nabla\cE_F +(\lambda_P/\kappa_P)\nabla\cP$, where $\nabla\cE_F=\nabla\bF^{\top}\bW_V\bF$.
+	The weighted stationarity residual $\Phi(\bz)\triangleq\bF(\bz)^{\top}\bW_{V}\bF(\bz)$ satisfies $\Phi(\bz)\le2\kappa_{F}\Vk(\bz)/\lambda_{F}$.
+	
+	The composite Lyapunov decrease signals along the two population directions are
+	\begin{equation}\label{eq:composite_signals}
+		\begin{aligned}
+			D_F(\bz)
+			&\triangleq\inner{\nabla\Vk(\bz)}{\bF(\bz)}
+			\\[-2pt]
+			&=\frac{\lambda_F}{\kappa_F}\chi_F(\bz)
+			+\frac{\lambda_P}{\kappa_P}\inner{\nabla\cP(\bz)}{\bF(\bz)},\\
+			D_G(\bz)
+			&\triangleq-\inner{\nabla\Vk(\bz)}{\bG(\bz)}
+			\\[-2pt]
+			&=\frac{\lambda_F}{\kappa_F}\chi_G(\bz)
+			-\frac{\lambda_P}{\kappa_P}\inner{\nabla\cP(\bz)}{\bG(\bz)}.
+		\end{aligned}
+	\end{equation}
+	Thus, $D_F>0$ and $D_G>0$ mean first-order decrease of $\Vk$ along $-\bF$ and $+\bG$, respectively.
+	
+	\subsection{Second-Order Local Drift Model}\label{subsec:two_direction}
+	For a realized oracle pair and candidate step sizes $(\beta,\gamma)$, define the trial displacement $\Delta_{k}(\beta,\gamma)\triangleq -\beta\hatF_{k}+\gamma\hatG_{k}$ and the pathwise trial increment $\mathscr I_k(\beta,\gamma)\triangleq\Vk(\bz_k+\Delta_k(\beta,\gamma))-\Vk(\bz_k)$.
+	The actual quantities satisfy $\mathscr I_k=\mathscr I_k(\beta_k,\gamma_k)$ and $\mathscr D_k=\E[\mathscr I_k(\beta_k,\gamma_k)\mid\mathscr F_k]$.
+	Exact query-dependent minimization of $\mathscr D_k$ requires the full conditional oracle distribution and repeated evaluation of the nonlinear post-update function $\Vk(\bz_k+\Delta_k)$.
+	A single query instead provides one realized oracle pair, so we minimize a second-order pathwise surrogate of $\mathscr I_k(\beta,\gamma)$ after observing $(\hatF_k,\hatG_k)$.
+	The surrogate exposes the directional curvature along each search direction and their cross-curvature, which determine the step-size pair $(\beta_k,\gamma_k)$; Section~\ref{sec:conv} bounds its mismatch from the realized increment and converts the pathwise choice into an expected finite-time guarantee.
+	
+	\begin{assumption}[Local regularity along the iterates]\label{ass:local_reg}
+		For every $k$ and every feasible $(\beta,\gamma)$ produced by the step-size routine, the segment $\{\bz_{k}+t\Delta_{k}(\beta,\gamma):t\in[0,1]\}\subset\cD$.
+		There exist $\mathscr{F}_{k}$-measurable $G_{V,k},H_{V,k},M_{3,k}\ge 0$ that, simultaneously for every feasible pair and almost every realization of the current stochastic queries, satisfy $\norm{\nabla\Vk(\bz_{k})}\le G_{V,k}$, $\norm{\nabla^{2}\Vk(\bz_{k})}\le H_{V,k}$, and $\sup_{t\in[0,1]}\norm{\nabla^{3}\Vk(\bz_{k}+t\Delta_{k}(\beta,\gamma))} \le M_{3,k}$.
+	\end{assumption}
+	
+	Under Assumption~\ref{ass:local_reg}, Taylor's theorem gives the following expansion for every feasible $(\beta,\gamma)$:
+	\begin{equation}\label{eq:drift_taylor}
+		\begin{aligned}
+			&\Vk(\bz_{k}+\Delta_{k}(\beta,\gamma))-\Vk(\bz_{k}) \\
+			={}&-\beta\inner{\nabla\Vk(\bz_k)}{\hatF_k}
+			+\gamma\inner{\nabla\Vk(\bz_k)}{\hatG_k}\\
+			&+\tfrac12\beta^2\hatF_k^\top\nabla^2\Vk(\bz_k)\hatF_k
+			-\beta\gamma\hatF_k^\top\nabla^2\Vk(\bz_k)\hatG_k\\
+			&+\tfrac12\gamma^2\hatG_k^\top\nabla^2\Vk(\bz_k)\hatG_k
+			+\mathrm{rem}_{k}(\beta,\gamma),
+		\end{aligned}
+	\end{equation}
+	The remainder satisfies $\lvert \mathrm{rem}_{k}(\beta,\gamma)\rvert\le\frac{M_{3,k}}{6}(\beta\norm{\hatF_{k}}+\gamma\norm{\hatG_{k}})^{3}$.
+	
+	Eq.~\eqref{eq:drift_taylor} is the pathwise second-order Taylor expansion for each realized oracle pair.
+	Its linear and quadratic terms define the five scalar coefficients
+	\begin{equation}\label{eq:drift_terms_def}
+		\begin{aligned}
+			e_{k}&\triangleq\inner{\nabla\Vk(\bz_{k})}{\hatF_{k}},
+			\quad
+			d_{k}\triangleq -\inner{\nabla\Vk(\bz_{k})}{\hatG_{k}},\\
+			c_{k}&\triangleq\hatF_{k}^{\top}\nabla^{2}\Vk(\bz_{k})\hatF_{k},
+			\quad
+			a_{k}\triangleq\hatG_{k}^{\top}\nabla^{2}\Vk(\bz_{k})\hatG_{k},\\
+			b_{k}&\triangleq\hatF_{k}^{\top}\nabla^{2}\Vk(\bz_{k})\hatG_{k}.
+		\end{aligned}
+	\end{equation}
+	Eq.~\eqref{eq:drift_terms_def} is pathwise: it uses the realized oracle pair $(\hatF_k,\hatG_k)$ rather than the population directions $(\bF(\bz_k),\bG(\bz_k))$.
+	Collecting these five coefficients gives the pathwise reference quadratic
+	\begin{equation}\label{eq:qref}
+		q_k(\beta,\gamma)
+		\triangleq
+		-\beta e_k-\gamma d_k
+		+\tfrac12c_k\beta^2-b_k\beta\gamma
+		+\tfrac12a_k\gamma^2.
+	\end{equation}
+	Thus, Eq.~\eqref{eq:drift_taylor} is $\mathscr I_k(\beta,\gamma)=q_k(\beta,\gamma)+\mathrm{rem}_k(\beta,\gamma)$.
+	Here $e_k,d_k$ are first-order predicted decreases along $-\hatF_k,+\hatG_k$, $c_k,a_k$ are their directional curvatures, and $b_k$ is the cross-curvature.
+	Assumptions~\ref{ass:local_reg} and~\ref{ass:oracles} respectively control the third-order remainder and the conditional oracle errors used in the expected-drift analysis.
+	
+	\subsection{Closed-Form Box-QP Step-Size Selection}\label{subsec:closed_form}
+	Discarding the bounded third-order remainder in Eq.~\eqref{eq:drift_taylor} yields a bivariate quadratic model for selecting $(\beta,\gamma)$.
+	Eq.~\eqref{eq:drift_terms_def} defines reference coefficients from $\nabla\Vk(\bz_k)$ and directional Hessian actions.
+	We denote their evaluated counterparts returned by the local-model routine by $(\tilde e_k,\tilde d_k,\tilde c_k,\tilde a_k,\tilde b_k)$.
+	Exact automatic differentiation gives $(\tilde e_k,\tilde d_k,\tilde c_k,\tilde a_k,\tilde b_k)=(e_k,d_k,c_k,a_k,b_k)$, whereas finite-difference or directional-secant implementations, possibly combined with moving averages, generally give estimates such as $\tilde e_k\approx e_k$ and $\tilde c_k\approx c_k$.
+	The quadratic coefficient matrix assembled from the evaluated values is $\widetilde{\bH}_k\triangleq\left[\begin{smallmatrix}\tilde c_k&-\tilde b_k\\-\tilde b_k&\tilde a_k\end{smallmatrix}\right]$.
+	Because local nonconvexity or evaluation error may make $\widetilde{\bH}_k$ indefinite or nearly singular, we stabilize it by a common spectral shift.
+	Let $\lambda_{\min}(\cdot)$ denote the smallest eigenvalue and fix a positive-definiteness floor $\lambda_{\rm pd}>0$.
+	Using $[u]_+\triangleq\max\{u,0\}$ for the positive part of a scalar $u$, the shift is
+	\begin{equation}\label{eq:spectral_shift}
+		\lambda_k=[\lambda_{\rm pd}-\lambda_{\min}(\widetilde{\bH}_k)]_+,
+		\quad
+		\widehat{\bH}_k=\widetilde{\bH}_k+\lambda_k\Id_2.
+	\end{equation}
+	Here $\lambda_k$ is the smallest nonnegative common diagonal correction that raises the minimum eigenvalue to at least $\lambda_{\rm pd}$.
+	We denote the resulting numerically stabilized coefficients by hats: $\hat e_k=\tilde e_k$, $\hat d_k=\tilde d_k$, $\hat b_k=\tilde b_k$, and $(\hat c_k,\hat a_k)=(\tilde c_k+\lambda_k,\tilde a_k+\lambda_k)$.
+	Equivalently, $\rho_{c,k}=\rho_{a,k}=\lambda_k\ge0$ add $\tfrac12\rho_{c,k}\beta^2+\tfrac12\rho_{a,k}\gamma^2$ to the tilde-coefficient model while leaving its linear and cross terms unchanged.
+	The implemented model is therefore
+	\begin{equation}\label{eq:qhat}
+		\begin{aligned}
+			\hat q_{k}(\beta,\gamma)
+			&\triangleq
+			-\beta\hat e_{k}-\gamma\hat d_{k}
+			+\tfrac{1}{2}\hat c_{k}\beta^{2}-\hat b_{k}\beta\gamma\\
+			&\quad+\tfrac{1}{2}\hat a_{k}\gamma^{2},
+			\quad \textcolor{blue}{(\beta,\gamma)\in\R^{2}.}
+		\end{aligned}
+	\end{equation}
+	Its stabilized Hessian is $\widehat{\bH}_k$, and $\hat\delta_k\triangleq\det\widehat{\bH}_k=\hat c_k\hat a_k-\hat b_k^2$.
+	
+	Eq.~\eqref{eq:spectral_shift} gives $\lambda_{\min}(\widehat{\bH}_k)=\max\{\lambda_{\min}(\widetilde{\bH}_k),\lambda_{\rm pd}\}\ge\lambda_{\rm pd}$.
+	Thus, $\widehat{\bH}_k$ is positive definite, and its leading principal minors satisfy $\hat c_k>0$ and $\hat\delta_k>0$.
+	\textcolor{blue}{For caps $\beta_{\max},\gamma_{\max}>0$, the controller solves}
+	\begin{equation*}\tag{P1}\label{prob:box_qp}
+		\textcolor{blue}{
+		\begin{aligned}
+		(\beta_k,\gamma_k)\in
+		\arg\min_{\beta,\gamma}\quad &\hat q_k(\beta,\gamma)\\
+		\mathrm{s.t.}\quad &0\le\beta\le\beta_{\max},\quad
+		0\le\gamma\le\gamma_{\max}.
+		\end{aligned}}
+	\end{equation*}
+	\textcolor{blue}{The decision variables $\beta$ and $\gamma$ are the field and curvature step sizes. The objective $\hat q_k$ is the stabilized second-order model of the one-step Lyapunov increment; minimizing it therefore selects the feasible update with the largest predicted local Lyapunov decrease. The nonnegativity constraints preserve the prescribed orientations $-\hatF_k$ and $+\hatG_k$, while the upper bounds limit the trial displacement to the local-model scale and provide finite caps for the safeguard in Section~\ref{subsec:safeguard}. To solve Problem~\eqref{prob:box_qp}, first consider the uncapped critical point}
+	\begin{equation}\label{eq:unconstrained_pair}
+		(\beta_{k}^{\rm uc},\gamma_{k}^{\rm uc})
+		\triangleq
+		\Bigl(\tfrac{\hat a_{k}\hat e_{k}+\hat b_{k}\hat d_{k}}{\hat\delta_{k}},\,
+		\tfrac{\hat b_{k}\hat e_{k}+\hat c_{k}\hat d_{k}}{\hat\delta_{k}}\Bigr),
+	\end{equation}
+	and the boundary candidates are $\bigl([\hat e_{k}/\hat c_{k}]_{+},0\bigr)$, $\bigl(0,[\hat d_{k}/\hat a_{k}]_{+}\bigr)$, $(0,0)$.
+	
+	\begin{proposition}[Closed-form bi-direction surrogate controller]\label{prop:closed_form}
+		\textcolor{blue}{Problem~\eqref{prob:box_qp} has a unique minimizer.}
+		\textcolor{blue}{For its uncapped counterpart on $[0,\infty)^2$, the minimizer is given by Eq.~\eqref{eq:unconstrained_pair} when both components are nonnegative and otherwise by the boundary candidate with smallest $\hat q_k$.}
+		When the unconstrained critical point belongs to $[0,\infty)^2$, the predicted decrease $\widehat\Delta_{k}^{\star}\triangleq -\hat q_{k}(\beta_{k}^{\star},\gamma_{k}^{\star})$ is
+		\begin{equation}\label{eq:Delta_hat_interior}
+			\widehat\Delta_{k}^{\star}=\frac{\hat a_{k}\hat e_{k}^{2}+2\hat b_{k}\hat e_{k}\hat d_{k}+\hat c_{k}\hat d_{k}^{2}}{2\hat\delta_{k}}.
+		\end{equation}
+		\textcolor{blue}{For the finite caps in Problem~\eqref{prob:box_qp}, the unique minimizer is the member with smallest objective value among the feasible unconstrained point and the four edge minimizers}
+		\begin{align*}
+			&\left(\left[\hat e_k/\hat c_k\right]_{[0,\beta_{\max}]},0\right),\quad
+			\left(0,\left[\hat d_k/\hat a_k\right]_{[0,\gamma_{\max}]}\right),\\
+			&\left(\beta_{\max},
+			\left[(\hat d_k+\hat b_k\beta_{\max})/\hat a_k\right]_{[0,\gamma_{\max}]}\right),\\
+			&\left(\left[(\hat e_k+\hat b_k\gamma_{\max})/\hat c_k\right]_{[0,\beta_{\max}]},
+			\gamma_{\max}\right),
+		\end{align*}
+		where $[u]_{[l,r]}\triangleq\min\{r,\max\{l,u\}\}$.
+		Consequently, its predicted decrease is at least as large as that of every single-direction or fixed-coupling comparator whose step-size pair lies in the same box.
+	\end{proposition}
+	
+	The proposition provides both the analytical uncapped rule and the exact safeguarded box solution used by the implementation.
+	
+	\subsection{Model-Level Comparison and Algorithm Summary}\label{subsec:dominance}
+	
+	The closed-form rule makes the bi-direction update computationally explicit.
+	Its model-level benefit is determined by comparing the optimized quadratic decrease with the decreases attainable after restricting the feasible step-size pair.
+	
+	\begin{proposition}[Predicted-decrease comparison]\label{prop:dominance}
+		Consider first the uncapped controller in Proposition~\ref{prop:closed_form}, and fix a maximum comparator step size $s_{\max}>0$.
+		Let $\widehat\Delta_k^{\bF}$ and $\widehat\Delta_k^{\bG}$ denote the best predicted decreases along the two coordinate axes, and let $\widehat\Delta_k^{\mathrm{2nd}}$ denote the best decrease along the PPM/EGM coupling $(\beta,\gamma)=(s,s^2)$:
+		\[
+		\begin{gathered}
+			\widehat\Delta_{k}^{\bF}=\frac{[\hat e_k]_+^2}{2\hat c_k},
+			\quad
+			\widehat\Delta_{k}^{\bG}=\frac{[\hat d_k]_+^2}{2\hat a_k},\\
+			\widehat\Delta_{k}^{\mathrm{2nd}}=-\min_{s\in[0,s_{\max}]}\hat q_k(s,s^2).
+		\end{gathered}
+		\]
+		Then $\widehat\Delta_{k}^{\star}\ge\max\{\widehat\Delta_{k}^{\bF},\widehat\Delta_{k}^{\bG},\widehat\Delta_{k}^{\mathrm{2nd}}\}$ almost surely.
+		Moreover, when the unconstrained critical point in Eq.~\eqref{eq:unconstrained_pair} belongs to $[0,\infty)^2$, the gap over the field-only rule is exactly
+		\begin{equation}\label{eq:dominance_gap}
+			\widehat\Delta_{k}^{\star}-\widehat\Delta_{k}^{\bF}
+			=
+			\frac{(\hat b_{k}\hat e_{k}+\hat c_{k}\hat d_{k})^{2}}{2\hat c_{k}\hat\delta_{k}}
+			+\frac{[-\hat e_k]_{+}^{2}}{2\hat c_k}
+			\ge 0,
+		\end{equation}
+		which is strictly positive if and only if either $\hat b_{k}\hat e_{k}+\hat c_{k}\hat d_{k}\neq 0$ or $\hat e_k<0$.
+		In the usual field-descent regime $\hat e_k\ge0$, strict improvement is therefore equivalent to the curvature direction having a nonzero reduced gradient after projecting out the field direction in the $\widehat{\bH}_{k}$-metric.
+	\end{proposition}
+	
+	Eq.~\eqref{eq:dominance_gap} measures the curvature direction's additional predicted decrease through the reduced gradient $\hat b_k\hat e_k+\hat c_k\hat d_k$ left after accounting for the field direction.
+	For collinear directions, the common spectral shift makes the Hessian nonsingular; because the direction span is unchanged, any gain arises from step-size constraints or regularization.
+	One joint policy update of the resulting controller consists of the following operations:
+	\begin{enumerate}[(i)]
+		\item obtain the stochastic field and curvature observations $(\hatF_k,\hatG_k)$;
+		\item evaluate the five coefficients of the local Lyapunov model and apply the common spectral shift;
+		\item solve the two-dimensional box QP for $(\beta_k,\gamma_k)$ using Proposition~\ref{prop:closed_form};
+		\item apply the stochastic policy recursion in Eq.~\eqref{eq:update}.
+	\end{enumerate}
+	This sequence separates the geometric construction of the two search directions from their Lyapunov-based step-size selection.
+	Section~\ref{sec:conv} combines this comparator dominance with the field-geometry certificate and explicitly propagates stochastic-oracle, model-estimation, Taylor-remainder, and safeguard errors into finite-time guarantees.
+	
+	% ============================================================
+	\section{Finite-Time and Policy-Space Guarantees}\label{sec:conv}
+	% ============================================================
+	Section~\ref{sec:drift} constructs the controller and characterizes its predicted quadratic decrease.
+	We now bound its realized and conditional Lyapunov changes, derive a finite-time certificate for the two available descent directions, and then identify when this certificate yields stationarity and policy-space performance guarantees.
+	
+	\subsection{Conditional Drift and a Bi-Direction Certificate}\label{subsec:pathwise}
+	
+	\begin{assumption}[Local admissible region]\label{ass:local}
+		There exist an open set $\cN$ whose compact closure satisfies $\overline{\cN}\subset\cD$ and an index $k_{0}\ge0$ such that $\cN$ contains the local stationary component of interest, $\cP$ is $C^3$ on a neighborhood of $\overline{\cN}$, and $\bz_k\in\cN$ for every $k\ge k_0$ almost surely.
+	\end{assumption}
+	
+	This is a local-invariance condition: the safeguards in Section~\ref{sec:impl} keep the accepted trajectory in a prescribed implementable region, and the analysis applies when that trajectory remains in $\cN$.
+	Because $\overline{\cN}$ is compactly contained in $\cD$, continuity yields uniform constants $G_V,H_V,B_F,B_G\ge0$ such that $\norm{\nabla\Vk}\le G_V$, $\norm{\nabla^2\Vk}\le H_V$, $\norm{\bF}\le B_F$, and $\norm{\bG}\le B_G$ on $\cN$.
+	In particular, $G_{V,k},H_{V,k}$ may be replaced by $G_V,H_V$ for $k\ge k_0$.
+	
+	Recall the pathwise reference quadratic $q_k$ in Eq.~\eqref{eq:qref} and the stabilized implemented quadratic $\hat q_k$ in Eq.~\eqref{eq:qhat}.
+	For fixed caps $\beta_{\max},\gamma_{\max}>0$ and an implemented pair $(\beta_k,\gamma_k)\in[0,\beta_{\max}]\times[0,\gamma_{\max}]$, define the box-optimal predicted decrease
+	\[
+	\widehat\Delta_k^{\rm box}
+	\triangleq
+	-\min_{0\le\beta\le\beta_{\max},\,0\le\gamma\le\gamma_{\max}}
+	\hat q_k(\beta,\gamma).
+	\]
+	The implemented model $\hat q_k$ uses the stabilized coefficients, and one-sided residuals measure model discrepancy and accepted step-size-pair suboptimality.
+	Define the cubic Taylor remainder $\varepsilon_{k}^{\mathrm{rem}}\triangleq M_{3,k} (\beta_{k}\norm{\hatF_{k}}+\gamma_{k}\norm{\hatG_{k}})^{3}/6$.
+	Let $\varepsilon_k^{\rm model}\ge0$ be $\mathscr F_{k+1}$-measurable and satisfy $q_k(\beta_k,\gamma_k)\le\hat q_k(\beta_k,\gamma_k) +\varepsilon_k^{\rm model}$.
+	For the implemented box problem, define $\varepsilon_k^{\rm step,box}\triangleq\hat q_k(\beta_k,\gamma_k)+\widehat\Delta_k^{\rm box}\ge0$ and
+	\begin{equation}\label{eq:eps_tot}
+		\varepsilon_{k}^{\mathrm{box}}
+		\triangleq
+		\varepsilon_{k}^{\mathrm{rem}}+\varepsilon_{k}^{\mathrm{model}}
+		+\varepsilon_{k}^{\mathrm{step,box}}.
+	\end{equation}
+	
+	Suppose the raw evaluated coefficients satisfy $\lvert\tilde e_{k}-e_{k}\rvert\le\delta_{e,k}$, $\lvert\tilde d_{k}-d_{k}\rvert\le\delta_{d,k}$, $\lvert\tilde c_{k}-c_{k}\rvert\le\delta_{c,k}$, $\lvert\tilde a_{k}-a_{k}\rvert\le\delta_{a,k}$, and $\lvert\tilde b_{k}-b_{k}\rvert\le\delta_{b,k}$ for nonnegative error bounds.
+	
+	\begin{proposition}[Local-model and pathwise error bounds]\label{prop:model_approx}
+		Under the preceding coefficient-error bounds, the following statements hold.
+		\begin{enumerate}[(i)]
+			\item For every feasible $(\beta,\gamma)$,
+			\begin{equation}\label{eq:eps_model_bound}
+				\begin{aligned}
+					\varepsilon_k^{\rm model}(\beta,\gamma)
+					&\triangleq\beta\delta_{e,k}+\gamma\delta_{d,k}
+					+\tfrac12\beta^2\delta_{c,k}\\
+					&\quad+\beta\gamma\delta_{b,k}+\tfrac12\gamma^2\delta_{a,k},\\
+					\varepsilon_k^{\rm cmp}(\beta,\gamma)
+					&\triangleq\varepsilon_k^{\rm model}(\beta,\gamma)
+					+\tfrac12\rho_{c,k}\beta^2+\tfrac12\rho_{a,k}\gamma^2,\\
+					q_k-\hat q_k&\le\varepsilon_k^{\rm model},\\
+					\hat q_k-q_k&\le\varepsilon_k^{\rm cmp}.
+				\end{aligned}
+			\end{equation}
+			The inequality arguments are suppressed, $\mathrm{cmp}$ denotes the comparator-side bound, and Eq.~\eqref{eq:eps_tot} uses $\varepsilon_k^{\mathrm{model}}=\varepsilon_k^{\mathrm{model}}(\beta_k,\gamma_k)$.
+			\item Under Assumption~\ref{ass:local_reg}, the realized update satisfies
+			\begin{equation}\label{eq:pathwise_drift}
+				\Vk(\bz_{k+1})-\Vk(\bz_{k})
+				\le -\widehat\Delta_{k}^{\rm box}+\varepsilon_{k}^{\rm box}
+				\quad\text{almost surely}.
+			\end{equation}
+			\item If Assumptions~\ref{ass:oracles} and~\ref{ass:local_reg} hold and $\beta_{k}\le\beta_{\max}$, $\gamma_{k}\le\gamma_{\max}$, then
+			\begin{equation}\label{eq:eps_rem_cond}
+				\E[\varepsilon_{k}^{\mathrm{rem}}\mid\mathscr{F}_{k}]
+				\le
+				\frac{2M_{3,k}}{3}(\beta_{\max}+\gamma_{\max})^{3}\sigma_{3,k}^{3}.
+			\end{equation}
+			If $M_{3,k}\le\bar M_{3}$ and $\sigma_{3,k}\le\bar\sigma_{3}$, then $\E[\varepsilon_{k}^{\mathrm{rem}}\mid\mathscr F_k]\le\bar R_{\rm rem}$ almost surely, where $\bar R_{\rm rem}\triangleq(2\bar M_3/3)(\beta_{\max}+\gamma_{\max})^3\bar\sigma_3^3$.
+		\end{enumerate}
+	\end{proposition}
+	
+	The three parts control coefficient evaluation, pathwise model mismatch, and the conditional Taylor remainder; exact automatic differentiation and an exact box-QP solution set the corresponding evaluation, selected-pair, and solution residuals to zero.
+	
+	\begin{assumption}[Uniform local budgets]\label{ass:budget}
+		There exist finite nonnegative constants appearing below such that, for every $k\ge k_0$, the following hold:
+		(a) $\bar b_k^F\le\bar b_F$, $\bar b_k^G\le\bar b_G$, $\sigma_{2,k}\le\bar\sigma_2$, and $\sigma_{3,k}\le\bar\sigma_3$;
+		(b) the common spectral shift satisfies $\rho_{c,k}=\rho_{a,k}\le\bar\rho$, and the raw coefficient-evaluation errors in Proposition~\ref{prop:model_approx} satisfy
+		\[
+		\begin{gathered}
+			\E[\delta_{e,k}\mid\mathscr F_k]\le\bar\delta_e,
+			\quad
+			\E[\delta_{d,k}\mid\mathscr F_k]\le\bar\delta_d,\\
+			\E[\delta_{c,k}\mid\mathscr F_k]\le\bar\delta_c,
+			\quad
+			\E[\delta_{a,k}\mid\mathscr F_k]\le\bar\delta_a,
+			\quad
+			\E[\delta_{b,k}\mid\mathscr F_k]\le\bar\delta_b;
+		\end{gathered}
+		\]
+		(c) $M_{3,k}\le\bar M_3$ and $\E[\varepsilon_k^{\rm step,box}\mid\mathscr F_k]\le\bar R_{\rm step}$ almost surely.
+	\end{assumption}
+	
+	Define the derived oracle-moment bounds and aggregate residual budgets
+	\[
+	\begin{gathered}
+		M_F\triangleq3B_F^2+3\bar b_F^2+3\bar\sigma_2^2,
+		\quad
+		M_G\triangleq3B_G^2+3\bar b_G^2+3\bar\sigma_2^2,\\
+		\bar b_D\triangleq\max\{\bar b_F,\bar b_G\},
+		\quad
+		M_D\triangleq\max\{M_F,M_G\},\\
+		\bar\delta_1\triangleq\max\{\bar\delta_e,\bar\delta_d\},
+		\quad
+		\bar\delta_2\triangleq\max\{\bar\delta_c,\bar\delta_a\},\\
+		\bar R_{\rm model}\triangleq{}
+		\beta_{\max}\bar\delta_e+\gamma_{\max}\bar\delta_d
+		+\tfrac12\beta_{\max}^2\bar\delta_c\\
+		\quad{}+\beta_{\max}\gamma_{\max}\bar\delta_b
+		+\tfrac12\gamma_{\max}^2\bar\delta_a,\\
+		\bar R_{\rm box}\triangleq\bar R_{\rm rem}+\bar R_{\rm model}+\bar R_{\rm step}.
+	\end{gathered}
+	\]
+	Proposition~\ref{prop:model_approx}, the step-size caps, and Assumption~\ref{ass:budget} give $\E[\varepsilon_k^{\rm box}\mid\mathscr F_k]\le\bar R_{\rm box}$ almost surely, so the aggregate is derived from its three displayed sources.
+	For a comparator step size $s\in[0,\min\{\beta_{\max},\gamma_{\max}\}]$, let
+	\begin{equation}\label{eq:R_direction}
+		\mathcal R_D(s)
+		\triangleq
+		s(G_V\bar b_D+\bar\delta_1)
+		+\tfrac12s^2(H_VM_D+\bar\rho+\bar\delta_2)
+		+\bar R_{\rm box}.
+	\end{equation}
+	
+	\begin{proposition}[Conditional and finite-time bi-direction Lyapunov certificate]\label{prop:directional_certificate}
+		Suppose Assumptions~\ref{ass:smooth}, \ref{ass:oracles}, \ref{ass:local_reg}, \ref{ass:local}, and~\ref{ass:budget} hold.
+		Then the following statements hold.
+		\begin{enumerate}[(i)]
+		\item For every $k\ge k_0$ and every admissible deterministic comparator step size $s$,
+			\begin{equation}\label{eq:cond_drift}
+				\mathscr D_k
+				\le
+				-s\left[\max\{D_F(\bz_k),D_G(\bz_k)\}\right]_+
+				+\mathcal R_D(s).
+			\end{equation}
+			\item For every $s\in(0,\min\{\beta_{\max},\gamma_{\max}\}]$ and integer $K>k_0$,
+			\begin{equation}\label{eq:directional_certificate}
+				\begin{aligned}
+					&\frac{1}{K-k_0}
+					\sum_{k=k_0}^{K-1}
+					\E\!\left[\left[\max\{D_F(\bz_k),D_G(\bz_k)\}\right]_+\right]
+					\\
+					&\quad\le
+					\frac{\E[\Vk(\bz_{k_0})]}{s(K-k_0)}
+					+\frac{\mathcal R_D(s)}{s}.
+				\end{aligned}
+			\end{equation}
+		\end{enumerate}
+	\end{proposition}
+	
+	Part~(i) transfers the strongest available single-direction decrease to the implemented update up to explicit residuals, and Part~(ii) converts this one-step comparison into a finite-time average certificate.
+	The next subsection relates this signal to the stationarity residual.
+	
+	\subsection{From Geometric Coverage to Finite-Time Stationarity}\label{subsec:ergodic}
+	
+	For this conversion, define the geometric coverage modulus on $\cN$ by
+	\begin{equation}\label{eq:coverage_modulus}
+		m_{\rm geo}
+		\triangleq
+		\inf_{\substack{\bz\in\cN\\\Phi(\bz)>0}}
+		\frac{\max\{\chi_F(\bz),\chi_G(\bz)\}}{\Phi(\bz)}.
+	\end{equation}
+	The condition $m_{\rm geo}>0$ states that, at every nonstationary point in $\cN$, at least one available direction supplies field-energy decrease proportional to the stationarity residual.
+	The following proposition derives this property locally from the Jacobian at the target stationary point; $\sigma_{\min}(\cdot)$ denotes the smallest singular value.
+	
+	\begin{proposition}[A sufficient condition for geometric coverage]\label{prop:coverage_sufficient}
+		Suppose Assumption~\ref{ass:smooth} holds.
+		Fix a target stationary point $\bz^\star\in\mathcal Z^\star$ and define its metric-transformed Jacobian $\widetilde{\bA}_\star\triangleq\bW_V^{1/2}\bA(\bz^\star)\bW_V^{-1/2}$.
+		If $\sym(\widetilde{\bA}_\star)$ is positive semidefinite and $\sigma_{\min}(\widetilde{\bA}_\star)>0$, then there exist a constant $c_\star>0$ and an open neighborhood $\cN_\star$ of $\bz^\star$, with $\overline{\cN_\star}\subset\cD$, such that
+		\(\max\{\chi_F(\bz),\chi_G(\bz)\}\ge c_\star\Phi(\bz)\) for every $\bz\in\cN_\star$.
+		Consequently, if the admissible region in Assumption~\ref{ass:local} satisfies $\overline{\cN}\subset\cN_\star$, then $m_{\rm geo}\ge c_\star>0$.
+	\end{proposition}
+	
+	For $\bW_V=\Id$, max-variable concavity and min-variable convexity at $\bz^\star$ give the positive-semidefinite condition, while nonsingularity gives a nondegenerate target linearization; continuity then supplies neighborhood coverage, including pure rotation with $\sym(\widetilde{\bA}_\star)=0$.
+	For the normal block $\bA=\mu\Id_2+\sigma J_0$, the exact ratio in Eq.~\eqref{eq:coverage_modulus} is $\max\{\mu,\sigma^2-\mu^2\}$; in particular, $\mu=0$ gives $m_{\rm geo}=\sigma^2$.
+	
+	Compactness and smoothness give the finite performance-direction bound
+	\[
+	B_{P,D}
+	\triangleq
+	\sup_{\bz\in\overline{\cN}}
+	\max\!\left\{
+	\left|\inner{\nabla\cP}{\bF}\right|,
+	\left|\inner{\nabla\cP}{\bG}\right|
+	\right\}.
+	\]
+	
+	When Assumption~\ref{ass:local} holds and $m_{\rm geo}>0$, define the geometric descent coefficient $\mu_{\rm geo}$ and policy-component perturbation $r_P$ by
+	\[
+	\mu_{\rm geo}\triangleq\frac{\lambda_Fm_{\rm geo}}{\kappa_F},
+	\quad
+	r_P\triangleq\frac{\lambda_PB_{P,D}}{\kappa_P}.
+	\]
+	Selecting the larger signal in Eq.~\eqref{eq:composite_signals} and applying Eq.~\eqref{eq:coverage_modulus} gives, for every $\bz\in\cN$,
+	\begin{equation}\label{eq:derived_drift_certificate}
+		\max\{D_F(\bz),D_G(\bz)\}
+		\ge
+		\mu_{\rm geo}\Phi(\bz)-r_P.
+	\end{equation}
+	
+	Proposition~\ref{prop:coverage_sufficient} and Eq.~\eqref{eq:derived_drift_certificate} provide the stationarity conversion: target-Jacobian conditions yield local coverage, which lower-bounds the strongest bi-direction Lyapunov signal by the stationarity residual up to $r_P$.
+	The perturbation $r_P$ vanishes for $\lambda_P=0$ and otherwise enters the residual floor.
+	
+	\begin{theorem}[Main Theorem: Local Finite-Time Stationarity under Geometric Coverage]\label{thm:ergodic}
+		Suppose Assumptions~\ref{ass:smooth}, \ref{ass:oracles}, \ref{ass:local_reg}, \ref{ass:local}, and~\ref{ass:budget} hold, and the modulus in Eq.~\eqref{eq:coverage_modulus} satisfies $m_{\rm geo}>0$.
+		For any comparator step size $s\in(0,\min\{\beta_{\max},\gamma_{\max}\}]$, define $\mathcal R_{\rm geo}(s)\triangleq\mathcal R_D(s)+sr_P$.
+		Then, for every integer $K>k_0$,
+		\begin{equation}\label{eq:main_stationarity}
+			\frac{1}{K-k_{0}}
+			\sum_{k=k_{0}}^{K-1}\E[\Phi(\bz_{k})]
+			\le
+			\frac{\E[\Vk(\bz_{k_{0}})]}{s\mu_{\rm geo}(K-k_{0})}
+			+
+			\frac{\mathcal R_{\rm geo}(s)}{s\mu_{\rm geo}}.
+		\end{equation}
+	\end{theorem}
+	
+	For fixed admissible $s$ and $K$-independent budgets, Eq.~\eqref{eq:main_stationarity} gives an $O(1/K)$ transient to an explicit floor containing the oracle, model, Taylor-remainder, policy-component, and safeguard errors.
+	The signals $\chi_F$ and $\chi_G$ respectively certify contractive symmetric fields and pure rotation, and box-QP dominance inherits either certificate.
+	For an independent uniform index $I_K\in\{k_0,\ldots,K-1\}$, the left side is $\E[\Phi(\bz_{I_K})]$, which gives an equivalent uniform-random-iterate interpretation of the theorem.
+	The comparator $s$ trades nominal decrease against higher-order and $s$-independent residuals, while the implemented controller continues to select $(\beta_k,\gamma_k)$ from the box QP.
+	
+	\subsection{Policy-Space Performance Guarantee}\label{subsec:performance_guarantee}
+	
+	Exploitability and robust return are policy-space quantities beyond parameter-space stationarity.
+	We therefore transfer Lyapunov control to these performance measures.
+	For stationary randomized policies, define the maximizing player's worst-case return, game value, and unregularized Nash gap (reported below as exploitability), where the subscript ${\rm BR}$ denotes best response:
+	\begin{align}
+		R_{\rm BR}(\pi)&\triangleq\inf_{\bar\nu}J(\pi,\bar\nu),\notag\\
+		v^{\star}&\triangleq\sup_{\bar\pi}R_{\rm BR}(\bar\pi),\notag\\
+		\operatorname{Gap}_{0}(\pi,\nu)
+		&\triangleq
+		\sup_{\bar\pi}J(\bar\pi,\nu)-\inf_{\bar\nu}J(\pi,\bar\nu).
+		\label{eq:global_gap}
+	\end{align}
+	The following proposition links the entropy-regularized gap used by the controller to the original zero-sum Markov-game objective.
+	
+	\begin{proposition}[Policy-space performance bridge]\label{prop:performance_bridge}
+		Suppose $\mathcal A$ and $\mathcal B$ are finite.
+		For every policy pair $(\pi,\nu)$ and $\varepsilon\ge0$,
+		\begin{equation}\label{eq:performance_bridge}
+			\begin{aligned}
+				0&\le v^{\star}-R_{\rm BR}(\pi)
+				\le \operatorname{Gap}_{0}(\pi,\nu)\\
+				&\le \operatorname{Gap}_{\varepsilon}(\pi,\nu)
+				+\frac{\varepsilon\bigl(\log|\mathcal A|+\log|\mathcal B|\bigr)}{1-\alpha}.
+			\end{aligned}
+		\end{equation}
+	\end{proposition}
+	\begin{proof}
+		The definitions in Eq.~\eqref{eq:global_gap} give the first inequality, while $v^{\star}\le\sup_{\bar\pi}J(\bar\pi,\nu)$ gives the second.
+		The discounted entropy bounds are $0\le\mathsf H_\alpha^\pi\le\log|\mathcal A|/(1-\alpha)$ and $0\le\mathsf H_\alpha^\nu\le\log|\mathcal B|/(1-\alpha)$.
+		Substituting them into the two best-response terms in Eq.~\eqref{eq:global_gap} gives the final inequality in Eq.~\eqref{eq:performance_bridge}.
+	\end{proof}
+	
+	Thus the regularized gap controls the maximizing player's unregularized worst-case-return loss up to the stated entropy term.
+	
+	\begin{proposition}[Smooth finite-game performance component]\label{prop:smooth_entropy_gap}
+		Suppose $\mathcal S,\mathcal A,\mathcal B$ are finite, the one-stage rewards are bounded, $\varepsilon>0$, and, on the parameter neighborhood under consideration, the current policies are $C^3$ with action probabilities bounded away from zero.
+		Then the entropy-regularized best-response values against either current player, and hence $\operatorname{Gap}_\varepsilon$, are $C^3$ functions of the current policy parameters.
+	\end{proposition}
+	\begin{proof}
+		For a fixed opponent policy, the finite-state soft Bellman operator is $C^3$ in its value vector and the opponent parameters because it is composed of smooth policy probabilities, finite sums, and log-sum-exp.
+		Its value-vector Jacobian is a discounted transition matrix and therefore has induced infinity norm at most $\alpha<1$.
+		The implicit-function theorem consequently makes its unique fixed point and regularized best-response value $C^3$ in the opponent parameters.
+		Applying the same argument to the soft-min Bellman operator makes both best-response values, and hence their difference $\operatorname{Gap}_\varepsilon$, $C^3$.
+	\end{proof}
+	
+	Consequently, choosing $\cP=\operatorname{Gap}_\varepsilon$ gives a concrete smooth performance component for Definition~\ref{def:Lyap} in finite Markov games.
+	
+	\begin{assumption}[Local policy-space error bound]\label{ass:performance_error_bound}
+		There exist constants $c_{\rm gap}>0$ and $\xi_{\rm gap}\ge0$ such that
+		\begin{equation}\label{eq:gap_error_bound}
+			\operatorname{Gap}_\varepsilon(\bz)
+			\le
+			c_{\rm gap}\Phi(\bz)+\xi_{\rm gap},
+			\quad
+			\bz\in\cN.
+		\end{equation}
+	\end{assumption}
+	
+	Eq.~\eqref{eq:gap_error_bound} is a local Polyak--\L{}ojasiewicz-type policy error bound \cite{Karimi2016PL}.
+	The slack $\xi_{\rm gap}$ accommodates parameter-stationary points with nonzero policy-space exploitability and hence allows the two zero sets to differ.
+	
+	\begin{corollary}[Ergodic policy-space performance]\label{cor:ergodic_performance}
+		Suppose the assumptions of Theorem~\ref{thm:ergodic} and Assumption~\ref{ass:performance_error_bound} hold, and $\mathcal A$ and $\mathcal B$ are finite.
+		Then
+		\begin{equation}\label{eq:ergodic_performance}
+			\begin{aligned}
+				&\frac{1}{K-k_0}\sum_{k=k_0}^{K-1}
+				\E[v^\star-R_{\rm BR}(\pi_{\btheta_k})]\\
+				&\le
+				\frac{1}{K-k_0}\sum_{k=k_0}^{K-1}
+				\E[\operatorname{Gap}_0(\pi_{\btheta_k},\nu_{\bpsi_k})]\\
+				&\le
+				c_{\rm gap}\!\left[
+				\frac{\E[\Vk(\bz_{k_0})]}{s\mu_{\rm geo}(K-k_0)}
+				+\frac{\mathcal R_{\rm geo}(s)}{s\mu_{\rm geo}}
+				\right]
+				+\xi_{\rm gap}+B_\varepsilon,
+			\end{aligned}
+		\end{equation}
+		where $B_\varepsilon\triangleq\varepsilon(\log|\mathcal A|+\log|\mathcal B|)/(1-\alpha)$ is the entropy-regularization transfer term.
+	\end{corollary}
+	\begin{proof}
+		Average Eq.~\eqref{eq:gap_error_bound}, apply Theorem~\ref{thm:ergodic}, and then use Proposition~\ref{prop:performance_bridge} pointwise.
+	\end{proof}
+	
+	Thus, Eq.~\eqref{eq:ergodic_performance} gives the policy-space consequence of the main stationarity theorem under the local error bound with slack.
+	
+	% ============================================================
+	\section{Practical Implementation}\label{sec:impl}
+	% ============================================================
+	This section specifies how the local quantities required by the controller can be evaluated in practice.
+	We consider exact automatic differentiation, directional-secant approximations, and safeguarded box-constrained updates.
+	For finite games, the implementation evaluates both the saddle field and the regularized gap from $J_\varepsilon$ with $\varepsilon>0$; the unregularized return $J$ is retained for the performance measures in Section~\ref{subsec:performance_guarantee}.
+	
+	\subsection{Trajectory construction of the policy oracles}\label{subsec:trajectory_oracles}
+	\textcolor{blue}{At update $k$, collect a batch $\mathcal B_k=\{\tau_{k,i}\}_{i=1}^{N_k}$ of $N_k$ trajectories with rollout length $L_k$ under the current policies and transition kernel; transition $t$ records $(s_{k,i,t},a_{k,i,t},b_{k,i,t},r_{k,i,t},s_{k,i,t+1})$.}
+	\textcolor{blue}{For a candidate parameter $\bz=(\btheta,\bpsi)$, define the cumulative action log-likelihood and regularized stage payoff by}
+	\[
+	\textcolor{blue}{
+	\begin{aligned}
+	\ell_{k,i,t}(\bz)
+	&\triangleq\sum_{u=0}^{t}\log\!\bigl[
+	\pi_{\btheta}(a_{k,i,u}\mid s_{k,i,u})
+	\nu_{\bpsi}(b_{k,i,u}\mid s_{k,i,u})\bigr],\\
+	c_{\varepsilon,k,i,t}(\bz)
+	&\triangleq r_{k,i,t}
+	-\varepsilon\log\pi_{\btheta}(a_{k,i,t}\mid s_{k,i,t})\\[-2pt]
+	&\quad
+	+\varepsilon\log\nu_{\bpsi}(b_{k,i,t}\mid s_{k,i,t}).
+	\end{aligned}}
+	\]
+\textcolor{blue}{Let $\operatorname{sg}$ preserve its argument in value but have zero derivative, and set $\mathcal M_{k,i,t}(\bz)\triangleq\exp\{\ell_{k,i,t}(\bz)-\operatorname{sg}(\ell_{k,i,t}(\bz))\}$.}
+\textcolor{blue}{Using the policy-gradient score-function construction~\cite{Sutton2000PolicyGradient}, the infinitely differentiable Monte Carlo estimator (DiCE)~\cite{Foerster2018DiCE} gives the finite-trajectory surrogate}
+	\[
+	\textcolor{blue}{
+	\widehat J_{\varepsilon,k}(\bz;\mathcal B_k)
+	\triangleq
+	\frac{1}{N_k}\sum_{i=1}^{N_k}\sum_{t=0}^{L_k-1}
+	\alpha^t\mathcal M_{k,i,t}(\bz)c_{\varepsilon,k,i,t}(\bz).}
+	\]
+	\textcolor{blue}{Its first two automatic derivatives provide the sampled field and Jacobian--vector curvature estimate}
+	\[
+	\textcolor{blue}{
+	\begin{aligned}
+	\widehat{\bF}(\bz;\mathcal B_k)
+	&\triangleq
+	\begin{bmatrix}
+	-\nabla_{\btheta}\widehat J_{\varepsilon,k}(\bz;\mathcal B_k)\\
+	\phantom{-}\nabla_{\bpsi}\widehat J_{\varepsilon,k}(\bz;\mathcal B_k)
+	\end{bmatrix},\\
+	\hatF_k
+	&\triangleq\widehat{\bF}(\bz_k;\mathcal B_k),\quad
+	\hatG_k
+	\triangleq
+	\left.\nabla_{\bz}\widehat{\bF}(\bz;\mathcal B_k)\right|_{\bz=\bz_k}
+	\operatorname{sg}(\hatF_k).
+	\end{aligned}}
+	\]
+	\textcolor{blue}{Thus, automatic differentiation evaluates $\hatG_k$ without forming the Jacobian.}
+	\begin{proposition}[Finite-trajectory oracle validity]\label{prop:trajectory_oracle_validity}
+		\textcolor{blue}{Suppose Assumption~\ref{ass:smooth} holds; $N_k,L_k$ are finite positive $\mathscr F_k$-measurable integers; and rewards and the first two log-policy derivatives are uniformly bounded, with policy probabilities bounded below by $p_{\min}>0$, on the implementable region. Then $\hatF_k,\hatG_k$ are conditionally bounded, and their centered decomposition satisfies Assumption~\ref{ass:oracles} with finite $\mathscr F_k$-measurable bounds.}
+	\end{proposition}
+\textcolor{blue}{See \hyperref[app:trajectory_oracle_validity]{Appendix~\ref*{app:proofs}, item~i)} for the proof.}
+	
+	\subsection{Exact local-model evaluation}
+	The reference pathwise terms in Eq.~\eqref{eq:drift_terms_def} are assembled from one field oracle $\hatF_{k}$, one curvature oracle $\hatG_{k}$, one gradient $\nabla\Vk(\bz_k)$, and the Hessian--vector products of $\Vk$ along $\hatF_k$ and $\hatG_k$.
+	Automatic differentiation can pass through a fixed differentiable inner loop for $\cP$, while implicit differentiation handles an exact local envelope.
+	Because $\cE_F$ contains $\bF^\top\bW_V\bF/2$, exact Hessian--vector products of $\Vk$ generally involve third derivatives of the game objective; the secant realization below avoids forming them.
+	Exact automatic differentiation gives $(\tilde e_k,\tilde d_k,\tilde c_k,\tilde a_k,\tilde b_k)=(e_k,d_k,c_k,a_k,b_k)$.
+	After exact coefficient evaluation, $\hat q_k-q_k=\lambda_k(\beta^2+\gamma^2)/2\ge0$; hence the selected-pair one-sided model residual is zero, while the comparator-side bound retains the explicit shift.
+	
+	\subsection{Approximate local-model estimation}
+	For probe radii $\delta_{F,k},\delta_{G,k}>0$, a directional-secant realization holds $(\hatF_k,\hatG_k)$ fixed and evaluates $V_{\pm F}=\Vk(\bz_k\pm\delta_{F,k}\hatF_k)$, $V_{\pm G}=\Vk(\bz_k\pm\delta_{G,k}\hatG_k)$, and $V_{\pm F,\pm G}=\Vk(\bz_k\pm\delta_{F,k}\hatF_k \pm\delta_{G,k}\hatG_k)$.
+	Writing $V_0=\Vk(\bz_k)$, the central stencils give the tilde approximations
+	\[
+	\begin{gathered}
+		\tilde e_k=\frac{V_{+F}-V_{-F}}{2\delta_{F,k}},\quad
+		\tilde d_k=-\frac{V_{+G}-V_{-G}}{2\delta_{G,k}},\\
+		\tilde c_k=\frac{V_{+F}-2V_0+V_{-F}}{\delta_{F,k}^2},\quad
+		\tilde a_k=\frac{V_{+G}-2V_0+V_{-G}}{\delta_{G,k}^2},\\
+		\tilde b_k=\frac{V_{+F,+G}-V_{+F,-G}-V_{-F,+G}+V_{-F,-G}}
+		{4\delta_{F,k}\delta_{G,k}},
+	\end{gathered}
+	\]
+	before the spectral shift in Section~\ref{subsec:closed_form} is applied.
+	Writing $\hatF(\bz,\zeta)$ for the field oracle evaluated at $\bz$ with random seed $\zeta$, a shared seed $\zeta_k$ and radius $\epsilon_k>0$ give the Jacobian--vector finite-difference curvature oracle $\hatG_{k}^{\mathrm{fd}}=[\hatF(\bz_{k}+\epsilon_{k}\hatF_{k},\zeta_{k})-\hatF(\bz_{k},\zeta_{k})]/\epsilon_{k}$.
+	A moment-based realization smooths the second-order terms by exponential moving averages while preserving the subproblem.
+	
+	The effect of these approximation errors on the one-step model is quantified by Proposition~\ref{prop:model_approx}.
+	
+	\begin{figure*}[!t]
+		\centering
+		\includegraphics[width=\textwidth]{fig_vi_a_geometry.pdf}
+		\caption{Controlled normal-form results: (a) final normalized field energy; (b) analytical and computed curvature descent; (c) pure-rotation trajectories; and (d) first-update normalized curvature step size and relative curvature contribution.
+			Vertical lines in (a), (b), and (d) mark $\sigma/\mu=1$.}
+		\label{fig:controlled_geometry}
+	\end{figure*}
+	
+	\subsection{Safeguarded computation}\label{subsec:safeguard}
+	With positive caps $\beta_{\max}$ and $\gamma_{\max}$, the implementation solves $\min_{(\beta,\gamma)\in[0,\beta_{\max}]\times[0,\gamma_{\max}]}\hat q_{k}(\beta,\gamma)$.
+	Any loss from approximate solution or backtracking relative to the box optimum is recorded in $\varepsilon_k^{\rm step,box}$ in Theorem~\ref{thm:ergodic}.
+	Each iteration queries $(\hatF_k,\hatG_k)$, evaluates the five tilde coefficients, applies the spectral shift, solves the two-dimensional box QP by Proposition~\ref{prop:closed_form}, and applies Eq.~\eqref{eq:update}.
+	If the trial segment leaves a prescribed implementable trust region $\mathcal T\subset\cD$, a common backtracking factor shrinks $(\beta_k,\gamma_k)$; the analysis assumes the accepted trajectory lies in $\cN$, and records lost model decrease in $\varepsilon_k^{\mathrm{step,box}}$.
+	For bounded $\mathcal T$, the implementation reduces the probe radii as needed until every directional-stencil point lies in $\mathcal T$.
+	
+	% ============================================================
+	\section{Experiments}\label{sec:experiments}
+	% ============================================================
+	
+	The experiments follow the same hierarchy as the analysis.
+	The normal-form study first isolates the symmetric--antisymmetric mechanism, the tabular and neural population-oracle studies then test policy-space behavior without trajectory noise, and the finite-trajectory study finally replaces exact expected directions by sampled stochastic oracles.
+	This progression isolates geometric adaptation, nonlinear policy parameterization, and sampling error in successive levels of evaluation.
+	Methods are the proposed box-QP controller with curvature (QP+G), its field-only ablation noG ($\gamma_k=0$), GDA, Adam-GDA \cite{KingmaBa2015Adam}, EGM, and the three-inner-iteration PPM approximation PPM-3.
+	All methods update both players simultaneously; unless noted, fixed step sizes and QP caps are $0.03$, $\eta_\psi=1$ gives $\cE_F=\phi$, and population normalizers are frozen at initialization with floor $10^{-10}$.
+	For every Markov-game experiment, $(\alpha,\varepsilon)=(0.9,0.03)$; the regularized and unregularized value tolerances are $10^{-10}$ and $10^{-12}$, and the spectral floor is $10^{-8}$.
+	Across matched seeds, all paired $95\%$ confidence intervals are two-sided Student-$t$ intervals for metric-oriented differences, with positive values favoring QP+G.
+	
+	\subsection{Controlled Normal-Form Geometry}\label{subsec:controlled_geometry}
+	We test the mechanism on the exactly solvable normal linear field with $\lambda_P=0$, so Eq.~\eqref{eq:Vdef} retains only field energy.
+	For radial contraction rate $\mu\ge0$ and angular rotation rate $\sigma\ge0$,
+	\begin{align*}
+		\bF(\bz)&=\bA\bz,
+		&\bA&=\mu\Id_2+\sigma J_0,
+		&\Vk(\bz)&=\tfrac12\norm{\bF(\bz)}^2.
+	\end{align*}
+	Here $\bS=\mu\Id_2$, $\bW=\sigma J_0$, and direct calculation gives
+	\begin{align}
+		e&=\inner{\nabla\Vk}{\bF}
+		=\mu(\mu^2+\sigma^2)\norm{\bz}^2,\notag\\
+		d&=-\inner{\nabla\Vk}{\bG}
+		=(\mu^2+\sigma^2)(\sigma^2-\mu^2)\norm{\bz}^2.\label{eq:normal_d}
+	\end{align}
+	Eq.~\eqref{eq:normal_d} shows that $+\bG$ decreases the field energy exactly when $|\sigma|>|\mu|$, matching Theorem~\ref{thm:skew_dominance}; moreover, $\max\{\chi_F,\chi_G\}/\Phi=\max\{\mu,\sigma^2-\mu^2\}$ evaluates the coverage modulus in Eq.~\eqref{eq:coverage_modulus}.
+	For this quadratic field-energy function, the two-dimensional Taylor model is exact.
+	
+	To quantify accepted curvature use, define its relative contribution as $C_k^G\triangleq\gamma_k\norm{\bG(\bz_k)}/\max\{\beta_k\norm{\bF(\bz_k)}+\gamma_k\norm{\bG(\bz_k)},10^{-15}\}$.
+	Fig.~\ref{fig:controlled_geometry} sweeps $\sigma/\mu\in[0,2.5]$; panels (a)--(c) recover the threshold and pure-rotation decay, while panel (d) shows first-update $\gamma_0/\gamma_{\max}$ and $C_0^G$ from the common initial point.
+	These quantities measure curvature step-size activation and the curvature share of the additive nominal update magnitude; their threshold-like profile follows here from exact directions and $\lambda_P=0$.
+	
+	\subsection{Tabular Markov Games with Population Oracles}\label{subsec:tabular}
+	We span a one-state normal-form benchmark and sequential finite-state games while removing function approximation, using rock--paper--scissors (RPS), five-state CyclicControl, and eight-state FrequencyHopping, each with three actions per player and tabular softmax logits.
+	RPS is a standard multi-agent RL benchmark \cite{Terry2021PettingZoo}; Appendix~\ref{app:environments} specifies the games.
+	For both the tabular and neural population experiments, the QP+G/noG controller uses the Markov-game composite Lyapunov function
+	\begin{equation}\label{eq:vic_merit}
+		V_{\rm MG}(\bz)
+		=0.3\frac{\tfrac12\norm{\bF(\bz)}^{2}}{\kappa_F}
+		+\frac{\operatorname{Gap}_{\varepsilon}(\bz)}{\kappa_P},
+	\end{equation}
+	This corresponds to $\lambda_F=0.3$ and $\lambda_P=1$, with both normalizers frozen at initialization.
+	Population automatic differentiation computes $\bF$ as the saddle gradient of $J_\varepsilon$ and $\bG=\nabla\bF\,\bF$, each stencil recomputes both regularized BRs, and Eq.~\eqref{eq:performance_bridge} holds at every checkpoint.
+	
+	Across ten initializations and $100$ joint updates, QP+G raises worst-case return and lowers exploitability relative to noG in all three games.
+	Exact one-sided paired sign tests of the return gains remain significant after Holm correction across the three games \cite{Holm1979}.
+	Fig.~\ref{fig:tabular} reports the complete convergence trajectories for worst-case return, exploitability, regularized Nash gap, and field norm.
+	Across all three games, QP+G attains the strongest joint improvement in policy-space performance and saddle-field optimization.
+
+	\begin{figure*}[!t]
+		\centering
+		\includegraphics[width=\textwidth]{fig_vi_b_tabular.pdf}
+		\caption{Tabular population-oracle games over ten seeds (mean $\pm$ standard error); boundary triangles mark Adam-GDA means outside the displayed range.}
+		\label{fig:tabular}
+	\end{figure*}
+	
 \subsection{Neural-Policy Markov Games with Population Oracles}\label{subsec:neural_mg}
-The neural-policy experiment isolates nonlinear parameterization from sampling noise using separate $4$--$8$--$3$ tanh--softmax policies, forming a $134$-dimensional population field on the four games in Appendix~\ref{app:environments}.
-An exact differentiable value-system solve supplies $\bF$ and $\bG=\nabla\bF\,\bF$; QP+G and noG evaluate Eq.~\eqref{eq:vic_merit} on nine- and three-point central stencils, respectively, with $\delta_D=\min\{10^{-2},10^{-3}/\max(\|D\|,10^{-12})\}$, $D\in\{\bF,\bG\}$.
-Five screening seeds select each baseline rate from $\{0.001,0.003,0.01,0.03\}$; ten disjoint test seeds use $60$ simultaneous updates.
-QP+G attains higher worst-case return and lower exploitability than noG in all four games, with positive lower endpoints in all paired $95\%$ confidence intervals for return gain; Fig.~\ref{fig:neural_mg} displays three games, and SecurityPatrol has the same mean ordering.
-CyclicControl has the largest exploitability reduction, $79.1\%$.
-The game-wise mean of $C_k^G$ ranges from $0.177$ to $0.587$.
-With $\bS_k\triangleq\sym(\nabla\bF(\bz_k))$ and $\bW_k\triangleq\skewop(\nabla\bF(\bz_k))$, the median ratio $\norm{\bW_k\bF(\bz_k)}/(\norm{\bS_k\bF(\bz_k)}+10^{-15})$ is $0.951$ on FrequencyHopping and $0.966$ on RoutingInterdiction.
-Thus the controller is not a hard skew-threshold switch: Theorem~\ref{thm:skew_dominance} concerns $+\bG$ alone, whereas the composite QP may use curvature through the gap gradient and cross-curvature even below the skew threshold.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.65\textwidth]{fig_vi_c_neural.pdf}
-\caption{Neural-policy population-oracle results over ten test seeds (mean $\pm$ standard error); triangles mark clipped Adam-GDA means.}
-\label{fig:neural_mg}
-\end{figure*}
-
+	The neural-policy experiment isolates nonlinear parameterization from sampling noise using separate $4$--$8$--$3$ tanh--softmax policies, forming a $134$-dimensional population field on the four games in Appendix~\ref{app:environments}.
+	An exact differentiable value-system solve supplies $\bF$ and $\bG=\nabla\bF\,\bF$; QP+G and noG evaluate Eq.~\eqref{eq:vic_merit} on nine- and three-point central stencils, respectively, with $\delta_D=\min\{10^{-2},10^{-3}/\max(\|D\|,10^{-12})\}$, $D\in\{\bF,\bG\}$.
+	Five screening seeds select each baseline step size from $\{0.001,0.003,0.01,0.03\}$; ten disjoint test seeds use $60$ simultaneous updates.
+	QP+G attains higher worst-case return and lower exploitability than noG in all four games, with positive lower endpoints in all paired $95\%$ confidence intervals for return gain; Fig.~\ref{fig:neural_mg} displays the complete convergence trajectories for all four games.
+	CyclicControl has the largest exploitability reduction, $79.1\%$.
+	The game-wise mean of $C_k^G$ ranges from $0.177$ to $0.587$.
+	With $\bS_k\triangleq\sym(\nabla\bF(\bz_k))$ and $\bW_k\triangleq\skewop(\nabla\bF(\bz_k))$, the median ratio $\norm{\bW_k\bF(\bz_k)}/(\norm{\bS_k\bF(\bz_k)}+10^{-15})$ is $0.951$ on FrequencyHopping and $0.966$ on RoutingInterdiction.
+	Theorem~\ref{thm:skew_dominance} characterizes the field-energy effect of $+\bG$ alone, whereas the composite QP can also activate curvature through the gap gradient and cross-curvature below the skew threshold.
+	
+	\begin{figure*}[!t]
+		\centering
+		\includegraphics[width=\textwidth]{fig_vi_c_neural.pdf}
+		\caption{Neural-policy population-oracle results over ten test seeds (mean $\pm$ standard error); boundary triangles mark Adam-GDA means outside the displayed range.}
+		\label{fig:neural_mg}
+	\end{figure*}
+	
 \subsection{Finite-Trajectory Oracle Validation}\label{subsec:finite_trajectory}
 The preceding population-oracle studies evaluate the controller with exact expectations and therefore isolate its deterministic geometry.
-We now test whether the same two-direction mechanism remains observable when the training field, curvature action, and local-model stencil are all estimated from finitely many trajectories.
+We first test whether the same bi-direction mechanism remains observable when the field direction, curvature direction, and local-model stencil are all estimated from finitely many trajectories.
 At each of $60$ CyclicControl updates, two $4$--$8$--$3$ policies use $128$ horizon-$16$ trajectories ($2048$ transitions).
-One detached-policy batch $\mathcal B_k$ supplies every stencil through unclipped per-decision prefix ratios and the infinitely differentiable Monte Carlo estimator (DiCE) \cite{Foerster2018DiCE}.
+One detached-policy batch $\mathcal B_k$ supplies every stencil through unclipped per-decision prefix ratios and the infinitely differentiable Monte Carlo estimator (DiCE)~\cite{Foerster2018DiCE}.
 DiCE gives the regularized field and Hessian--vector curvature oracles, with the field detached in the latter product.
-For $\lambda_P=0$, an independent-batch-normalized field-energy merit controls training, while population quantities are used only for checkpoint evaluation.
+For $\lambda_P=0$, an independent-batch-normalized field-energy Lyapunov function controls training, while population quantities are used only for checkpoint evaluation.
 Proposition~\ref{prop:model_approx} and Theorem~\ref{thm:ergodic} account for dependent same-batch stencil errors.
 
-\begin{table}[!ht]
-\caption{Finite-trajectory CyclicControl at $k=60$ ($2048$ transitions/update; ten held-out seeds).
-Entries are mean $\pm$ standard error with paired $95\%$ confidence intervals; positive $\Delta$ favors QP+G.}
+\begin{table}[!t]
+\caption{Finite-trajectory CyclicControl at $k=60$ ($2048$ transitions/update; ten held-out seeds). Entries are mean $\pm$ standard error with paired $95\%$ confidence intervals; positive $\Delta$ favors QP+G.}
 \label{tab:finite_trajectory}
 \centering
 \footnotesize
@@ -1118,114 +1180,125 @@ Metric & QP+G & noG & Paired $\Delta$\\
 
 All paired intervals are positive; mean exploitability decreases by $54.0\%$ relative to noG, and curvature remains active at every update.
 The diagnostics separate parameter-space stationarity ($\norm{\bF}$), unilateral policy improvement (exploitability), and unregularized robust performance (worst-case return), while population checkpoints keep training noise out of evaluation.
-Thus the population-oracle curves test deterministic geometry, whereas Table~I tests whether its benefits survive the biased, dependent sampled queries covered by the analysis; matched-seed intervals isolate the curvature-enabled controller.
 
-% ============================================================
-\section{Conclusion}
-% ============================================================
-This paper developed complementary field and curvature directions for zero-sum Markov-game policy optimization.
-The symmetric--antisymmetric analysis identifies when curvature decreases field energy, while a closed-form box QP selects independent step sizes from a second-order Lyapunov-drift model.
-Under local geometric coverage and explicit stochastic-error budgets, the stationarity guarantee gives an $O(1/K)$ ergodic transient plus an error floor; with the local policy-space error bound, it transfers to Nash-gap and worst-case-return bounds.
-Population-oracle and finite-trajectory experiments support the predicted geometry and show improved worst-case return and exploitability over the field-only ablation.
-Independent step sizes thereby use curvature when its local contribution is beneficial without requiring it to be a universally descending direction.
+\subsection{\textcolor{blue}{Finite-Trajectory Robustness under Attack-Strength Shifts}}\label{subsec:finite_trajectory_robustness}
+\textcolor{blue}{The preceding population-oracle studies isolate deterministic geometry; we next test the controller when its optimization directions are sampled and the physical severity of the adverse interaction changes.}
+\textcolor{blue}{For each of the four neural-policy games, an attack-strength multiplier $\eta\in\{0.5,0.75,1,1.25,1.5,1.75,2\}$ scales only the adverse reward term, with $\eta=1$ recovering the nominal game, while transitions, policy classes, initializations, and algorithmic parameters remain fixed.}
+\textcolor{blue}{Specifically, $\eta$ scales negative cyclic outcomes, matched-action jamming loss, matched-route interdiction loss, and uncovered-target loss in CyclicControl, FrequencyHopping, RoutingInterdiction, and SecurityPatrol, respectively.}
+\textcolor{blue}{The minimizing player receives the negative of the displayed maximizing-player reward, so every severity level remains a zero-sum game.}
 
+\textcolor{blue}{At each of $60$ updates, the two $4$--$8$--$3$ policies use one batch of $512$ horizon-$16$ trajectories ($8192$ transitions).}
+\textcolor{blue}{The same detached-policy batch supplies the field, Hessian--vector curvature, and local-model stencil estimates through unclipped per-decision prefix ratios and DiCE~\cite{Foerster2018DiCE}; population quantities are used only for checkpoint evaluation.}
+\textcolor{blue}{QP+G and noG use the independently normalized field-energy Lyapunov function with $\lambda_P=0$.}
+\textcolor{blue}{GDA, EGM, and PPM-3 use the common screened step size $0.03$, Adam-GDA uses $0.001$, and all step sizes are frozen before the five-seed severity sweep and are not retuned across $\eta$.}
+\textcolor{blue}{EGM and PPM-3 reuse the same trajectory batch for their additional field queries, giving every method the same transition budget per update.}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig_vi_d_finite_trajectory_robustness_six_methods.pdf}
+\caption{\textcolor{blue}{Finite-trajectory robustness over attack strength $\eta$ and five held-out seeds (mean $\pm$ standard error). The top row reports final unregularized worst-case return, for which higher is better; the bottom row reports exploitability, for which lower is better. The vertical dotted line marks the nominal setting $\eta=1$.}}
+\label{fig:finite_trajectory_robustness}
+\end{figure*}
+
+\textcolor{blue}{Fig.~\ref{fig:finite_trajectory_robustness} shows that QP+G preserves the strongest overall policy-space performance as the adverse reward scale varies.}
+\textcolor{blue}{Across all $28$ environment--severity settings, QP+G attains the lowest mean exploitability; its worst-case return is also generally the highest and remains within sampling uncertainty of the strongest baseline where the curves meet.}
+\textcolor{blue}{These results jointly show that the curvature-enabled advantage survives finite-trajectory DiCE estimation and persists across substantial changes in the physical attack severity, rather than being confined to the nominal environment.}
+\FloatBarrier
+
+	% ============================================================
+	\section{Conclusion}
+	% ============================================================
+	This paper developed complementary field and curvature directions for zero-sum Markov-game policy optimization.
+	The symmetric--antisymmetric analysis identifies when curvature decreases field energy, while a closed-form box QP selects independent step sizes from a second-order Lyapunov-drift model.
+	Under local geometric coverage and explicit stochastic-error budgets, the stationarity guarantee gives an $O(1/K)$ ergodic transient plus an error floor; with the local policy-space error bound, it transfers to Nash-gap and worst-case-return bounds.
+	Population-oracle and finite-trajectory experiments support the predicted geometry and show improved worst-case return and exploitability over the field-only ablation.
+	Independent step sizes thereby align curvature use with its local contribution to the composite Lyapunov model.
+	
 \appendices
 % ============================================================
-
-\section{Proofs}\label{app:proofs}
+	
+	\section{Proofs}\label{app:proofs}
 \paragraph{Proof of Proposition~\ref{prop:DTA}}\label{app:DTA}
-The GDA claim is immediate from Eq.~\eqref{eq:classical_updates}.
-On the closed ball $\bar B(\bz;r)\subset\cD$, let $M_i$ and $B_F$ bound $\nabla^i\bF$ ($i=1,2$) and $\bF$.
-For $s\le\min\{r/B_F,(2M_1)^{-1},1\}$, the contraction $T_s(\bu)=\bz-s\bF(\bu)$ has PPM fixed-point displacement $\norm{\Delta}\le sB_F$.
-Taylor expansion yields $\Delta+s\bF=-s\nabla\bF\,\Delta-s\mathbf r_2$, $\norm{\mathbf r_2}\le M_2\norm{\Delta}^2/2$, and hence $\Delta=-s\bF+s^2\nabla\bF\,\bF+O(s^3)$ uniformly.
-For EGM, $\bF(\bz-s\bF)=\bF-s\nabla\bF\,\bF+O(s^2)$ uniformly; multiplication by $-s$ gives the same expansion.
-\hfill$\blacksquare$
+	The GDA identity follows directly from Eq.~\eqref{eq:classical_updates}.
+	Choose a closed ball $\bar B(\bz_k;r)\subset\cD$, and let $M_i$ and $B_F$ bound $\nabla^i\bF$ ($i=1,2$) and $\bF$ on this ball.
+	Choose $\bar s_k>0$ such that $\bar s_k B_F\le r$, $\bar s_k M_1\le1/2$, and $\bar s_k\le1$.
+	For $s\le\bar s_k$, the map $T_{k,s}(\bu)=\bz_k-s\bF(\bu)$ maps the ball into itself and is a contraction, giving a unique PPM update in the ball with $\norm{\Delta_k^{\rm PPM}}\le sB_F$, where $\Delta_k^{\rm PPM}\triangleq\bz_{k+1}^{\rm PPM}-\bz_k$.
+	The same bound places the EGM extrapolation and update points in this ball.
+	Taylor expansion of the PPM equation gives $\Delta_k^{\rm PPM}+s\bF(\bz_k)=-s\nabla\bF(\bz_k)\Delta_k^{\rm PPM}-s\mathbf r_{2,k}$, where $\norm{\mathbf r_{2,k}}\le M_2\norm{\Delta_k^{\rm PPM}}^2/2$.
+	The displayed bounds imply $\norm{\Delta_k^{\rm PPM}+s\bF(\bz_k)}\le s^2M_1B_F+s^3M_2B_F^2/2$, so substituting this relation once more gives $\Delta_k^{\rm PPM}=-s\bF(\bz_k)+s^2\nabla\bF(\bz_k)\bF(\bz_k)+R_s^{\rm PPM}(\bz_k)$ with $\norm{R_s^{\rm PPM}(\bz_k)}\le C_{\rm PPM}s^3$.
+	For EGM, Taylor's theorem gives $\bF(\bz_k-s\bF(\bz_k))=\bF(\bz_k)-s\nabla\bF(\bz_k)\bF(\bz_k)+\mathbf r_{E,k}$ with $\norm{\mathbf r_{E,k}}\le M_2s^2B_F^2/2$; multiplication by $-s$ yields the stated expansion with $\norm{R_s^{\rm EGM}(\bz_k)}\le(M_2B_F^2/2)s^3$.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Theorem~\ref{thm:skew_dominance}}\label{app:skew_dominance}
+	With $\bA=\nabla\bF$ and $\nabla\phi=\bA^\top\bF$, direct substitution gives Eq.~\eqref{eq:dphi_F} and $\inner{\nabla\phi}{\bG}=\bF^\top\bA^2\bF$.
+	Expanding $\bA^2$ as $\bS^2+\bS\bW+\bW\bS+\bW^2$ eliminates the antisymmetric cross term, while $\bF^\top\bS^2\bF=\norm{\bS\bF}^2$ and $\bF^\top\bW^2\bF=-\norm{\bW\bF}^2$, proving Eq.~\eqref{eq:dphi_G}.
+	The right-hand side of Eq.~\eqref{eq:dphi_G} is negative exactly under Eq.~\eqref{eq:skew_dominance}.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Proposition~\ref{prop:closed_form}}\label{app:closed_form}
+	Positive definiteness makes $\hat q_k$ strictly convex; solving $\widehat{\bH}_k(\beta,\gamma)^\top=(\hat e_k,\hat d_k)^\top$ gives Eq.~\eqref{eq:unconstrained_pair} and its explicit inverse gives Eq.~\eqref{eq:Delta_hat_interior}.
+	An uncapped boundary solution lies on an axis, giving the two scalar candidates.
+	For the capped problem, any boundary solution lies on one of the four edges; minimizing the resulting one-dimensional quadratic and clipping its stationary point gives the four displayed edge candidates.
+	Strict convexity and direct objective comparison establish uniqueness and the comparator claim.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Proposition~\ref{prop:dominance}}\label{app:dominance}
+	The comparator sets are subsets of $[0,\infty)^2$, so set inclusion and scalar minimization prove dominance and their formulas.
+	Completing the square in Eq.~\eqref{eq:Delta_hat_interior} gives $\widehat\Delta_k^\star=\hat e_k^2/(2\hat c_k)+ (\hat b_k\hat e_k+\hat c_k\hat d_k)^2/(2\hat c_k\hat\delta_k)$.
+	Subtracting $[\hat e_k]_+^2/(2\hat c_k)$ proves Eq.~\eqref{eq:dominance_gap} and its equality condition.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Proposition~\ref{prop:coverage_sufficient}}\label{app:coverage_sufficient}
+	For $\widetilde{\bA}(\bz)\triangleq\bW_V^{1/2}\bA(\bz)\bW_V^{-1/2}$, define $\widetilde{\bS}(\bz)\triangleq\sym(\widetilde{\bA}(\bz))$, $\widetilde{\bW}(\bz)\triangleq\skewop(\widetilde{\bA}(\bz))$, and
+	\[
+	h(\bz,\bu)\triangleq\max\!\left\{\bu^\top\widetilde{\bS}(\bz)\bu,\,\norm{\widetilde{\bW}(\bz)\bu}^2-\norm{\widetilde{\bS}(\bz)\bu}^2\right\}.
+	\]
+	At $\bz^\star$, a unit $\bu$ either has $\bu^\top\widetilde{\bS}(\bz^\star)\bu>0$, or positive semidefiniteness gives $\widetilde{\bS}(\bz^\star)\bu=0$ and nonsingularity gives $\norm{\widetilde{\bW}(\bz^\star)\bu}=\norm{\widetilde{\bA}_\star\bu}>0$.
+	Hence $h>0$ on the compact unit sphere, so continuity yields $c_\star>0$ and a neighborhood $\cN_\star$ where $h\ge c_\star$ uniformly.
+	For $\Phi(\bz)>0$, set $\bu=\bW_V^{1/2}\bF(\bz)/\sqrt{\Phi(\bz)}$; then $\norm{\bu}=1$, $\chi_F/\Phi=\bu^\top\widetilde{\bS}\bu$, and $\chi_G/\Phi=\norm{\widetilde{\bW}\bu}^{2}-\norm{\widetilde{\bS}\bu}^{2}$, which proves the result.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Proposition~\ref{prop:model_approx}}\label{app:model_approx}
+	For Part~(i), subtract the models and use $\hat c_k=\tilde c_k+\rho_{c,k}$ and $\hat a_k=\tilde a_k+\rho_{a,k}$.
+	In $q_k-\hat q_k$ the shifts are nonpositive; dropping them and applying the five coefficient-error bounds gives the first inequality in Eq.~\eqref{eq:eps_model_bound}, while reversing the difference gives the comparator bound.
+	For Part~(ii), Eq.~\eqref{eq:qref}, Taylor's bound, and the definitions of $\varepsilon_k^{\rm model}$ and $\varepsilon_k^{\rm step,box}$ give Eq.~\eqref{eq:pathwise_drift}.
+	For Part~(iii), the step-size caps and $(a+b)^3\le4(a^3+b^3)$ imply $\varepsilon_k^{\rm rem}\le(2M_{3,k}/3)(\beta_{\max}+\gamma_{\max})^3 (\norm{\hatF_k}^3+\norm{\hatG_k}^3)$.
+	Conditional expectation gives Eq.~\eqref{eq:eps_rem_cond}, and the uniform bounds give its stated specialization.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Proposition~\ref{prop:directional_certificate}}\label{app:directional_certificate}
+	For Part~(i), fix $k\ge k_0$ and compare the box-QP solution with $(s,0)$ when $D_F(\bz_k)$ is the largest positive signal, with $(0,s)$ when $D_G(\bz_k)$ is the largest positive signal, and with $(0,0)$ when both signals are nonpositive, resolving ties deterministically.
+	These comparator choices are $\mathscr F_k$-measurable.
+	For either nonzero comparator, box optimality and Proposition~\ref{prop:model_approx} bound the realized increment by the comparator model plus $\varepsilon_k^{\rm box}$ and, respectively, $s\delta_{e,k}+s^2(\delta_{c,k}+\rho_{c,k})/2$ or $s\delta_{d,k}+s^2(\delta_{a,k}+\rho_{a,k})/2$.
+	Conditional expectation of the linear term contributes at most $-s[\max\{D_F(\bz_k),D_G(\bz_k)\}]_++sG_V\bar b_D$, while $\E[\norm{\hatF_k}^2\mid\mathscr F_k]\le M_F$ and $\E[\norm{\hatG_k}^2\mid\mathscr F_k]\le M_G$ bound the Hessian terms.
+	When both signals are nonpositive, comparison with $(0,0)$ gives $\mathscr D_k\le\bar R_{\rm box}\le\mathcal R_D(s)$.
+	Collecting the shift, coefficient-error, and residual budgets gives Eq.~\eqref{eq:cond_drift}.
+	For Part~(ii), take total expectations in Eq.~\eqref{eq:cond_drift}, sum from $k_0$ to $K-1$, and use $\Vk\ge0$ to obtain Eq.~\eqref{eq:directional_certificate}.
+	\hfill$\blacksquare$
+	
+	\paragraph{Proof of Theorem~\ref{thm:ergodic}}\label{app:ergodic}
+	Let $S_k\triangleq[\max\{D_F(\bz_k),D_G(\bz_k)\}]_+$.
+	Eq.~\eqref{eq:derived_drift_certificate} gives $S_k\ge\mu_{\rm geo}\Phi(\bz_k)-r_P$.
+	Taking expectations and averaging, then applying Proposition~\ref{prop:directional_certificate}, yields $\mu_{\rm geo}(K-k_0)^{-1}\sum_{k=k_0}^{K-1}\E[\Phi(\bz_k)]\le \E[\Vk(\bz_{k_0})]/[s(K-k_0)]+\mathcal R_D(s)/s+r_P$.
+	Division by $\mu_{\rm geo}>0$ and $\mathcal R_{\rm geo}(s)=\mathcal R_D(s)+sr_P$ give Eq.~\eqref{eq:main_stationarity}.
+	\hfill$\blacksquare$
 
-\paragraph{Proof of Lemma~\ref{lem:decomp}}\label{app:decomp}
-With $\bA=\nabla\bF$ and $\nabla\phi=\bA^\top\bF$, $\inner{\nabla\phi}{-\bF}=-\bF^\top\bS\bF$ and $\inner{\nabla\phi}{\bG}=\bF^\top\bA^2\bF$.
-Expanding $\bA^2$ gives $\bS^2+\bS\bW+\bW\bS+\bW^2$; the cross term is antisymmetric, whereas $\bF^\top\bS^2\bF=\norm{\bS\bF}^2$ and $\bF^\top\bW^2\bF=-\norm{\bW\bF}^2$, proving Eq.~\eqref{eq:dphi_F} and Eq.~\eqref{eq:dphi_G}.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Theorem~\ref{thm:skew_dominance}}\label{app:skew_dominance}
-Eq.~\eqref{eq:dphi_G} proves Eq.~\eqref{eq:skew_dominance}.
-For (i), $\bS\bF=0$ gives $\inner{\nabla\phi}{\bG}=-\norm{\bW\bF}^{2}<0$ when $\bW\bF\ne0$, while Eq.~\eqref{eq:dphi_F} gives $\inner{\nabla\phi}{-\bF}=0$.
-For (ii), $\bW=0$ gives $\inner{\nabla\phi}{\bG}=\norm{\bS\bF}^{2}\ge0$.
-For (iii), normality on the invariant plane gives $\bS=\mu\Id$ and $\bW=\sigma J_0$; hence Eq.~\eqref{eq:skew_dominance} is equivalent to $\lvert\sigma\rvert>\lvert\mu\rvert$.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Lemma~\ref{lem:Lyap_properties}}\label{app:Lyap_properties}
-Nonnegativity gives $\Vk\ge0$; $\Vk=0$ forces $\cE_F=0$ and thus $\bF=0$ because $\lambda_F>0$ and $\bW_V\succ0$.
-Composition and the chain rule give smoothness and the gradient formula, while $\Vk\ge\lambda_F\cE_F/\kappa_F=\lambda_F\Phi/(2\kappa_F)$ gives (iv).
-\hfill$\blacksquare$
-
-\paragraph{Proof of Lemma~\ref{lem:drift_taylor}}\label{app:drift_taylor}
-Taylor's theorem on the admissible segment gives Eq.~\eqref{eq:drift_taylor} with remainder $\nabla^3\Vk(\bz_k+\theta\Delta_k)[\Delta_k]^3/6$, $\theta\in(0,1)$; Eq.~\eqref{eq:drift_terms_def} and $\norm{\Delta_k}\le\beta\norm{\hatF_k}+\gamma\norm{\hatG_k}$ give the bound.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Proposition~\ref{prop:closed_form}}\label{app:closed_form}
-Positive definiteness makes $\hat q_k$ strictly convex; solving $\widehat{\bH}_k(\beta,\gamma)^\top=(\hat e_k,\hat d_k)^\top$ gives Eq.~\eqref{eq:unconstrained_pair} and its explicit inverse gives Eq.~\eqref{eq:Delta_hat_interior}.
-An infeasible interior point leaves a KKT point on an axis, giving the stated clipped scalar candidates.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Proposition~\ref{prop:dominance}}\label{app:dominance}
-The comparator sets are subsets of $[0,\infty)^2$, so set inclusion and scalar minimization prove dominance and their formulas.
-Completing the square in Eq.~\eqref{eq:Delta_hat_interior} gives $\widehat\Delta_k^\star=\hat e_k^2/(2\hat c_k)+ (\hat b_k\hat e_k+\hat c_k\hat d_k)^2/(2\hat c_k\hat\delta_k)$.
-Subtracting $[\hat e_k]_+^2/(2\hat c_k)$ proves Eq.~\eqref{eq:dominance_gap} and its equality condition.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Proposition~\ref{prop:coverage_sufficient}}\label{app:coverage_sufficient}
-For $\widetilde{\bA}(\bz)\triangleq\bW_V^{1/2}\bA(\bz)\bW_V^{-1/2}$, define $\widetilde{\bS}(\bz)\triangleq\sym(\widetilde{\bA}(\bz))$, $\widetilde{\bW}(\bz)\triangleq\skewop(\widetilde{\bA}(\bz))$, and
-\[
-h(\bz,\bu)\triangleq\max\!\left\{\bu^\top\widetilde{\bS}(\bz)\bu,\,\norm{\widetilde{\bW}(\bz)\bu}^2-\norm{\widetilde{\bS}(\bz)\bu}^2\right\}.
-\]
-At $\bz^\star$, a unit $\bu$ either has $\bu^\top\widetilde{\bS}(\bz^\star)\bu>0$, or positive semidefiniteness gives $\widetilde{\bS}(\bz^\star)\bu=0$ and nonsingularity gives $\norm{\widetilde{\bW}(\bz^\star)\bu}=\norm{\widetilde{\bA}_\star\bu}>0$.
-Hence $h>0$ on the compact unit sphere, so continuity yields $c_\star>0$ and a neighborhood $\cN_\star$ where $h\ge c_\star$ uniformly.
-For $\Phi(\bz)>0$, set $\bu=\bW_V^{1/2}\bF(\bz)/\sqrt{\Phi(\bz)}$; then $\norm{\bu}=1$, $\chi_F/\Phi=\bu^\top\widetilde{\bS}\bu$, and $\chi_G/\Phi=\norm{\widetilde{\bW}\bu}^{2}-\norm{\widetilde{\bS}\bu}^{2}$, which proves the result.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Lemma~\ref{lem:geometry_certificate}}\label{app:geometry_certificate}
-Select the larger signal in Eq.~\eqref{eq:composite_signals}, lower-bound its performance term by $-\lambda_PB_{P,D}/\kappa_P$, and apply Eq.~\eqref{eq:coverage_modulus} to obtain Eq.~\eqref{eq:derived_drift_certificate}.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Proposition~\ref{prop:model_approx}}\label{app:model_approx}
-Subtract the models and use $\hat c_k=\tilde c_k+\rho_{c,k}$ and $\hat a_k=\tilde a_k+\rho_{a,k}$.
-In $q_k-\hat q_k$ the shifts are nonpositive; dropping them and applying the five coefficient-error bounds gives the first inequality in Eq.~\eqref{eq:eps_model_bound}, while reversing the difference gives the comparator bound.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Lemma~\ref{lem:pathwise_drift}}\label{app:pathwise_drift}
-Eq.~\eqref{eq:qref}, Taylor's bound, and the definitions of $\varepsilon_k^{\rm model}$ and $\varepsilon_k^{\rm step,box}$ successively give Eq.~\eqref{eq:pathwise_drift}.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Lemma~\ref{lem:residual_budget}}\label{app:residual_budget}
-The step caps and $(a+b)^3\le4(a^3+b^3)$ imply $\varepsilon_k^{\rm rem}\le(2M_{3,k}/3)(\beta_{\max}+\gamma_{\max})^3 (\norm{\hatF_k}^3+\norm{\hatG_k}^3)$.
-Conditional expectation gives Eq.~\eqref{eq:eps_rem_cond}, and the uniform bounds give its stated specialization.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Lemma~\ref{lem:cond_drift}}\label{app:cond_drift}
-Fix $k\ge k_0$ and use comparator $(s,0)$ for $\jmath_k=F$ or $(0,s)$ for $\jmath_k=G$.
-Box optimality, Lemma~\ref{lem:pathwise_drift}, and Proposition~\ref{prop:model_approx} bound the realized increment by the comparator model plus $\varepsilon_k^{\rm box}$ and, respectively, $s\delta_{e,k}+s^2(\delta_{c,k}+\rho_{c,k})/2$ or $s\delta_{d,k}+s^2(\delta_{a,k}+\rho_{a,k})/2$.
-Conditional expectation of the linear term contributes at most $-sD_{\jmath_k}(\bz_k)+sG_V\bar b_D$, while $\E[\norm{\hatF_k}^2\mid\mathscr F_k]\le M_F$ and $\E[\norm{\hatG_k}^2\mid\mathscr F_k]\le M_G$ bound the Hessian terms.
-Collecting the shift, coefficient-error, and residual budgets gives $\mathcal R_D(s)$ in Eq.~\eqref{eq:cond_drift}.
-\hfill$\blacksquare$
-
-\paragraph{Proof of Theorem~\ref{thm:ergodic}}\label{app:ergodic}
-At each $k$, choose the $\mathscr F_k$-measurable selector attaining $\max\{D_F(\bz_k),D_G(\bz_k)\}$.
-Lemma~\ref{lem:geometry_certificate} and Eq.~\eqref{eq:cond_drift} give $\mathscr D_k\le-s\mu_{\rm geo}\Phi(\bz_k)+\mathcal R_{\rm geo}(s)$.
-Taking total expectation, summing from $k_0$ to $K-1$, using $\Vk\ge0$, and dividing by $s\mu_{\rm geo}(K-k_0)$ proves Eq.~\eqref{eq:main_stationarity}.
-\hfill$\blacksquare$
-
-\section{Finite Markov-game environments}\label{app:environments}
-Let $S$ denote the number of states; all games use actions $a,b\in\{0,1,2\}$ and a uniform initial state.
-For $S>1$, $P(s'\mid s,a,b)=(1-\xi)\mathbf 1_{\{s'=T(s,a,b)\}}+\xi\mathbf 1_{\{s'\ne T(s,a,b)\}}/(S-1)$, where $T$, $\xi$, and $\mathbf 1$ denote the nominal next-state map, transition-noise probability, and event indicator.
-Let $\varphi_s=2\pi s/S$ and $M\triangleq\left[\begin{smallmatrix}0&-1&1\\1&0&-1\\-1&1&0\end{smallmatrix}\right]$.
-RPS has $S=1$, reward $M_{ab}$, and a deterministic self-loop; the remaining games are: \emph{CyclicControl:} $S=5$, $\xi=0.02$, $T=(s+1+((a-b)\bmod3))\bmod S$, and $r_s(a,b)=(1+0.12\cos\varphi_s)M_{\pi_s(a),\pi_s(b)}$, where $\pi_s(j)=(j-s)\bmod3$.
-\emph{FrequencyHopping:} $S=8$, $\xi=0.08$, $T=(s+1+a-b)\bmod S$, $q_s(a)=0.25\cos(\varphi_s+2\pi a/3)$, and $r_s(a,b)=q_s(a)+0.55$ if $a\ne b$, while $r_s(a,a)=q_s(a)-1.10$.
-\emph{RoutingInterdiction:} $S=6$, $\xi=0.10$, $T=(s+1+\mathbf 1_{\{a=b\}}+a)\bmod S$, $c_s(a)=1+0.20\sin(\varphi_s+2\pi a/3)$, and $r_s(a,b)=c_s(a)-0.55-1.35\mathbf 1_{\{a=b\}}-0.15\mathbf 1_{\{a\ne b\}}$.
-\emph{SecurityPatrol:} $S=8$, $\xi=0.08$, $T=(s+1+b+\mathbf 1_{\{a\ne b\}})\bmod S$, $v_s(b)=0.8+0.25\cos(\varphi_s+2\pi b/3)$, and $r_s(a,b)=v_s(b)$ if $a=b$, while $r_s(a,b)=-0.55v_s(b)$ otherwise.
-Neural policies use $x_s=(\sin\varphi_s,\cos\varphi_s,u_s,1)$, with $u_s=s/(S-1)$, $\operatorname{range}_{a}q_s(a)$, $\operatorname{std}_{a}c_s(a)$, or $\operatorname{mean}_{b}v_s(b)$ in the listed order.
+	\paragraph{\textcolor{blue}{Proof of Proposition~\ref{prop:trajectory_oracle_validity}}}\label{app:trajectory_oracle_validity}
+	\textcolor{blue}{Stop-gradient differentiation gives $\mathcal M=1$, $\nabla\mathcal M=\nabla\ell$, and $\nabla^2\mathcal M=\nabla^2\ell+\nabla\ell\nabla\ell^{\top}$. Finite $L_k$ and the stated bounds therefore bound $\hatF_k,\hatG_k$ and their population counterparts. The centered decompositions have zero-mean noises, finite bias norms, and finite conditional second and third moments, which supply the bounds in Assumption~\ref{ass:oracles}.}
+	\hfill\textcolor{blue}{$\blacksquare$}
+	
+	\section{Finite Markov-game environments}\label{app:environments}
+	Let $S$ denote the number of states; all games use actions $a,b\in\{0,1,2\}$ and a uniform initial state.
+	For $S>1$, $P(s'\mid s,a,b)=(1-\xi)\mathbf 1_{\{s'=T(s,a,b)\}}+\xi\mathbf 1_{\{s'\ne T(s,a,b)\}}/(S-1)$, where $T$, $\xi$, and $\mathbf 1$ denote the nominal next-state map, transition-noise probability, and event indicator.
+	Let $\varphi_s=2\pi s/S$ and $M\triangleq\left[\begin{smallmatrix}0&-1&1\\1&0&-1\\-1&1&0\end{smallmatrix}\right]$.
+	RPS has $S=1$, reward $M_{ab}$, and a deterministic self-loop; the remaining games are: \emph{CyclicControl:} $S=5$, $\xi=0.02$, $T=(s+1+((a-b)\bmod3))\bmod S$, and $r_s(a,b)=(1+0.12\cos\varphi_s)M_{\pi_s(a),\pi_s(b)}$, where $\pi_s(j)=(j-s)\bmod3$.
+	\emph{FrequencyHopping:} $S=8$, $\xi=0.08$, $T=(s+1+a-b)\bmod S$, $q_s(a)=0.25\cos(\varphi_s+2\pi a/3)$, and $r_s(a,b)=q_s(a)+0.55$ if $a\ne b$, while $r_s(a,a)=q_s(a)-1.10$.
+	\emph{RoutingInterdiction:} $S=6$, $\xi=0.10$, $T=(s+1+\mathbf 1_{\{a=b\}}+a)\bmod S$, $c_s(a)=1+0.20\sin(\varphi_s+2\pi a/3)$, and $r_s(a,b)=c_s(a)-0.55-1.35\mathbf 1_{\{a=b\}}-0.15\mathbf 1_{\{a\ne b\}}$.
+	\emph{SecurityPatrol:} $S=8$, $\xi=0.08$, $T=(s+1+b+\mathbf 1_{\{a\ne b\}})\bmod S$, $v_s(b)=0.8+0.25\cos(\varphi_s+2\pi b/3)$, and $r_s(a,b)=v_s(b)$ if $a=b$, while $r_s(a,b)=-0.55v_s(b)$ otherwise.
+	Neural policies use $x_s=(\sin\varphi_s,\cos\varphi_s,u_s,1)$, where $u_s$ is the normalized state index $s/(S-1)$ for CyclicControl, the action-wise range of $q_s(a)$ for FrequencyHopping, the action-wise standard deviation of $c_s(a)$ for RoutingInterdiction, and the action-wise mean of $v_s(b)$ for SecurityPatrol.
 \begingroup
-\renewcommand{\baselinestretch}{0.985}\selectfont
-\bibliographystyle{IEEEtran}
-\bibliography{refs}
-\endgroup
+\emergencystretch=2em
+	\bibliographystyle{IEEEtran}
+	\bibliography{refs}
+	\endgroup
 \end{document}

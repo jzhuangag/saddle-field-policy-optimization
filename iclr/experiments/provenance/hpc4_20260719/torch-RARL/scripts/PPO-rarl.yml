@@ -1,0 +1,279 @@
+LunarLanderContinuous-v2:
+  n_envs: 16
+  n_timesteps: !!float 50
+  N_mu: !!float 10
+  N_nu: !!float 10
+  protagonist_algo: "ppo"
+  adversary_algo: "ppo"
+  protagonist_optimizer: "adam"
+  adversary_optimizer: "adam"
+  protagonist_optimizer_kwargs: "dict()"
+  adversary_optimizer_kwargs: "dict()"
+  protagonist_policy: "MlpPolicy"
+  adversary_policy: "MlpPolicy"
+  n_steps_protagonist: 128
+  n_steps_adversary: 128
+  protagonist_kwargs: "dict(batch_size=128,
+                            gamma=0.999,
+                            learning_rate=3e-4,
+                            n_epochs=4,
+                            clip_range=0.2,
+                            ent_coef=0.01,
+                            vf_coef=0.5,
+                            max_grad_norm=0.5,
+                            gae_lambda=0.98
+                            )"
+  protagonist_policy_kwargs: "dict(activation_fn=torch.nn.ReLU,
+                              net_arch=dict(pi=[64, 64], vf=[64, 64])
+                              )"
+  adversary_kwargs: "dict(batch_size=128,
+                            gamma=0.999,
+                            learning_rate=3e-4,
+                            n_epochs=4,
+                            clip_range=0.2,
+                            ent_coef=0.01,
+                            vf_coef=0.5,
+                            max_grad_norm=0.5,
+                            gae_lambda=0.98
+                            )"
+  adversary_policy_kwargs: "dict(activation_fn=torch.nn.ReLU,
+                              net_arch=dict(pi=[64, 64], vf=[64, 64])
+                              )"
+
+
+HalfCheetah-v3:
+  normalize: true
+  n_envs: 1
+  device: cuda:1
+  n_timesteps: !!float 100
+  N_mu: !!float 5
+  N_nu: !!float 1
+  protagonist_algo: "ppo"
+  adversary_algo: "ppo"
+  protagonist_optimizer: "adam"
+  adversary_optimizer: "adam"
+  protagonist_optimizer_kwargs: "dict()"
+  adversary_optimizer_kwargs: "dict()"
+  protagonist_policy: "MlpPolicy"
+  adversary_policy: "MlpPolicy"
+  n_steps_protagonist: 2048
+  n_steps_adversary: 128
+  adv_fraction: 2.5
+  protagonist_kwargs: "dict(batch_size=64,
+                            gamma=0.98,
+                            learning_rate=2.0633e-05,
+                            n_epochs=20,
+                            clip_range=0.1,
+                            ent_coef=0.000401762,
+                            vf_coef=0.58096,
+                            max_grad_norm=0.8,
+                            gae_lambda=0.92
+                            )"
+  protagonist_policy_kwargs: "dict(
+                              log_std_init=-2,
+                              ortho_init=False,
+                              activation_fn=torch.nn.ReLU,
+                              net_arch=dict(pi=[256, 256], vf=[256, 256])
+                            )"
+
+  adversary_kwargs: "dict(batch_size=64,
+                            gamma=0.98,
+                            learning_rate=2.0633e-05,
+                            n_epochs=20,
+                            clip_range=0.1,
+                            ent_coef=0.000401762,
+                            vf_coef=0.58096,
+                            max_grad_norm=0.8,
+                            gae_lambda=0.92
+                            )"
+  adversary_policy_kwargs: "dict(
+                            log_std_init=-2,
+                            ortho_init=False,
+                            activation_fn=torch.nn.ReLU,
+                            net_arch=dict(pi=[64, 64], vf=[64, 64])
+                          )"
+
+HalfCheetah-v4:
+  normalize: true
+  n_envs: 1
+  device: cpu
+  n_timesteps: !!float 100
+  N_mu: !!float 5
+  N_nu: !!float 1
+  protagonist_algo: "ppo"
+  adversary_algo: "ppo"
+  protagonist_optimizer: "adam"
+  adversary_optimizer: "adam"
+  protagonist_optimizer_kwargs: "dict()"
+  adversary_optimizer_kwargs: "dict()"
+  protagonist_policy: "MlpPolicy"
+  adversary_policy: "MlpPolicy"
+  n_steps_protagonist: 2048
+  n_steps_adversary: 2048
+  adv_fraction: 2.5
+  protagonist_kwargs: "dict(batch_size=64,
+                            gamma=0.98,
+                            learning_rate=2.0633e-05,
+                            n_epochs=20,
+                            clip_range=0.1,
+                            ent_coef=0.000401762,
+                            vf_coef=0.58096,
+                            max_grad_norm=0.8,
+                            gae_lambda=0.92
+                            )"
+  protagonist_policy_kwargs: "dict(
+                              log_std_init=-2,
+                              ortho_init=False,
+                              activation_fn=torch.nn.ReLU,
+                              net_arch=dict(pi=[256, 256], vf=[256, 256])
+                            )"
+
+  adversary_kwargs: "dict(batch_size=64,
+                            gamma=0.98,
+                            learning_rate=2.0633e-05,
+                            n_epochs=20,
+                            clip_range=0.1,
+                            ent_coef=0.000401762,
+                            vf_coef=0.58096,
+                            max_grad_norm=0.8,
+                            gae_lambda=0.92
+                            )"
+  adversary_policy_kwargs: "dict(
+                            log_std_init=-2,
+                            ortho_init=False,
+                            activation_fn=torch.nn.ReLU,
+                            net_arch=dict(pi=[64, 64], vf=[64, 64])
+                          )"
+
+Hopper-v4:
+  normalize: true
+  n_envs: 1
+  device: cpu
+  n_timesteps: !!float 100
+  N_mu: !!float 5
+  N_nu: !!float 1
+  protagonist_algo: "ppo"
+  adversary_algo: "ppo"
+  protagonist_optimizer: "adam"
+  adversary_optimizer: "adam"
+  protagonist_optimizer_kwargs: "dict()"
+  adversary_optimizer_kwargs: "dict()"
+  protagonist_policy: "MlpPolicy"
+  adversary_policy: "MlpPolicy"
+  n_steps_protagonist: 2048
+  n_steps_adversary: 2048
+  adv_fraction: 2.5
+  protagonist_kwargs: "dict(batch_size=32,
+                            gamma=0.999,
+                            learning_rate=9.80828e-05,
+                            n_epochs=5,
+                            clip_range=0.2,
+                            ent_coef=0.00229519,
+                            vf_coef=0.835671,
+                            max_grad_norm=0.7,
+                            gae_lambda=0.99
+                            )"
+  protagonist_policy_kwargs: "dict(
+                              log_std_init=-2,
+                              ortho_init=False,
+                              activation_fn=torch.nn.ReLU,
+                              net_arch=dict(pi=[256, 256], vf=[256, 256])
+                            )"
+  adversary_kwargs: "dict(batch_size=32,
+                          gamma=0.999,
+                          learning_rate=9.80828e-05,
+                          n_epochs=5,
+                          clip_range=0.2,
+                          ent_coef=0.00229519,
+                          vf_coef=0.835671,
+                          max_grad_norm=0.7,
+                          gae_lambda=0.99
+                          )"
+  adversary_policy_kwargs: "dict(
+                            log_std_init=-2,
+                            ortho_init=False,
+                            activation_fn=torch.nn.ReLU,
+                            net_arch=dict(pi=[64, 64], vf=[64, 64])
+                          )"
+
+Walker2d-v4:
+  normalize: true
+  n_envs: 1
+  device: cpu
+  n_timesteps: !!float 100
+  N_mu: !!float 5
+  N_nu: !!float 1
+  protagonist_algo: "ppo"
+  adversary_algo: "ppo"
+  protagonist_optimizer: "adam"
+  adversary_optimizer: "adam"
+  protagonist_optimizer_kwargs: "dict()"
+  adversary_optimizer_kwargs: "dict()"
+  protagonist_policy: "MlpPolicy"
+  adversary_policy: "MlpPolicy"
+  n_steps_protagonist: 2048
+  n_steps_adversary: 2048
+  adv_fraction: 2.5
+  protagonist_kwargs: "dict(batch_size=32,
+                            gamma=0.99,
+                            learning_rate=5.05041e-05,
+                            n_epochs=20,
+                            clip_range=0.1,
+                            ent_coef=0.000585045,
+                            vf_coef=0.871923,
+                            max_grad_norm=1.0,
+                            gae_lambda=0.95
+                            )"
+  protagonist_policy_kwargs: "dict(
+                              log_std_init=-2,
+                              ortho_init=False,
+                              activation_fn=torch.nn.ReLU,
+                              net_arch=dict(pi=[256, 256], vf=[256, 256])
+                            )"
+  adversary_kwargs: "dict(batch_size=32,
+                          gamma=0.99,
+                          learning_rate=5.05041e-05,
+                          n_epochs=20,
+                          clip_range=0.1,
+                          ent_coef=0.000585045,
+                          vf_coef=0.871923,
+                          max_grad_norm=1.0,
+                          gae_lambda=0.95
+                          )"
+  adversary_policy_kwargs: "dict(
+                            log_std_init=-2,
+                            ortho_init=False,
+                            activation_fn=torch.nn.ReLU,
+                            net_arch=dict(pi=[64, 64], vf=[64, 64])
+                          )"
+
+Pendulum-v1:
+  normalize: true
+  n_envs: 1
+  device: cpu
+  n_timesteps: !!float 40
+  N_mu: !!float 5
+  N_nu: !!float 1
+  protagonist_algo: "ppo"
+  adversary_algo: "ppo"
+  protagonist_optimizer: "adam"
+  adversary_optimizer: "adam"
+  protagonist_optimizer_kwargs: "dict()"
+  adversary_optimizer_kwargs: "dict()"
+  protagonist_policy: "MlpPolicy"
+  adversary_policy: "MlpPolicy"
+  n_steps_protagonist: 1024
+  n_steps_adversary: 1024
+  adv_fraction: 0.2
+  protagonist_kwargs: "dict(batch_size=64, gamma=0.95, learning_rate=1e-4,
+                            n_epochs=10, clip_range=0.2, ent_coef=0.0,
+                            vf_coef=0.5, max_grad_norm=0.5, gae_lambda=0.95)"
+  protagonist_policy_kwargs: "dict(log_std_init=-1, ortho_init=False,
+                              activation_fn=torch.nn.Tanh,
+                              net_arch=dict(pi=[64, 64], vf=[64, 64]))"
+  adversary_kwargs: "dict(batch_size=64, gamma=0.95, learning_rate=1e-4,
+                          n_epochs=10, clip_range=0.2, ent_coef=0.0,
+                          vf_coef=0.5, max_grad_norm=0.5, gae_lambda=0.95)"
+  adversary_policy_kwargs: "dict(log_std_init=-1, ortho_init=False,
+                            activation_fn=torch.nn.Tanh,
+                            net_arch=dict(pi=[64, 64], vf=[64, 64]))"

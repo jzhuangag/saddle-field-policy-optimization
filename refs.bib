@@ -1,5 +1,7 @@
 % IEEE-style bibliography for the submission manuscript.
-% Only entries cited by main.tex are retained; citation keys are unchanged.
+% Only cited entries are retained; citation keys are unchanged.
+% Conference locations follow the selected published IEEE exemplars;
+% publisher locations are retained for books and proceedings volumes.
 
 @book{SuttonBarto2018,
   author    = {Sutton, R. S. and Barto, A. G.},
@@ -12,7 +14,7 @@
 
 @article{MorimotoDoya2005RobustRL,
   author  = {Morimoto, J. and Doya, K.},
-  title   = {Robust Reinforcement Learning},
+  title   = {Robust reinforcement learning},
   journal = {Neural Comput.},
   volume  = {17},
   number  = {2},
@@ -24,54 +26,47 @@
 
 @article{Iyengar2005RobustDP,
   author  = {Iyengar, G. N.},
-  title   = {Robust Dynamic Programming},
-  journal = {Math. Oper. Res.},
+  title   = {Robust dynamic programming},
+  journal = {Math. Operations Res.},
   volume  = {30},
   number  = {2},
   pages   = {257--280},
-  month   = {May},
   year    = {2005},
   doi     = {10.1287/moor.1040.0129}
 }
 
 @article{NilimElGhaoui2005,
   author  = {Nilim, A. and El Ghaoui, L.},
-  title   = {Robust Control of {M}arkov Decision Processes with Uncertain Transition Matrices},
-  journal = {Oper. Res.},
+  title   = {Robust control of {M}arkov decision processes with uncertain transition matrices},
+  journal = {Operations Res.},
   volume  = {53},
   number  = {5},
   pages   = {780--798},
-  month   = {Sep.},
   year    = {2005},
   doi     = {10.1287/opre.1050.0216}
 }
 
 @inproceedings{Pinto2017RARL,
   author    = {Pinto, L. and Davidson, J. and Sukthankar, R. and Gupta, A.},
-  title     = {Robust Adversarial Reinforcement Learning},
-  booktitle = {Proc. 34th Int. Conf. Mach. Learn. (ICML)},
-  volume    = {70},
+  title     = {Robust adversarial reinforcement learning},
+  booktitle = {Proc. Int. Conf. Mach. Learn.},
   pages     = {2817--2826},
-  month     = {Aug.},
-  address   = {Sydney, Australia},
   year      = {2017}
 }
 
 @inproceedings{Kamalaruban2020LangevinRARL,
   author    = {Kamalaruban, P. and Huang, Y.-T. and Hsieh, Y.-P. and Rolland, P. and Shi, C. and Cevher, V.},
-  title     = {Robust Reinforcement Learning via Adversarial Training with {L}angevin Dynamics},
-  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  title     = {Robust reinforcement learning via adversarial training with {L}angevin dynamics},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst.},
   volume    = {33},
   pages     = {8127--8138},
-  month     = {Dec.},
-  address   = {Virtual Conf.},
   year      = {2020}
 }
 
 @article{Shapley1953StochasticGames,
   author  = {Shapley, L. S.},
-  title   = {Stochastic Games},
-  journal = {Proc. Natl. Acad. Sci. U.S.A.},
+  title   = {Stochastic games},
+  journal = {Proc. Nat. Acad. Sci. USA},
   volume  = {39},
   number  = {10},
   pages   = {1095--1100},
@@ -82,40 +77,76 @@
 
 @inproceedings{Littman1994MarkovGames,
   author    = {Littman, M. L.},
-  title     = {{M}arkov Games as a Framework for Multi-Agent Reinforcement Learning},
-  booktitle = {Proc. 11th Int. Conf. Mach. Learn. (ICML)},
+  title     = {{M}arkov games as a framework for multi-agent reinforcement learning},
+  booktitle = {Proc. 11th Int. Conf. Mach. Learn.},
+  address   = {New Brunswick, NJ},
   pages     = {157--163},
   month     = {Jul.},
-  address   = {New Brunswick, NJ, USA},
   year      = {1994},
   doi       = {10.1016/B978-1-55860-335-6.50027-1}
 }
 
 @inproceedings{Alacaoglu2022NACMG,
   author    = {Alacaoglu, A. and Viano, L. and He, N. and Cevher, V.},
-  title     = {A Natural Actor--Critic Framework for Zero-Sum {M}arkov Games},
-  booktitle = {Proc. 39th Int. Conf. Mach. Learn. (ICML)},
+  title     = {A natural actor--critic framework for zero-sum {M}arkov games},
+  booktitle = {Proc. 39th Int. Conf. Mach. Learn.},
   volume    = {162},
   pages     = {307--366},
   month     = {Jul.},
-  address   = {Baltimore, MD, USA},
   year      = {2022}
+}
+
+@inproceedings{Wei2021LastIterate,
+  author    = {Wei, C.-Y. and Lee, C.-W. and Zhang, M. and Luo, H.},
+  title     = {Last-iterate convergence of decentralized optimistic gradient descent/ascent in infinite-horizon competitive {M}arkov games},
+  booktitle = {Proc. 34th Annu. Conf. Learn. Theory},
+  volume    = {134},
+  pages     = {4259--4299},
+  month     = {Aug.},
+  year      = {2021}
+}
+
+@inproceedings{Zhao2022EfficientPO,
+  author    = {Zhao, Y. and Tian, Y. and Lee, J. D. and Du, S. S.},
+  title     = {Provably efficient policy optimization for two-player zero-sum {M}arkov games},
+  booktitle = {Proc. Int. Conf. Artif. Intell. Statist.},
+  pages     = {2736--2761},
+  year      = {2022}
+}
+
+@inproceedings{Zhang2022UnifiedPO,
+  author    = {Zhang, R. and Liu, Q. and Wang, H. and Xiong, C. and Li, N. and Bai, Y.},
+  title     = {Policy optimization for {M}arkov games: Unified framework and faster convergence},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst.},
+  volume    = {35},
+  pages     = {21886--21899},
+  month     = {Dec.},
+  year      = {2022},
+  doi       = {10.52202/068431-1591}
+}
+
+@inproceedings{Prajapat2021CoPO,
+  author    = {Prajapat, M. and Azizzadenesheli, K. and Liniger, A. and Yue, Y. and Anandkumar, A.},
+  title     = {Competitive policy optimization},
+  booktitle = {Proc. 37th Conf. Uncertainty Artif. Intell.},
+  volume    = {161},
+  pages     = {64--74},
+  month     = {Jul.},
+  year      = {2021}
 }
 
 @inproceedings{ZhangHuBasar2020StabilityRARL,
   author    = {Zhang, K. and Hu, B. and Ba{\c{s}}ar, T.},
-  title     = {On the Stability and Convergence of Robust Adversarial Reinforcement Learning: A Case Study on Linear Quadratic Systems},
-  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  title     = {On the stability and convergence of robust adversarial reinforcement learning: A case study on linear quadratic systems},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst.},
   volume    = {33},
   pages     = {22056--22068},
-  month     = {Dec.},
-  address   = {Virtual Conf.},
   year      = {2020}
 }
 
 @article{Rockafellar1976PPM,
   author  = {Rockafellar, R. T.},
-  title   = {Monotone Operators and the Proximal Point Algorithm},
+  title   = {Monotone operators and the proximal point algorithm},
   journal = {SIAM J. Control Optim.},
   volume  = {14},
   number  = {5},
@@ -127,17 +158,16 @@
 
 @article{Korpelevich1976Extragradient,
   author  = {Korpelevich, G. M.},
-  title   = {The Extragradient Method for Finding Saddle Points and for Other Problems},
-  journal = {Ekonomika i Matematicheskie Metody},
+  title   = {The extragradient method for finding saddle points and other problems},
+  journal = {Matecon},
   volume  = {12},
-  number  = {4},
   pages   = {747--756},
   year    = {1976}
 }
 
 @article{Nemirovski2004MirrorProx,
   author  = {Nemirovski, A.},
-  title   = {Prox-Method with Rate of Convergence {$O(1/t)$} for Variational Inequalities with {L}ipschitz Continuous Monotone Operators and Smooth Convex--Concave Saddle Point Problems},
+  title   = {Prox-method with rate of convergence {$O(1/t)$} for variational inequalities with {L}ipschitz continuous monotone operators and smooth convex--concave saddle point problems},
   journal = {SIAM J. Optim.},
   volume  = {15},
   number  = {1},
@@ -149,59 +179,53 @@
 
 @inproceedings{Hsieh2020DSEG,
   author    = {Hsieh, Y.-G. and Iutzeler, F. and Malick, J. and Mertikopoulos, P.},
-  title     = {Explore Aggressively, Update Conservatively: Stochastic Extragradient Methods with Variable Stepsize Scaling},
-  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  title     = {Explore aggressively, update conservatively: Stochastic extragradient methods with variable stepsize scaling},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst.},
   volume    = {33},
   pages     = {16223--16234},
   month     = {Dec.},
-  address   = {Virtual Conf.},
   year      = {2020}
 }
 
 @inproceedings{Antonakopoulos2021AdaProx,
   author    = {Antonakopoulos, K. and Belmega, E. V. and Mertikopoulos, P.},
-  title     = {Adaptive Extra-Gradient Methods for Min-Max Optimization and Games},
-  booktitle = {Proc. Int. Conf. Learn. Represent. (ICLR)},
+  title     = {Adaptive extra-gradient methods for min-max optimization and games},
+  booktitle = {Proc. Int. Conf. Learn. Represent.},
   month     = {May},
-  address   = {Virtual Conf.},
   year      = {2021}
 }
 
 @inproceedings{Mokhtari2020UnifiedEG,
   author    = {Mokhtari, A. and Ozdaglar, A. and Pattathil, S.},
-  title     = {A Unified Analysis of Extra-Gradient and Optimistic Gradient Methods for Saddle Point Problems: Proximal Point Approach},
-  booktitle = {Proc. 23rd Int. Conf. Artif. Intell. Stat. (AISTATS)},
+  title     = {A unified analysis of extra-gradient and optimistic gradient methods for saddle point problems: Proximal point approach},
+  booktitle = {Proc. 23rd Int. Conf. Artif. Intell. Stat.},
   volume    = {108},
   pages     = {1497--1507},
   month     = {Aug.},
-  address   = {Online},
   year      = {2020}
 }
 
-@article{CenWeiChi2024FastPolicyEG,
-  author  = {Cen, S. and Wei, Y. and Chi, Y.},
-  title   = {Fast Policy Extragradient Methods for Competitive Games with Entropy Regularization},
-  journal = {J. Mach. Learn. Res.},
-  volume  = {25},
-  number  = {4},
-  pages   = {1--48},
-  year    = {2024}
+@inproceedings{CenWeiChi2024FastPolicyEG,
+  author    = {Cen, S. and Wei, Y. and Chi, Y.},
+  title     = {Fast policy extragradient methods for competitive games with entropy regularization},
+  booktitle = {Proc. 35th Int. Conf. Neural Inf. Process. Syst.},
+  pages     = {27952--27964},
+  year      = {2021}
 }
 
 @inproceedings{Balduzzi2018Mechanics,
-  author    = {Balduzzi, D. and Racaniere, S. and Martens, J. and Foerster, J. and Tuyls, K. and Graepel, T.},
-  title     = {The Mechanics of n-Player Differentiable Games},
-  booktitle = {Proc. 35th Int. Conf. Mach. Learn. (ICML)},
+  author    = {Balduzzi, D. and Racani{\`e}re, S. and Martens, J. and Foerster, J. and Tuyls, K. and Graepel, T.},
+  title     = {The mechanics of n-player differentiable games},
+  booktitle = {Proc. 35th Int. Conf. Mach. Learn.},
   volume    = {80},
   pages     = {354--363},
   month     = {Jul.},
-  address   = {Stockholm, Sweden},
   year      = {2018}
 }
 
 @article{Letcher2019DifferentiableGameMechanics,
-  author  = {Letcher, A. and Balduzzi, D. and Racaniere, S. and Martens, J. and Foerster, J. and Tuyls, K. and Graepel, T.},
-  title   = {Differentiable Game Mechanics},
+  author  = {Letcher, A. and Balduzzi, D. and Racani{\`e}re, S. and Martens, J. and Foerster, J. and Tuyls, K. and Graepel, T.},
+  title   = {Differentiable game mechanics},
   journal = {J. Mach. Learn. Res.},
   volume  = {20},
   number  = {84},
@@ -211,29 +235,27 @@
 
 @inproceedings{Mescheder2018GANConvergence,
   author    = {Mescheder, L. and Geiger, A. and Nowozin, S.},
-  title     = {Which Training Methods for {GAN}s Do Actually Converge?},
-  booktitle = {Proc. 35th Int. Conf. Mach. Learn. (ICML)},
+  title     = {Which training methods for {GAN}s do actually converge?},
+  booktitle = {Proc. 35th Int. Conf. Mach. Learn.},
   volume    = {80},
   pages     = {3481--3490},
   month     = {Jul.},
-  address   = {Stockholm, Sweden},
   year      = {2018}
 }
 
 @inproceedings{Loizou2020SHGD,
   author    = {Loizou, N. and Berard, H. and Jolicoeur-Martineau, A. and Vincent, P. and Lacoste-Julien, S. and Mitliagkas, I.},
-  title     = {Stochastic {H}amiltonian Gradient Methods for Smooth Games},
-  booktitle = {Proc. 37th Int. Conf. Mach. Learn. (ICML)},
+  title     = {Stochastic {H}amiltonian gradient methods for smooth games},
+  booktitle = {Proc. 37th Int. Conf. Mach. Learn.},
   volume    = {119},
   pages     = {6370--6381},
   month     = {Jul.},
-  address   = {Virtual Conf.},
   year      = {2020}
 }
 
 @article{Lu2022ODE,
   author  = {Lu, H.},
-  title   = {An {$O(s^r)$}-Resolution {ODE} Framework for Understanding Discrete-Time Algorithms and Applications to the Linear Convergence of Minimax Problems},
+  title   = {An {$O(s^r)$}-resolution {ODE} framework for understanding discrete-time algorithms and applications to the linear convergence of minimax problems},
   journal = {Math. Program.},
   volume  = {194},
   number  = {1--2},
@@ -244,16 +266,15 @@
 
 @inproceedings{KingmaBa2015Adam,
   author    = {Kingma, D. P. and Ba, J.},
-  title     = {Adam: A Method for Stochastic Optimization},
-  booktitle = {Proc. Int. Conf. Learn. Represent. (ICLR)},
+  title     = {Adam: A method for stochastic optimization},
+  booktitle = {Proc. Int. Conf. Learn. Represent.},
   month     = {May},
-  address   = {San Diego, CA, USA},
   year      = {2015}
 }
 
 @article{Holm1979,
   author  = {Holm, S.},
-  title   = {A Simple Sequentially Rejective Multiple Test Procedure},
+  title   = {A simple sequentially rejective multiple test procedure},
   journal = {Scand. J. Stat.},
   volume  = {6},
   number  = {2},
@@ -263,7 +284,7 @@
 
 @article{Zhang2025AdaptivePolyak,
   author  = {Zhang, J. and Jin, C. and Gu, Y.},
-  title   = {Adaptive {P}olyak Step-Size for Momentum Accelerated Stochastic Gradient Descent with General Convergence Guarantee},
+  title   = {Adaptive {P}olyak step-size for momentum accelerated stochastic gradient descent with general convergence guarantee},
   journal = {IEEE Trans. Signal Process.},
   volume  = {73},
   pages   = {462--476},
@@ -274,7 +295,7 @@
 
 @article{Yuan2025StepSizeSDE,
   author  = {Yuan, Y. and Tsang, D. H. K. and Lau, V. K. N.},
-  title   = {Step Size Adaptation for Accelerated Stochastic Momentum Algorithm Using {SDE} Modeling and {L}yapunov Drift Minimization},
+  title   = {Step size adaptation for accelerated stochastic momentum algorithm using {SDE} modeling and {L}yapunov drift minimization},
   journal = {IEEE Trans. Signal Process.},
   volume  = {73},
   pages   = {3124--3139},
@@ -285,23 +306,20 @@
 
 @inproceedings{Sutton2000PolicyGradient,
   author    = {Sutton, R. S. and McAllester, D. and Singh, S. and Mansour, Y.},
-  title     = {Policy Gradient Methods for Reinforcement Learning with Function Approximation},
-  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
-  volume    = {12},
+  title     = {Policy gradient methods for reinforcement learning with function approximation},
+  booktitle = {Proc. 12th Int. Conf. Neural Inf. Process. Syst.},
+  address   = {Cambridge, MA, USA},
   pages     = {1057--1063},
-  year      = {2000}
+  year      = {1999}
 }
 
 @inproceedings{Karimi2016PL,
   author    = {Karimi, H. and Nutini, J. and Schmidt, M.},
-  title     = {Linear Convergence of Gradient and Proximal-Gradient Methods Under the {P}olyak--{{\L}ojasiewicz} Condition},
-  booktitle = {Proc. Eur. Conf. Mach. Learn. Knowl. Discovery Databases (ECML PKDD)},
-  series    = {Lecture Notes in Computer Science},
-  volume    = {9851},
+  title     = {Linear convergence of gradient and proximal-gradient methods under the {P}olyak--{{\L}ojasiewicz} condition},
+  booktitle = {Proc. Joint Eur. Conf. Mach. Learn. Knowl. Discovery Databases},
   pages     = {795--811},
   publisher = {Springer},
-  month     = {Sep.},
-  address   = {Riva del Garda, Italy},
+  address   = {Cham, Switzerland},
   year      = {2016},
   doi       = {10.1007/978-3-319-46128-1_50}
 }
@@ -309,21 +327,19 @@
 @inproceedings{Terry2021PettingZoo,
   author    = {Terry, J. K. and others},
   title     = {{PettingZoo}: Gym for Multi-Agent Reinforcement Learning},
-  booktitle = {Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)},
+  booktitle = {Proc. Adv. Neural Inf. Process. Syst.},
   volume    = {34},
   pages     = {15032--15043},
   month     = {Dec.},
-  address   = {Virtual Conf.},
   year      = {2021}
 }
 
 @inproceedings{Foerster2018DiCE,
   author    = {Foerster, J. and Farquhar, G. and Al-Shedivat, M. and Rockt{\"a}schel, T. and Xing, E. and Whiteson, S.},
-  title     = {{DiCE}: The Infinitely Differentiable {Monte Carlo} Estimator},
-  booktitle = {Proc. 35th Int. Conf. Mach. Learn. (ICML)},
+  title     = {{DiCE}: The infinitely differentiable {Monte Carlo} estimator},
+  booktitle = {Proc. 35th Int. Conf. Mach. Learn.},
   volume    = {80},
   pages     = {1529--1538},
   month     = {Jul.},
-  address   = {Stockholm, Sweden},
   year      = {2018}
 }

@@ -15,6 +15,9 @@
 /$reviewDir/
 /output/build/
 /output/qa/
+/qa_page_text/
+/qa_render_*/
+**/tmp/
 
 # Separate conference project and local presentation material
 /ICC/
@@ -41,6 +44,18 @@
 /RARL_final.out
 /latexmk*.log
 /latexmk*.pid
+/main_13pages.aux
+/main_13pages.bbl
+/main_13pages.blg
+/main_13pages.fdb_latexmk
+/main_13pages.fls
+/main_13pages.log
+/main_13pages.out
+/pdflatex*.fls
+
+# Keep the related ICLR source tree, but exclude its reproducible build cache.
+/iclr/output/*
+!/iclr/output/main.pdf
 
 # Python environments and caches
 **/.venv/
@@ -68,6 +83,8 @@
 /experiments/stochastic_oracle_validation_20260727/results/*
 !/experiments/stochastic_oracle_validation_20260727/results/formal-CyclicControl-dice-20260727-124224/
 !/experiments/stochastic_oracle_validation_20260727/results/sentinels-dice-20260728-142504/
+!/experiments/stochastic_oracle_validation_20260727/results/ftrob/
+!/experiments/stochastic_oracle_validation_20260727/results/ftrob/**
 
 # Experiment scratch files
 /experiments/**/*.log

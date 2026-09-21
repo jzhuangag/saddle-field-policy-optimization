@@ -1,0 +1,64 @@
+{
+  "material_passport": {
+    "origin_skill": "experiment-agent",
+    "origin_mode": "run+validate",
+    "origin_date": "2026-09-19T20:41:22+0800",
+    "verification_status": "ANALYZED",
+    "version_label": "exp_result_v1"
+  },
+  "protocol": {
+    "environments": [
+      "CyclicControl",
+      "FrequencyHopping",
+      "RoutingInterdiction",
+      "SecurityPatrol"
+    ],
+    "attack_strength_values": [
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0
+    ],
+    "seeds": [
+      6100,
+      6101,
+      6102,
+      6103,
+      6104
+    ],
+    "methods": [
+      "QP+G",
+      "noG",
+      "GDA",
+      "Adam-GDA",
+      "EGM",
+      "PPM-3"
+    ],
+    "steps": 60,
+    "trajectories_per_update": 512,
+    "horizon": 16,
+    "shared_baseline_learning_rate": 0.03,
+    "adam_learning_rate": 0.001
+  },
+  "validation": {
+    "curve_rows": 5880,
+    "diagnostic_rows": 50400,
+    "maximum_initial_metric_difference": 0.0,
+    "maximum_hard_br_residual": 9.001688283660769e-13,
+    "maximum_soft_br_residual": 8.999689882216444e-11,
+    "maximum_game_value_residual": 8.981704269217516e-13
+  },
+  "qp_positive_mean_comparisons": {
+    "return": 138,
+    "exploitability": 140,
+    "total_comparisons": 140
+  },
+  "outputs": {
+    "result_directory": "E:\\HKUST-study\\vin\\claude\u8bb0\u5f55\\RARL-Codex-Project\\experiments\\stochastic_oracle_validation_20260727\\results\\ftrob\\merged\\finite-trajectory-six-methods-20260919-204034",
+    "paper_pdf": "E:\\HKUST-study\\vin\\claude\u8bb0\u5f55\\RARL-Codex-Project\\experiments\\stochastic_oracle_validation_20260727\\output\\pdf\\fig_vi_d_finite_trajectory_robustness_six_methods.pdf",
+    "paper_png": "E:\\HKUST-study\\vin\\claude\u8bb0\u5f55\\RARL-Codex-Project\\experiments\\stochastic_oracle_validation_20260727\\output\\pdf\\fig_vi_d_finite_trajectory_robustness_six_methods.png"
+  }
+}

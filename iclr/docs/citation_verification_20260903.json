@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-09-03",
+  "scope": "References newly added during the initial ICLR refactoring",
+  "records": [
+    {
+      "citation_key": "Wei2021OptimisticMG",
+      "title": "Last-iterate Convergence of Decentralized Optimistic Gradient Descent/Ascent in Infinite-horizon Competitive Markov Games",
+      "authoritative_record": "https://proceedings.mlr.press/v134/wei21a.html",
+      "openalex_id": "https://openalex.org/W3127950324",
+      "arxiv_doi": "10.48550/arXiv.2102.04540",
+      "proceedings_metadata_status": "passed",
+      "openalex_status": "passed",
+      "crossref_status": "not applicable: PMLR proceedings entry has no separate publisher DOI"
+    },
+    {
+      "citation_key": "Zhao2022ProvablyEfficientMG",
+      "title": "Provably Efficient Policy Optimization for Two-Player Zero-Sum Markov Games",
+      "authoritative_record": "https://proceedings.mlr.press/v151/zhao22b.html",
+      "openalex_id": "https://openalex.org/W4287326718",
+      "arxiv_doi": "10.48550/arXiv.2102.08903",
+      "proceedings_metadata_status": "passed",
+      "openalex_status": "passed; OpenAlex publication year follows the preprint, while the cited PMLR version is 2022",
+      "crossref_status": "not applicable: PMLR proceedings entry has no separate publisher DOI"
+    },
+    {
+      "citation_key": "Zhang2022UnifiedMG",
+      "title": "Policy Optimization for Markov Games: Unified Framework and Faster Convergence",
+      "authoritative_record": "https://proceedings.neurips.cc/paper_files/paper/2022/hash/8951f484e8242b7f74817fdc390dd954-Abstract-Conference.html",
+      "openalex_id": "https://openalex.org/W4320460345",
+      "arxiv_doi": "10.48550/arXiv.2206.02640",
+      "proceedings_metadata_status": "passed",
+      "openalex_status": "passed",
+      "crossref_status": "not applicable: NeurIPS proceedings record has no separate publisher DOI"
+    },
+    {
+      "citation_key": "Prajapat2021CoPO",
+      "title": "Competitive Policy Optimization",
+      "authoritative_record": "https://proceedings.mlr.press/v161/prajapat21a.html",
+      "openalex_id": "https://openalex.org/W3036486305",
+      "arxiv_doi": "10.48550/arXiv.2006.10611",
+      "proceedings_metadata_status": "passed",
+      "openalex_status": "passed; OpenAlex publication year follows the preprint, while the cited UAI proceedings version is 2021",
+      "crossref_status": "not applicable: PMLR proceedings entry has no separate publisher DOI"
+    }
+  ]
+}

@@ -56,6 +56,7 @@ OUTPUT_PDF = PROJECT / "output" / "pdf"
 OUTPUT_DATA = PROJECT / "output" / "data"
 METHODS = ("QP+G", "noG", "GDA", "Adam-GDA", "EGM", "PPM-3")
 STYLES = {"QP+G": ("black", "-"), "noG": ("tab:green", "-"), "GDA": ("tab:orange", "--"), "Adam-GDA": ("tab:blue", "--"), "EGM": ("tab:purple", "-."), "PPM-3": ("tab:red", ":")}
+MARKERS = {"QP+G": "o", "noG": "s", "GDA": "^", "Adam-GDA": "v", "EGM": "D", "PPM-3": "P"}
 
 
 def style_axis(axis):
@@ -144,7 +145,9 @@ def plot(curves, environments, destination):
         ("field_norm", r"Field norm $\|\mathbf{F}\|$"),
     )
     seeds = sorted({int(row["seed"]) for row in curves})
-    figure_height = 5.25 if len(environments) == 3 else 3.70
+    # Preserve the configured font sizes and provide enough vertical room for
+    # row labels, tick labels, and axis labels to remain visually separated.
+    figure_height = 1.55 * len(environments)
     fig, axes = plt.subplots(
         len(environments),
         4,
@@ -230,20 +233,126 @@ def plot(curves, environments, destination):
         top=0.925,
         bottom=0.105,
         wspace=0.56,
-        hspace=0.86,
+        hspace=0.80,
     )
     panel_letters = "abcdefghijklmnopqrstuvwxyz"
     for row_index, environment in enumerate(environments):
         left = axes[row_index, 0].get_position()
         right = axes[row_index, -1].get_position()
+        if row_index + 1 < len(environments):
+            next_row = axes[row_index + 1, 0].get_position()
+            label_y = 0.5 * (left.y0 + next_row.y1)
+        else:
+            label_y = left.y0 - 0.070
         fig.text(
             0.5 * (left.x0 + right.x1),
-            left.y0 - 0.068,
+            label_y,
             f"({panel_letters[row_index]}) {environment}",
             ha="center",
             va="top",
             fontweight="normal",
         )
+    fig.savefig(destination, metadata={"CreationDate": None, "ModDate": None})
+    fig.savefig(destination.with_suffix(".png"), dpi=300)
+    plt.close(fig)
+
+
+def plot_population_summary(tabular_summary, neural_summary, destination):
+    """Plot the decisive population-oracle metric in a compact two-panel figure."""
+    panels = (
+        (
+            tabular_summary,
+            ("RPS", "CyclicControl", "FrequencyHopping"),
+            ("RPS", "Cyclic", "Frequency"),
+            "(a) Tabular policies",
+        ),
+        (
+            neural_summary,
+            ("CyclicControl", "FrequencyHopping", "RoutingInterdiction"),
+            ("Cyclic", "Frequency", "Routing"),
+            "(b) Neural policies",
+        ),
+    )
+    fig, axes = plt.subplots(1, 2, figsize=(DOUBLE_COLUMN_WIDTH, 1.95))
+    offsets = np.linspace(-0.25, 0.25, len(METHODS))
+    for axis, (summary, environments, tick_labels, panel_label) in zip(axes, panels):
+        base = np.arange(len(environments), dtype=float)
+        for offset, method in zip(offsets, METHODS):
+            selected = [
+                next(
+                    row
+                    for row in summary
+                    if row["environment"] == environment and row["method"] == method
+                )
+                for environment in environments
+            ]
+            mean = np.asarray(
+                [row["hard_exploitability_mean"] for row in selected], dtype=float
+            )
+            sem = np.asarray(
+                [row["hard_exploitability_sem"] for row in selected], dtype=float
+            )
+            lower = np.minimum(sem, 0.8 * mean)
+            axis.errorbar(
+                base + offset,
+                mean,
+                yerr=np.vstack((lower, sem)),
+                color=STYLES[method][0],
+                marker=MARKERS[method],
+                markersize=3.2,
+                linestyle="none",
+                linewidth=METHOD_LINE_WIDTH,
+                elinewidth=REFERENCE_LINE_WIDTH,
+                capsize=1.8,
+                capthick=REFERENCE_LINE_WIDTH,
+                label=method,
+                zorder=4 if method == "QP+G" else 2,
+            )
+        axis.set_yscale("log")
+        axis.set_xticks(base)
+        axis.set_xticklabels(tick_labels)
+        axis.set_xlim(-0.48, len(environments) - 0.52)
+        axis.set_ylabel("Final exploitability", labelpad=2.0)
+        axis.grid(
+            True,
+            axis="y",
+            color="0.84",
+            linewidth=GRID_LINE_WIDTH,
+            alpha=GRID_ALPHA,
+        )
+        axis.set_axisbelow(True)
+        axis.tick_params(width=SPINE_WIDTH, length=2.6, pad=1.5)
+        for spine in axis.spines.values():
+            spine.set_linewidth(SPINE_WIDTH)
+        position = axis.get_position()
+        fig.text(
+            0.5 * (position.x0 + position.x1),
+            0.055,
+            panel_label,
+            ha="center",
+            va="bottom",
+            fontweight="normal",
+        )
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="upper center",
+        ncol=6,
+        frameon=False,
+        bbox_to_anchor=(0.5, 0.995),
+        handlelength=1.4,
+        columnspacing=0.85,
+        handletextpad=0.35,
+        borderaxespad=0,
+    )
+    fig.subplots_adjust(
+        left=0.065,
+        right=0.995,
+        top=0.78,
+        bottom=0.28,
+        wspace=0.25,
+    )
     fig.savefig(destination, metadata={"CreationDate": None, "ModDate": None})
     fig.savefig(destination.with_suffix(".png"), dpi=300)
     plt.close(fig)
@@ -529,7 +638,21 @@ def main():
     write_csv(output_data / "vi_b_tabular_summary.csv", tab_summary)
     write_csv(output_data / "vi_c_neural_summary.csv", neu_summary)
     plot(tab_curves, ["RPS", "CyclicControl", "FrequencyHopping"], output_pdf / "fig_vi_b_tabular.pdf")
-    plot(neu_curves, ["CyclicControl", "FrequencyHopping", "RoutingInterdiction"], output_pdf / "fig_vi_c_neural.pdf")
+    plot(
+        neu_curves,
+        [
+            "CyclicControl",
+            "FrequencyHopping",
+            "RoutingInterdiction",
+            "SecurityPatrol",
+        ],
+        output_pdf / "fig_vi_c_neural.pdf",
+    )
+    plot_population_summary(
+        tab_summary,
+        neu_summary,
+        output_pdf / "fig_vi_bc_population_summary.pdf",
+    )
     source_files = [linear_dir / "curves.csv", linear_dir / "summary.json", tabular_dir / "curves.csv", tabular_dir / "diagnostics.csv", tabular_dir / "summary.json", neural_dir / "curves.csv", neural_dir / "diagnostics.csv", neural_dir / "summary.json"]
     manifest = {
         "schema": "journal-artifact-manifest/1",
@@ -551,8 +674,8 @@ def main():
             "CyclicControl",
             "FrequencyHopping",
             "RoutingInterdiction",
+            "SecurityPatrol",
         ],
-        "additional_reported_environment": "SecurityPatrol",
     }
     with (output_data / "final_experiment_manifest.json").open(
         "w", encoding="utf-8", newline="\n"

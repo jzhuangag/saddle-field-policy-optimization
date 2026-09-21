@@ -1,0 +1,39 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb}
+\title{Supplementary Material: Finite Markov-Game Environments}
+\author{}
+\begin{document}
+\maketitle
+\section{Finite Markov-Game Environments}
+All games use actions $a,b\in\{0,1,2\}$ and a uniform initial state. For $S>1$,
+\[
+P(s'\mid s,a,b)=(1-\xi)\mathbf 1_{\{s'=T(s,a,b)\}}
++\frac{\xi}{S-1}\mathbf 1_{\{s'\ne T(s,a,b)\}},
+\]
+where $T$ is the nominal next-state map and $\xi$ is the transition-noise probability. Let $\varphi_s=2\pi s/S$ and
+$M=\left[\begin{smallmatrix}0&-1&1\\1&0&-1\\-1&1&0\end{smallmatrix}\right]$.
+
+\emph{RPS:} $S=1$, reward $M_{ab}$, and a deterministic self-loop.
+
+\emph{CyclicControl:} $S=5$, $\xi=0.02$,
+$T=(s+1+((a-b)\bmod3))\bmod S$, and
+$r_s(a,b)=(1+0.12\cos\varphi_s)M_{\pi_s(a),\pi_s(b)}$, where
+$\pi_s(j)=(j-s)\bmod3$.
+
+\emph{FrequencyHopping:} $S=8$, $\xi=0.08$,
+$T=(s+1+a-b)\bmod S$,
+$q_s(a)=0.25\cos(\varphi_s+2\pi a/3)$, and
+$r_s(a,b)=q_s(a)+0.55$ for $a\ne b$, while $r_s(a,a)=q_s(a)-1.10$.
+
+\emph{RoutingInterdiction:} $S=6$, $\xi=0.10$,
+$T=(s+1+\mathbf1_{\{a=b\}}+a)\bmod S$,
+$c_s(a)=1+0.20\sin(\varphi_s+2\pi a/3)$, and
+$r_s(a,b)=c_s(a)-0.55-1.35\mathbf1_{\{a=b\}}-0.15\mathbf1_{\{a\ne b\}}$.
+
+\emph{SecurityPatrol:} $S=8$, $\xi=0.08$,
+$T=(s+1+b+\mathbf1_{\{a\ne b\}})\bmod S$,
+$v_s(b)=0.8+0.25\cos(\varphi_s+2\pi b/3)$, and
+$r_s(a,b)=v_s(b)$ for $a=b$, while $r_s(a,b)=-0.55v_s(b)$ otherwise.
+
+Neural policies use $x_s=(\sin\varphi_s,\cos\varphi_s,u_s,1)$, where $u_s$ is the normalized state index $s/(S-1)$ for CyclicControl, the action-wise range of $q_s(a)$ for FrequencyHopping, the action-wise standard deviation of $c_s(a)$ for RoutingInterdiction, and the action-wise mean of $v_s(b)$ for SecurityPatrol.
+\end{document}

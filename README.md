@@ -19,18 +19,27 @@ second-order Lyapunov-drift model.
 - [`main.tex`](main.tex), [`refs.bib`](refs.bib), and
   [`RARL_final.pdf`](RARL_final.pdf): manuscript source, bibliography, and
   rendered paper.
+- [`main_13pages.tex`](main_13pages.tex),
+  [`main_13pages_supplement.tex`](main_13pages_supplement.tex), and
+  [`output/pdf/main_submit_13pages.pdf`](output/pdf/main_submit_13pages.pdf):
+  the page-limited submission source, companion material, and compiled
+  13-page manuscript.
 - [`experiments/paper_suite_20260723/`](experiments/paper_suite_20260723/):
   analytical geometry, tabular and neural population-oracle experiments,
   theory sentinels, baseline tuning, performance-bridge audit, and paper
   figure assembly.
 - [`experiments/stochastic_oracle_validation_20260727/`](experiments/stochastic_oracle_validation_20260727/):
-  finite-trajectory DiCE experiment, formal statistical audit, and Table I
-  reconstruction.
+  finite-trajectory DiCE experiments, the four-environment attack-strength
+  robustness sweep, formal statistical audits, and figure reconstruction.
 - [`output/data/`](output/data/): frozen-artifact manifest and manuscript
   summary tables.
 - [`output/pdf/`](output/pdf/): vector figures consumed by the LaTeX source.
 - [`docs/verification/`](docs/verification/): machine-readable citation and
   IEEE bibliography-style release gates.
+- [`draw-system_model.pptx`](draw-system_model.pptx): editable source artwork
+  retained alongside the rendered manuscript assets.
+- [`iclr/`](iclr/): related conference-manuscript sources and experiment code
+  retained for project provenance.
 - [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md): protocols and exact full-rerun
   commands.
 

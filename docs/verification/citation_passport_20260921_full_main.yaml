@@ -1,0 +1,544 @@
+literature_corpus:
+- citation_key: SuttonBarto2018
+  title: 'Reinforcement Learning: An Introduction'
+  authors:
+  - family: Sutton
+    given: R. S.
+  - family: Barto
+    given: A. G.
+  year: 2018
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#SuttonBarto2018
+  venue: MIT Press
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: MorimotoDoya2005RobustRL
+  title: Robust reinforcement learning
+  authors:
+  - family: Morimoto
+    given: J.
+  - family: Doya
+    given: K.
+  year: 2005
+  source_pointer: https://doi.org/10.1162/0899766053011528
+  venue: Neural Comput.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1162/0899766053011528
+- citation_key: Iyengar2005RobustDP
+  title: Robust dynamic programming
+  authors:
+  - family: Iyengar
+    given: G. N.
+  year: 2005
+  source_pointer: https://doi.org/10.1287/moor.1040.0129
+  venue: Math. Operations Res.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1287/moor.1040.0129
+- citation_key: NilimElGhaoui2005
+  title: Robust control of Markov decision processes with uncertain transition matrices
+  authors:
+  - family: Nilim
+    given: A.
+  - family: El Ghaoui
+    given: L.
+  year: 2005
+  source_pointer: https://doi.org/10.1287/opre.1050.0216
+  venue: Operations Res.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1287/opre.1050.0216
+- citation_key: Pinto2017RARL
+  title: Robust adversarial reinforcement learning
+  authors:
+  - family: Pinto
+    given: L.
+  - family: Davidson
+    given: J.
+  - family: Sukthankar
+    given: R.
+  - family: Gupta
+    given: A.
+  year: 2017
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Pinto2017RARL
+  venue: Proc. Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Kamalaruban2020LangevinRARL
+  title: Robust reinforcement learning via adversarial training with Langevin dynamics
+  authors:
+  - family: Kamalaruban
+    given: P.
+  - family: Huang
+    given: Y.-T.
+  - family: Hsieh
+    given: Y.-P.
+  - family: Rolland
+    given: P.
+  - family: Shi
+    given: C.
+  - family: Cevher
+    given: V.
+  year: 2020
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Kamalaruban2020LangevinRARL
+  venue: Proc. Adv. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Shapley1953StochasticGames
+  title: Stochastic games
+  authors:
+  - family: Shapley
+    given: L. S.
+  year: 1953
+  source_pointer: https://doi.org/10.1073/pnas.39.10.1095
+  venue: Proc. Nat. Acad. Sci. USA
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1073/pnas.39.10.1095
+- citation_key: Littman1994MarkovGames
+  title: Markov games as a framework for multi-agent reinforcement learning
+  authors:
+  - family: Littman
+    given: M. L.
+  year: 1994
+  source_pointer: https://doi.org/10.1016/B978-1-55860-335-6.50027-1
+  venue: Proc. 11th Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1016/B978-1-55860-335-6.50027-1
+- citation_key: Alacaoglu2022NACMG
+  title: A natural actor–critic framework for zero-sum Markov games
+  authors:
+  - family: Alacaoglu
+    given: A.
+  - family: Viano
+    given: L.
+  - family: He
+    given: N.
+  - family: Cevher
+    given: V.
+  year: 2022
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Alacaoglu2022NACMG
+  venue: Proc. 39th Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Wei2021LastIterate
+  title: Last-iterate convergence of decentralized optimistic gradient descent/ascent
+    in infinite-horizon competitive Markov games
+  authors:
+  - family: Wei
+    given: C.-Y.
+  - family: Lee
+    given: C.-W.
+  - family: Zhang
+    given: M.
+  - family: Luo
+    given: H.
+  year: 2021
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Wei2021LastIterate
+  venue: Proc. 34th Annu. Conf. Learn. Theory
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Zhao2022EfficientPO
+  title: Provably efficient policy optimization for two-player zero-sum Markov games
+  authors:
+  - family: Zhao
+    given: Y.
+  - family: Tian
+    given: Y.
+  - family: Lee
+    given: J. D.
+  - family: Du
+    given: S. S.
+  year: 2022
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Zhao2022EfficientPO
+  venue: Proc. Int. Conf. Artif. Intell. Statist.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Zhang2022UnifiedPO
+  title: 'Policy optimization for Markov games: Unified framework and faster convergence'
+  authors:
+  - family: Zhang
+    given: R.
+  - family: Liu
+    given: Q.
+  - family: Wang
+    given: H.
+  - family: Xiong
+    given: C.
+  - family: Li
+    given: N.
+  - family: Bai
+    given: Y.
+  year: 2022
+  source_pointer: https://doi.org/10.52202/068431-1591
+  venue: Proc. Adv. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.52202/068431-1591
+- citation_key: Prajapat2021CoPO
+  title: Competitive policy optimization
+  authors:
+  - family: Prajapat
+    given: M.
+  - family: Azizzadenesheli
+    given: K.
+  - family: Liniger
+    given: A.
+  - family: Yue
+    given: Y.
+  - family: Anandkumar
+    given: A.
+  year: 2021
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Prajapat2021CoPO
+  venue: Proc. 37th Conf. Uncertainty Artif. Intell.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: ZhangHuBasar2020StabilityRARL
+  title: 'On the stability and convergence of robust adversarial reinforcement learning:
+    A case study on linear quadratic systems'
+  authors:
+  - family: Zhang
+    given: K.
+  - family: Hu
+    given: B.
+  - family: Basar
+    given: T.
+  year: 2020
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#ZhangHuBasar2020StabilityRARL
+  venue: Proc. Adv. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Rockafellar1976PPM
+  title: Monotone operators and the proximal point algorithm
+  authors:
+  - family: Rockafellar
+    given: R. T.
+  year: 1976
+  source_pointer: https://doi.org/10.1137/0314056
+  venue: SIAM J. Control Optim.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1137/0314056
+- citation_key: Korpelevich1976Extragradient
+  title: The extragradient method for finding saddle points and other problems
+  authors:
+  - family: Korpelevich
+    given: G. M.
+  year: 1976
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Korpelevich1976Extragradient
+  venue: Matecon
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Nemirovski2004MirrorProx
+  title: Prox-method with rate of convergence O(1/t) for variational inequalities
+    with Lipschitz continuous monotone operators and smooth convex–concave saddle
+    point problems
+  authors:
+  - family: Nemirovski
+    given: A.
+  year: 2004
+  source_pointer: https://doi.org/10.1137/S1052623403425629
+  venue: SIAM J. Optim.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1137/S1052623403425629
+- citation_key: Hsieh2020DSEG
+  title: 'Explore aggressively, update conservatively: Stochastic extragradient methods
+    with variable stepsize scaling'
+  authors:
+  - family: Hsieh
+    given: Y.-G.
+  - family: Iutzeler
+    given: F.
+  - family: Malick
+    given: J.
+  - family: Mertikopoulos
+    given: P.
+  year: 2020
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Hsieh2020DSEG
+  venue: Proc. Adv. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Antonakopoulos2021AdaProx
+  title: Adaptive extra-gradient methods for min-max optimization and games
+  authors:
+  - family: Antonakopoulos
+    given: K.
+  - family: Belmega
+    given: E. V.
+  - family: Mertikopoulos
+    given: P.
+  year: 2021
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Antonakopoulos2021AdaProx
+  venue: Proc. Int. Conf. Learn. Represent.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Mokhtari2020UnifiedEG
+  title: 'A unified analysis of extra-gradient and optimistic gradient methods for
+    saddle point problems: Proximal point approach'
+  authors:
+  - family: Mokhtari
+    given: A.
+  - family: Ozdaglar
+    given: A.
+  - family: Pattathil
+    given: S.
+  year: 2020
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Mokhtari2020UnifiedEG
+  venue: Proc. 23rd Int. Conf. Artif. Intell. Stat.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: CenWeiChi2024FastPolicyEG
+  title: Fast policy extragradient methods for competitive games with entropy regularization
+  authors:
+  - family: Cen
+    given: S.
+  - family: Wei
+    given: Y.
+  - family: Chi
+    given: Y.
+  year: 2021
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#CenWeiChi2024FastPolicyEG
+  venue: Proc. 35th Int. Conf. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Balduzzi2018Mechanics
+  title: The mechanics of n-player differentiable games
+  authors:
+  - family: Balduzzi
+    given: D.
+  - family: Racani\`ere
+    given: S.
+  - family: Martens
+    given: J.
+  - family: Foerster
+    given: J.
+  - family: Tuyls
+    given: K.
+  - family: Graepel
+    given: T.
+  year: 2018
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Balduzzi2018Mechanics
+  venue: Proc. 35th Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Letcher2019DifferentiableGameMechanics
+  title: Differentiable game mechanics
+  authors:
+  - family: Letcher
+    given: A.
+  - family: Balduzzi
+    given: D.
+  - family: Racani\`ere
+    given: S.
+  - family: Martens
+    given: J.
+  - family: Foerster
+    given: J.
+  - family: Tuyls
+    given: K.
+  - family: Graepel
+    given: T.
+  year: 2019
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Letcher2019DifferentiableGameMechanics
+  venue: J. Mach. Learn. Res.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Mescheder2018GANConvergence
+  title: Which training methods for GANs do actually converge?
+  authors:
+  - family: Mescheder
+    given: L.
+  - family: Geiger
+    given: A.
+  - family: Nowozin
+    given: S.
+  year: 2018
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Mescheder2018GANConvergence
+  venue: Proc. 35th Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Loizou2020SHGD
+  title: Stochastic Hamiltonian gradient methods for smooth games
+  authors:
+  - family: Loizou
+    given: N.
+  - family: Berard
+    given: H.
+  - family: Jolicoeur-Martineau
+    given: A.
+  - family: Vincent
+    given: P.
+  - family: Lacoste-Julien
+    given: S.
+  - family: Mitliagkas
+    given: I.
+  year: 2020
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Loizou2020SHGD
+  venue: Proc. 37th Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Lu2022ODE
+  title: An O(s^r)-resolution ODE framework for understanding discrete-time algorithms
+    and applications to the linear convergence of minimax problems
+  authors:
+  - family: Lu
+    given: H.
+  year: 2022
+  source_pointer: https://doi.org/10.1007/s10107-021-01669-4
+  venue: Math. Program.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1007/s10107-021-01669-4
+- citation_key: KingmaBa2015Adam
+  title: 'Adam: A method for stochastic optimization'
+  authors:
+  - family: Kingma
+    given: D. P.
+  - family: Ba
+    given: J.
+  year: 2015
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#KingmaBa2015Adam
+  venue: Proc. Int. Conf. Learn. Represent.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Holm1979
+  title: A simple sequentially rejective multiple test procedure
+  authors:
+  - family: Holm
+    given: S.
+  year: 1979
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Holm1979
+  venue: Scand. J. Stat.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Zhang2025AdaptivePolyak
+  title: Adaptive Polyak step-size for momentum accelerated stochastic gradient descent
+    with general convergence guarantee
+  authors:
+  - family: Zhang
+    given: J.
+  - family: Jin
+    given: C.
+  - family: Gu
+    given: Y.
+  year: 2025
+  source_pointer: https://doi.org/10.1109/TSP.2025.3528217
+  venue: IEEE Trans. Signal Process.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1109/TSP.2025.3528217
+- citation_key: Yuan2025StepSizeSDE
+  title: Step size adaptation for accelerated stochastic momentum algorithm using
+    SDE modeling and Lyapunov drift minimization
+  authors:
+  - family: Yuan
+    given: Y.
+  - family: Tsang
+    given: D. H. K.
+  - family: Lau
+    given: V. K. N.
+  year: 2025
+  source_pointer: https://doi.org/10.1109/TSP.2025.3592678
+  venue: IEEE Trans. Signal Process.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1109/TSP.2025.3592678
+- citation_key: Sutton2000PolicyGradient
+  title: Policy gradient methods for reinforcement learning with function approximation
+  authors:
+  - family: Sutton
+    given: R. S.
+  - family: McAllester
+    given: D.
+  - family: Singh
+    given: S.
+  - family: Mansour
+    given: Y.
+  year: 1999
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Sutton2000PolicyGradient
+  venue: Proc. 12th Int. Conf. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Karimi2016PL
+  title: Linear convergence of gradient and proximal-gradient methods under the Polyak–Lojasiewicz
+    condition
+  authors:
+  - family: Karimi
+    given: H.
+  - family: Nutini
+    given: J.
+  - family: Schmidt
+    given: M.
+  year: 2016
+  source_pointer: https://doi.org/10.1007/978-3-319-46128-1_50
+  venue: Proc. Joint Eur. Conf. Mach. Learn. Knowl. Discovery Databases
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+  doi: 10.1007/978-3-319-46128-1_50
+- citation_key: Terry2021PettingZoo
+  title: 'PettingZoo: Gym for Multi-Agent Reinforcement Learning'
+  authors:
+  - family: Terry
+    given: J. K.
+  - literal: others
+  year: 2021
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Terry2021PettingZoo
+  venue: Proc. Adv. Neural Inf. Process. Syst.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'
+- citation_key: Foerster2018DiCE
+  title: 'DiCE: The infinitely differentiable Monte Carlo estimator'
+  authors:
+  - family: Foerster
+    given: J.
+  - family: Farquhar
+    given: G.
+  - family: Al-Shedivat
+    given: M.
+  - family: Rocktaschel
+    given: T.
+  - family: Xing
+    given: E.
+  - family: Whiteson
+    given: S.
+  year: 2018
+  source_pointer: file:///E:/HKUST-study/vin/claude%E8%AE%B0%E5%BD%95/RARL-Codex-Project/refs.bib#Foerster2018DiCE
+  venue: Proc. 35th Int. Conf. Mach. Learn.
+  obtained_via: other
+  adapter_name: rarl-bibtex-audit
+  adapter_version: '1.0'

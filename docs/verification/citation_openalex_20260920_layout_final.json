@@ -1,0 +1,1200 @@
+{
+  "audit_date": "2026-09-20",
+  "source": "refs.bib",
+  "resolver": "OpenAlex live works endpoint",
+  "record_count": 34,
+  "verified_count": 0,
+  "review_count": 34,
+  "records": [
+    {
+      "citation_key": "SuttonBarto2018",
+      "query_url": "https://api.openalex.org/works?search=Reinforcement+Learning++An+Introduction&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Reinforcement Learning: An Introduction",
+        "year": 2018,
+        "venue": "MIT Press",
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "MorimotoDoya2005RobustRL",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1162%2F0899766053011528",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Robust reinforcement learning",
+        "year": 2005,
+        "venue": "Neural Comput.",
+        "volume": "17",
+        "issue": "2",
+        "pages": "335--359",
+        "doi": "10.1162/0899766053011528"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Iyengar2005RobustDP",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1287%2Fmoor.1040.0129",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Robust dynamic programming",
+        "year": 2005,
+        "venue": "Math. Oper. Res.",
+        "volume": "30",
+        "issue": "2",
+        "pages": "257--280",
+        "doi": "10.1287/moor.1040.0129"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "NilimElGhaoui2005",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1287%2Fopre.1050.0216",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Robust control of Markov decision processes with uncertain transition matrices",
+        "year": 2005,
+        "venue": "Oper. Res.",
+        "volume": "53",
+        "issue": "5",
+        "pages": "780--798",
+        "doi": "10.1287/opre.1050.0216"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Pinto2017RARL",
+      "query_url": "https://api.openalex.org/works?search=Robust+adversarial+reinforcement+learning&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Robust adversarial reinforcement learning",
+        "year": 2017,
+        "venue": "Proc. 34th Int. Conf. Mach. Learn.",
+        "volume": "70",
+        "issue": null,
+        "pages": "2817--2826",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Kamalaruban2020LangevinRARL",
+      "query_url": "https://api.openalex.org/works?search=Robust+reinforcement+learning+via+adversarial+training+with+Langevin+dynamics&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Robust reinforcement learning via adversarial training with Langevin dynamics",
+        "year": 2020,
+        "venue": "Proc. Adv. Neural Inf. Process. Syst.",
+        "volume": "33",
+        "issue": null,
+        "pages": "8127--8138",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Shapley1953StochasticGames",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1073%2Fpnas.39.10.1095",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Stochastic games",
+        "year": 1953,
+        "venue": "Proc. Natl. Acad. Sci. U.S.A.",
+        "volume": "39",
+        "issue": "10",
+        "pages": "1095--1100",
+        "doi": "10.1073/pnas.39.10.1095"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Littman1994MarkovGames",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1016%2FB978-1-55860-335-6.50027-1",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Markov games as a framework for multi-agent reinforcement learning",
+        "year": 1994,
+        "venue": "Proc. 11th Int. Conf. Mach. Learn.",
+        "volume": null,
+        "issue": null,
+        "pages": "157--163",
+        "doi": "10.1016/B978-1-55860-335-6.50027-1"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Alacaoglu2022NACMG",
+      "query_url": "https://api.openalex.org/works?search=A+natural+actor+critic+framework+for+zero+sum+Markov+games&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "A natural actor–critic framework for zero-sum Markov games",
+        "year": 2022,
+        "venue": "Proc. 39th Int. Conf. Mach. Learn.",
+        "volume": "162",
+        "issue": null,
+        "pages": "307--366",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Wei2021LastIterate",
+      "query_url": "https://api.openalex.org/works?search=Last+iterate+convergence+of+decentralized+optimistic+gradient+descent+ascent+in+infinite+horizon+competitive+Markov+games&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Last-iterate convergence of decentralized optimistic gradient descent/ascent in infinite-horizon competitive Markov games",
+        "year": 2021,
+        "venue": "Proc. 34th Annu. Conf. Learn. Theory",
+        "volume": "134",
+        "issue": null,
+        "pages": "4259--4299",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Zhao2022EfficientPO",
+      "query_url": "https://api.openalex.org/works?search=Provably+efficient+policy+optimization+for+two+player+zero+sum+Markov+games&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Provably efficient policy optimization for two-player zero-sum Markov games",
+        "year": 2022,
+        "venue": "Proc. 25th Int. Conf. Artif. Intell. Stat.",
+        "volume": "151",
+        "issue": null,
+        "pages": "2736--2761",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Zhang2022UnifiedPO",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.52202%2F068431-1591",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Policy optimization for Markov games: Unified framework and faster convergence",
+        "year": 2022,
+        "venue": "Proc. Adv. Neural Inf. Process. Syst.",
+        "volume": "35",
+        "issue": null,
+        "pages": "21886--21899",
+        "doi": "10.52202/068431-1591"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Prajapat2021CoPO",
+      "query_url": "https://api.openalex.org/works?search=Competitive+policy+optimization&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Competitive policy optimization",
+        "year": 2021,
+        "venue": "Proc. 37th Conf. Uncertainty Artif. Intell.",
+        "volume": "161",
+        "issue": null,
+        "pages": "64--74",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "ZhangHuBasar2020StabilityRARL",
+      "query_url": "https://api.openalex.org/works?search=On+the+stability+and+convergence+of+robust+adversarial+reinforcement+learning++A+case+study+on+linear+quadratic+systems&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "On the stability and convergence of robust adversarial reinforcement learning: A case study on linear quadratic systems",
+        "year": 2020,
+        "venue": "Proc. Adv. Neural Inf. Process. Syst.",
+        "volume": "33",
+        "issue": null,
+        "pages": "22056--22068",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Rockafellar1976PPM",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1137%2F0314056",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Monotone operators and the proximal point algorithm",
+        "year": 1976,
+        "venue": "SIAM J. Control Optim.",
+        "volume": "14",
+        "issue": "5",
+        "pages": "877--898",
+        "doi": "10.1137/0314056"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Korpelevich1976Extragradient",
+      "query_url": "https://api.openalex.org/works?search=The+extragradient+method+for+finding+saddle+points+and+for+other+problems&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "The extragradient method for finding saddle points and for other problems",
+        "year": 1976,
+        "venue": "Ekon. Mat. Metody",
+        "volume": "12",
+        "issue": "4",
+        "pages": "747--756",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Nemirovski2004MirrorProx",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1137%2FS1052623403425629",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Prox-method with rate of convergence O(1/t) for variational inequalities with Lipschitz continuous monotone operators and smooth convex–concave saddle point problems",
+        "year": 2004,
+        "venue": "SIAM J. Optim.",
+        "volume": "15",
+        "issue": "1",
+        "pages": "229--251",
+        "doi": "10.1137/S1052623403425629"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Hsieh2020DSEG",
+      "query_url": "https://api.openalex.org/works?search=Explore+aggressively++update+conservatively++Stochastic+extragradient+methods+with+variable+stepsize+scaling&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Explore aggressively, update conservatively: Stochastic extragradient methods with variable stepsize scaling",
+        "year": 2020,
+        "venue": "Proc. Adv. Neural Inf. Process. Syst.",
+        "volume": "33",
+        "issue": null,
+        "pages": "16223--16234",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Antonakopoulos2021AdaProx",
+      "query_url": "https://api.openalex.org/works?search=Adaptive+extra+gradient+methods+for+min+max+optimization+and+games&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Adaptive extra-gradient methods for min-max optimization and games",
+        "year": 2021,
+        "venue": "Proc. Int. Conf. Learn. Represent.",
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Mokhtari2020UnifiedEG",
+      "query_url": "https://api.openalex.org/works?search=A+unified+analysis+of+extra+gradient+and+optimistic+gradient+methods+for+saddle+point+problems++Proximal+point+approach&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "A unified analysis of extra-gradient and optimistic gradient methods for saddle point problems: Proximal point approach",
+        "year": 2020,
+        "venue": "Proc. 23rd Int. Conf. Artif. Intell. Stat.",
+        "volume": "108",
+        "issue": null,
+        "pages": "1497--1507",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "CenWeiChi2024FastPolicyEG",
+      "query_url": "https://api.openalex.org/works?search=Fast+policy+extragradient+methods+for+competitive+games+with+entropy+regularization&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Fast policy extragradient methods for competitive games with entropy regularization",
+        "year": 2024,
+        "venue": "J. Mach. Learn. Res.",
+        "volume": "25",
+        "issue": "4",
+        "pages": "1--48",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Balduzzi2018Mechanics",
+      "query_url": "https://api.openalex.org/works?search=The+mechanics+of+n+player+differentiable+games&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "The mechanics of n-player differentiable games",
+        "year": 2018,
+        "venue": "Proc. 35th Int. Conf. Mach. Learn.",
+        "volume": "80",
+        "issue": null,
+        "pages": "354--363",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Letcher2019DifferentiableGameMechanics",
+      "query_url": "https://api.openalex.org/works?search=Differentiable+game+mechanics&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Differentiable game mechanics",
+        "year": 2019,
+        "venue": "J. Mach. Learn. Res.",
+        "volume": "20",
+        "issue": "84",
+        "pages": "1--40",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Mescheder2018GANConvergence",
+      "query_url": "https://api.openalex.org/works?search=Which+training+methods+for+GANs+do+actually+converge+&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Which training methods for GANs do actually converge?",
+        "year": 2018,
+        "venue": "Proc. 35th Int. Conf. Mach. Learn.",
+        "volume": "80",
+        "issue": null,
+        "pages": "3481--3490",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Loizou2020SHGD",
+      "query_url": "https://api.openalex.org/works?search=Stochastic+Hamiltonian+gradient+methods+for+smooth+games&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Stochastic Hamiltonian gradient methods for smooth games",
+        "year": 2020,
+        "venue": "Proc. 37th Int. Conf. Mach. Learn.",
+        "volume": "119",
+        "issue": null,
+        "pages": "6370--6381",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Lu2022ODE",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1007%2Fs10107-021-01669-4",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "An O(s^r)-resolution ODE framework for understanding discrete-time algorithms and applications to the linear convergence of minimax problems",
+        "year": 2022,
+        "venue": "Math. Program.",
+        "volume": "194",
+        "issue": "1--2",
+        "pages": "1061--1112",
+        "doi": "10.1007/s10107-021-01669-4"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "KingmaBa2015Adam",
+      "query_url": "https://api.openalex.org/works?search=Adam++A+method+for+stochastic+optimization&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Adam: A method for stochastic optimization",
+        "year": 2015,
+        "venue": "Proc. Int. Conf. Learn. Represent.",
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Holm1979",
+      "query_url": "https://api.openalex.org/works?search=A+simple+sequentially+rejective+multiple+test+procedure&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "A simple sequentially rejective multiple test procedure",
+        "year": 1979,
+        "venue": "Scand. J. Stat.",
+        "volume": "6",
+        "issue": "2",
+        "pages": "65--70",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Zhang2025AdaptivePolyak",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1109%2FTSP.2025.3528217",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Adaptive Polyak step-size for momentum accelerated stochastic gradient descent with general convergence guarantee",
+        "year": 2025,
+        "venue": "IEEE Trans. Signal Process.",
+        "volume": "73",
+        "issue": null,
+        "pages": "462--476",
+        "doi": "10.1109/TSP.2025.3528217"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Yuan2025StepSizeSDE",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1109%2FTSP.2025.3592678",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Step size adaptation for accelerated stochastic momentum algorithm using SDE modeling and Lyapunov drift minimization",
+        "year": 2025,
+        "venue": "IEEE Trans. Signal Process.",
+        "volume": "73",
+        "issue": null,
+        "pages": "3124--3139",
+        "doi": "10.1109/TSP.2025.3592678"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Sutton2000PolicyGradient",
+      "query_url": "https://api.openalex.org/works?search=Policy+gradient+methods+for+reinforcement+learning+with+function+approximation&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Policy gradient methods for reinforcement learning with function approximation",
+        "year": 1999,
+        "venue": "Proc. Adv. Neural Inf. Process. Syst.",
+        "volume": "12",
+        "issue": null,
+        "pages": "1057--1063",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Karimi2016PL",
+      "query_url": "https://api.openalex.org/works/https%3A%2F%2Fdoi.org%2F10.1007%2F978-3-319-46128-1_50",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "Linear convergence of gradient and proximal-gradient methods under the Polyak–Lojasiewicz condition",
+        "year": 2016,
+        "venue": "Proc. Eur. Conf. Mach. Learn. Knowl. Discovery Databases",
+        "volume": "9851",
+        "issue": null,
+        "pages": "795--811",
+        "doi": "10.1007/978-3-319-46128-1_50"
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Terry2021PettingZoo",
+      "query_url": "https://api.openalex.org/works?search=PettingZoo++Gym+for+Multi+Agent+Reinforcement+Learning&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "PettingZoo: Gym for Multi-Agent Reinforcement Learning",
+        "year": 2021,
+        "venue": "Proc. Adv. Neural Inf. Process. Syst.",
+        "volume": "34",
+        "issue": null,
+        "pages": "15032--15043",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    },
+    {
+      "citation_key": "Foerster2018DiCE",
+      "query_url": "https://api.openalex.org/works?search=DiCE++The+infinitely+differentiable+Monte+Carlo+estimator&per-page=10",
+      "openalex_id": null,
+      "landing_page_url": null,
+      "bib": {
+        "title": "DiCE: The infinitely differentiable Monte Carlo estimator",
+        "year": 2018,
+        "venue": "Proc. 35th Int. Conf. Mach. Learn.",
+        "volume": "80",
+        "issue": null,
+        "pages": "1529--1538",
+        "doi": null
+      },
+      "openalex": {
+        "title": "",
+        "authors": [],
+        "year": null,
+        "venue": null,
+        "volume": null,
+        "issue": null,
+        "pages": null,
+        "doi": null
+      },
+      "checks": {
+        "title": false,
+        "authors": false,
+        "year": false,
+        "volume": true,
+        "issue": true,
+        "pages": true,
+        "doi": true
+      },
+      "status": "review"
+    }
+  ]
+}

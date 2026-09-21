@@ -1,0 +1,76 @@
+{
+  "audit_date": "2026-09-21",
+  "bibliography": "refs.bib",
+  "scope": [7, 8, 9, 10, 12, 17, 20, 30, 34],
+  "method": "Existence and core metadata were checked against official proceedings, publisher records, or an authoritative bibliographic index. IEEE display choices were then aligned with the user-supplied published-reference exemplars.",
+  "records": [
+    {
+      "reference_number": 7,
+      "citation_key": "Pinto2017RARL",
+      "status": "verified",
+      "authoritative_record": "https://proceedings.mlr.press/v70/pinto17a.html",
+      "verified_fields": ["title", "authors", "year", "conference", "pages"]
+    },
+    {
+      "reference_number": 8,
+      "citation_key": "Kamalaruban2020LangevinRARL",
+      "status": "verified",
+      "authoritative_record": "https://proceedings.neurips.cc/paper/2020/hash/5cb0e249689cd6d8369c4885435a56c2-Abstract.html",
+      "verified_fields": ["title", "authors", "year", "conference", "volume", "pages"]
+    },
+    {
+      "reference_number": 9,
+      "citation_key": "ZhangHuBasar2020StabilityRARL",
+      "status": "verified",
+      "authoritative_record": "https://proceedings.neurips.cc/paper/2020/hash/fb2e203234df6dee15934e448ee88971-Abstract.html",
+      "verified_fields": ["title", "authors", "year", "conference", "volume", "pages"]
+    },
+    {
+      "reference_number": 10,
+      "citation_key": "Sutton2000PolicyGradient",
+      "status": "verified",
+      "authoritative_record": "https://proceedings.neurips.cc/paper/1999/hash/464d828b85b0bed98e80ade0a5c43b0f-Abstract.html",
+      "verified_fields": ["title", "authors", "year", "conference", "pages"],
+      "style_note": "The Cambridge, MA, USA proceedings location follows the user-supplied IEEE exemplar."
+    },
+    {
+      "reference_number": 12,
+      "citation_key": "Zhao2022EfficientPO",
+      "status": "verified",
+      "authoritative_record": "https://proceedings.mlr.press/v151/zhao22b.html",
+      "verified_fields": ["title", "authors", "year", "conference", "pages"]
+    },
+    {
+      "reference_number": 17,
+      "citation_key": "Korpelevich1976Extragradient",
+      "status": "verified",
+      "authoritative_record": "https://cir.nii.ac.jp/crid/1571698600143951616?lang=en",
+      "verified_fields": ["title", "author", "year", "journal", "volume", "pages"]
+    },
+    {
+      "reference_number": 20,
+      "citation_key": "CenWeiChi2024FastPolicyEG",
+      "status": "verified",
+      "authoritative_record": "https://proceedings.neurips.cc/paper/2021/hash/eb1848290d5a7de9c9ccabc67fefa211-Abstract.html",
+      "verified_fields": ["title", "authors", "year", "conference", "pages"],
+      "metadata_note": "The citation now uses the 2021 conference version shown in the exemplar; the existing BibTeX key is preserved for source compatibility."
+    },
+    {
+      "reference_number": 30,
+      "citation_key": "Karimi2016PL",
+      "status": "verified",
+      "authoritative_record": "https://doi.org/10.1007/978-3-319-46128-1_50",
+      "verified_fields": ["title", "authors", "year", "proceedings", "publisher", "publisher_location", "pages", "doi"]
+    },
+    {
+      "reference_number": 34,
+      "citation_key": "Holm1979",
+      "status": "verified_with_exemplar_conflict_resolved",
+      "authoritative_record": "https://www.jstor.org/stable/4615733",
+      "verified_fields": ["title", "author", "year", "journal", "volume", "issue", "pages"],
+      "resolution": "The exemplar's title 'A simple sequentially rejective Bonferroni test procedure' is not the article's official title. The bibliography retains the verified title 'A simple sequentially rejective multiple test procedure'."
+    }
+  ],
+  "unresolved_records": [],
+  "status": "pass"
+}

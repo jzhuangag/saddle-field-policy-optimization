@@ -179,7 +179,7 @@
   "displayed_vi_c_environments": [
     "CyclicControl",
     "FrequencyHopping",
-    "RoutingInterdiction"
-  ],
-  "additional_reported_environment": "SecurityPatrol"
+    "RoutingInterdiction",
+    "SecurityPatrol"
+  ]
 }

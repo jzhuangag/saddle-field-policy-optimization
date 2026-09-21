@@ -1,0 +1,5 @@
+environment,eta,seed,method,step,transition_batch,beta,gamma,backtracks,predicted_decrease,realized_decrease,field_norm,curvature_norm,inflation,e,d,field_queries,transitions_used
+CyclicControl,1.0,9999,GDA,1,32,0.03,0.0,0,0.0,0.0,1.7831609568069897,0.0,0.0,0.0,0.0,1,32
+CyclicControl,1.0,9999,Adam-GDA,1,32,0.001,0.0,0,0.0,0.0,1.7831609568069897,0.0,0.0,0.0,0.0,1,32
+CyclicControl,1.0,9999,EGM,1,32,0.03,0.0,0,0.0,0.0,1.7831609568069897,0.0,0.0,0.0,0.0,2,32
+CyclicControl,1.0,9999,PPM-3,1,32,0.03,0.0,0,0.0,0.0,1.7831609568069897,0.0,0.0,0.0,0.0,3,32
